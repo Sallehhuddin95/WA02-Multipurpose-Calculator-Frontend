@@ -30,6 +30,10 @@ const navigationItems = [
     href: "/retirement-fund",
     label: "Retirement Fund",
   },
+  {
+    href: "/salary-calculator",
+    label: "Salary Calculator",
+  },
 ];
 
 export function AppShell({ children }: Readonly<AppShellProps>) {

@@ -6,7 +6,7 @@ import type {
 } from "@/features/retirement-fund/types/retirement-fund";
 import { roundToCents } from "@/features/retirement-fund/utils/round-to-cents";
 
-const MAX_MONTHS = 1200; // 100-year cap — spec correctness requirement
+const MAX_MONTHS = 1200; // 100-year cap - spec correctness requirement
 
 function runScenario(
   startingBalance: number,
@@ -46,7 +46,7 @@ function runScenario(
     if (balance <= 0) {
       return {
         depletedAtMonth: month,
-        // month N means fund lasted N full months — year/month decomposition follows
+        // month N means fund lasted N full months - year/month decomposition follows
         depletionYears: Math.floor(month / 12),
         depletionRemainingMonths: month % 12,
         didNotDeplete: false,

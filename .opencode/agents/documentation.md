@@ -1,6 +1,7 @@
 ---
 description: "Documentation agent for keeping architecture docs, workflow guides, specs, ADRs, and conventions aligned with code"
 mode: subagent
+model: opencode-go/deepseek-v4-pro
 permission:
   edit: allow
   bash: deny

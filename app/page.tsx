@@ -26,21 +26,24 @@ const liveCalculators = [
       "Rental-property cash flow, exit proceeds, and REIT benchmark comparison over the same holding period.",
   },
   {
-    name: "Retirement Fund Calculator",
+    name: "Retirement Fund",
     href: "/retirement-fund",
     summary:
       "Project EPF-style retirement savings growth, then simulate how long the fund lasts under a gratuity-and-pension withdrawal pattern.",
   },
-];
-
-const upcomingCalculators = [
   {
     name: "Salary Calculator",
-    status: "Planned",
+    href: "/salary-calculator",
     summary:
-      "Take-home pay estimate from gross salary, statutory deductions, and reliefs.",
+      "Break down gross salary into net take-home pay and employer cost with EPF, SOCSO, EIS, PCB, and optional Lindung24.",
   },
 ];
+
+const upcomingCalculators: Array<{
+  name: string;
+  status: string;
+  summary: string;
+}> = [];
 
 export default function HomePage() {
   return (
@@ -55,8 +58,8 @@ export default function HomePage() {
           </h1>
           <p className="text-(--muted) mt-5 max-w-xl text-base leading-7 md:text-lg">
             Start with compound interest, car-loan, ASB financing,
-            property-versus-REIT, and retirement fund scenarios today, with more
-            everyday money calculators on the way.
+            property-versus-REIT, retirement fund, and salary calculator
+            scenarios today, with more everyday money calculators on the way.
           </p>
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {liveCalculators.map((calculator) => (
@@ -76,35 +79,37 @@ export default function HomePage() {
           </div>
         </div>
 
-        <aside className="surface-card rounded-[2rem] p-8 md:p-10">
-          <p className="text-(--warning) text-sm font-medium uppercase tracking-[0.2em]">
-            Planned Next
-          </p>
-          <ul className="mt-5 grid gap-4">
-            {upcomingCalculators.map((calculator) => (
-              <li
-                key={calculator.name}
-                className="rounded-3xl border border-(--line) bg-white/70 p-5"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold">{calculator.name}</h2>
-                  <span
-                    className={
-                      calculator.status === "Specified"
-                        ? "bg-(--accent-soft) text-(--accent-strong) rounded-full px-3 py-1 text-xs font-semibold"
-                        : "text-(--muted) rounded-full border border-(--line) bg-white/60 px-3 py-1 text-xs font-semibold"
-                    }
-                  >
-                    {calculator.status}
-                  </span>
-                </div>
-                <p className="text-(--muted) mt-3 text-sm leading-6">
-                  {calculator.summary}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </aside>
+        {upcomingCalculators.length > 0 ? (
+          <aside className="surface-card rounded-[2rem] p-8 md:p-10">
+            <p className="text-(--warning) text-sm font-medium uppercase tracking-[0.2em]">
+              Planned Next
+            </p>
+            <ul className="mt-5 grid gap-4">
+              {upcomingCalculators.map((calculator) => (
+                <li
+                  key={calculator.name}
+                  className="rounded-3xl border border-(--line) bg-white/70 p-5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-semibold">{calculator.name}</h2>
+                    <span
+                      className={
+                        calculator.status === "Specified"
+                          ? "bg-(--accent-soft) text-(--accent-strong) rounded-full px-3 py-1 text-xs font-semibold"
+                          : "text-(--muted) rounded-full border border-(--line) bg-white/60 px-3 py-1 text-xs font-semibold"
+                      }
+                    >
+                      {calculator.status}
+                    </span>
+                  </div>
+                  <p className="text-(--muted) mt-3 text-sm leading-6">
+                    {calculator.summary}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        ) : null}
       </section>
     </main>
   );

@@ -4,11 +4,11 @@ A collection of financial calculators built with Next.js App Router, TypeScript,
 
 ## Calculators
 
-- **ASB Financing** — Loan financing and repayment calculator
-- **Car Loan** — Hire purchase and auto loan calculator
-- **Compound Interest** — Compound interest growth and projection calculator
-- **Property Investment** — Real estate investment and return calculator
-- **Retirement Fund** — Retirement savings and withdrawal planner
+- **ASB Financing** - Loan financing and repayment calculator
+- **Car Loan** - Hire purchase and auto loan calculator
+- **Compound Interest** - Compound interest growth and projection calculator
+- **Property Investment** - Real estate investment and return calculator
+- **Retirement Fund** - Retirement savings and withdrawal planner
 
 ## Tech Stack
 
@@ -87,13 +87,13 @@ For detailed architecture rules, see `docs/architecture/`.
 
 This project follows a **spec-driven AI development** model:
 
-1. **Constitution** (`CONSTITUTION.md`) — non-negotiable governance principles
-2. **ADRs** (`docs/adr/`) — accepted architectural decisions
-3. **Architecture docs** (`docs/architecture/`) — structural and cross-cutting rules
-4. **Frontend guideline** (`.github/instructions/`) — coding conventions
-5. **Specs** (`specs/`) — feature behavior before implementation
-6. **Workflow docs** (`docs/workflow/`) — development and review processes
-7. **Agents** (`.opencode/agents/`) — specialized AI subagents
+1. **Constitution** (`CONSTITUTION.md`) - non-negotiable governance principles
+2. **ADRs** (`docs/adr/`) - accepted architectural decisions
+3. **Architecture docs** (`docs/architecture/`) - structural and cross-cutting rules
+4. **Frontend guideline** (`.github/instructions/`) - coding conventions
+5. **Specs** (`specs/`) - feature behavior before implementation
+6. **Workflow docs** (`docs/workflow/`) - development and review processes
+7. **Agents** (`.opencode/agents/`) - specialized AI subagents
 
 ### AI Agent Workflow
 

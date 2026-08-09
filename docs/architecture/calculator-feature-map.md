@@ -8,12 +8,14 @@ Its purpose is to give contributors one architecture-level source of truth for f
 
 ## 1. Initial Release Features
 
-The initial release contains four independent feature modules:
+The project contains the following independent feature modules:
 
 - `asb-financing`
 - `compound-interest`
 - `car-loan`
 - `property-investment`
+- `retirement-fund`
+- `salary-calculator`
 
 These features may share domain-agnostic math, formatting, and UI primitives, but they must not depend on each other's private internals.
 
@@ -28,6 +30,8 @@ Recommended app routes:
 - `app/compound-interest/page.tsx`
 - `app/car-loan/page.tsx`
 - `app/property-investment/page.tsx`
+- `app/retirement-fund/page.tsx`
+- `app/salary-calculator/page.tsx`
 
 Recommended feature folders:
 

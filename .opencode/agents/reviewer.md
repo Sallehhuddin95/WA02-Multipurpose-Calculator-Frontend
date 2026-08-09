@@ -1,6 +1,7 @@
 ---
 description: "Code review agent for correctness, regression risk, architecture compliance, security, and testing adequacy"
 mode: subagent
+model: opencode-go/deepseek-v4-pro
 permission:
   edit: deny
   bash: deny

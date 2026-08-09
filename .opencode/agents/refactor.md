@@ -1,6 +1,7 @@
 ---
 description: "Refactoring agent for safe structural improvement, duplication reduction, boundary cleanup, and behavior-preserving change"
 mode: subagent
+model: opencode-go/deepseek-v4-pro
 permission:
   edit: allow
   bash: allow

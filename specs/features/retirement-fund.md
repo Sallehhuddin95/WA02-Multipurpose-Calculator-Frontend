@@ -8,17 +8,17 @@ Draft
 
 Help a user plan for retirement under a Malaysian private-sector EPF-style savings model. The feature addresses two connected but distinct planning questions: how much a retirement fund can accumulate between now and retirement given ongoing contributions and an investment return assumption, and how long that accumulated fund will last under a withdrawal pattern designed to replicate the lump-sum gratuity and recurring pension structure of a government servant's retirement benefit.
 
-The feature exists to make the full lifecycle of private-sector retirement saving — accumulation through working years and drawdown through retirement — visible under one consistent set of assumptions, so a user can evaluate whether an EPF-style savings plan can replicate the security of a defined government pension.
+The feature exists to make the full lifecycle of private-sector retirement saving - accumulation through working years and drawdown through retirement - visible under one consistent set of assumptions, so a user can evaluate whether an EPF-style savings plan can replicate the security of a defined government pension.
 
 ## Scope
 
 This feature includes:
 
 - one accumulation phase projection (Section A: Retirement Savings Projection) that grows a starting savings balance with monthly contributions over a user-defined horizon to retirement
-- two contribution input modes for Section A — percentage of salary and fixed ringgit amount — with exactly one mode active at a time
+- two contribution input modes for Section A - percentage of salary and fixed ringgit amount - with exactly one mode active at a time
 - an optional employer contribution rate in percentage-of-salary mode for EPF-style combined employee-employer contribution modeling
 - one drawdown phase simulation (Section B: Retirement Fund Longevity Simulation) that evaluates how long a lump sum lasts under a gratuity-equivalent one-time withdrawal and a pension-equivalent recurring monthly withdrawal
-- two drawdown scenarios in Section B — stays invested and fully withdrawn — presented side by side within one comparison view, both visible simultaneously without the user switching between them
+- two drawdown scenarios in Section B - stays invested and fully withdrawn - presented side by side within one comparison view, both visible simultaneously without the user switching between them
 - a starting balance for Section B that defaults to Section A's final capital output but remains directly editable for standalone use
 - one annual-crediting model for investment return in both sections, consistent with the ASB financing dividend-crediting convention used in this repo
 - a 100-year simulation horizon cap for Section B to bound the case where the stays-invested balance never depletes
@@ -51,20 +51,20 @@ This feature includes:
 
 ### Section A: Retirement Savings Projection
 
-- initial savings balance (RM) — the user's current retirement savings; may be zero
-- years to retirement — whole years only; must be at least one year
-- annual investment or dividend return rate (%) — fixed for the full accumulation horizon
-- annual salary increment rate (%) — may be zero; drives salary growth once per year
-- contribution input mode — exactly one of the following two modes is active at any time:
+- initial savings balance (RM) - the user's current retirement savings; may be zero
+- years to retirement - whole years only; must be at least one year
+- annual investment or dividend return rate (%) - fixed for the full accumulation horizon
+- annual salary increment rate (%) - may be zero; drives salary growth once per year
+- contribution input mode - exactly one of the following two modes is active at any time:
   - **Percentage of salary:** requires current monthly salary (RM) and an employee contribution rate (%) applied to that salary; an employer contribution rate (%) is also available in this mode and defaults to zero when not entered
   - **Fixed ringgit amount:** requires a fixed monthly contribution amount (RM) that does not scale with the annual salary increment rate
 
 ### Section B: Retirement Fund Longevity Simulation
 
-- starting balance (RM) — defaults to Section A's final capital when Section A has been calculated, but remains directly editable; may be entered independently when Section B is used without running Section A first
-- one-time lump-sum withdrawal (RM) — deducted at the start of month 1; may be zero
-- fixed recurring monthly withdrawal (RM) — deducted every month beginning in month 1; may be zero for a lump-sum-only simulation
-- post-retirement annual return rate (%) — applies to the stays-invested scenario only; this is a separate input from Section A's annual return rate, defaulting to the same value as Section A's return rate when Section A has been run, and must be confirmed or entered before Section B calculates; this matches the convention in this repo of giving each phase its own rate assumption rather than forcing reuse across phases
+- starting balance (RM) - defaults to Section A's final capital when Section A has been calculated, but remains directly editable; may be entered independently when Section B is used without running Section A first
+- one-time lump-sum withdrawal (RM) - deducted at the start of month 1; may be zero
+- fixed recurring monthly withdrawal (RM) - deducted every month beginning in month 1; may be zero for a lump-sum-only simulation
+- post-retirement annual return rate (%) - applies to the stays-invested scenario only; this is a separate input from Section A's annual return rate, defaulting to the same value as Section A's return rate when Section A has been run, and must be confirmed or entered before Section B calculates; this matches the convention in this repo of giving each phase its own rate assumption rather than forcing reuse across phases
 
 ## Calculation Model
 
@@ -88,7 +88,7 @@ The initial release uses one explicit accumulation model for Section A and one e
 - Return is not compounded monthly within each year. This is a deliberate choice consistent with real EPF dividend crediting behavior and with the ASB financing annual-crediting convention already documented in this repo.
 - Once credited, the return becomes part of the balance and is included in subsequent years' calculations.
 
-#### Summary Metrics — Section A
+#### Summary Metrics - Section A
 
 - final capital: the ending balance at the close of the last projection year
 - total contributions: the cumulative sum of all monthly contributions paid in across all years, including both employee and employer portions
@@ -123,7 +123,7 @@ The initial release uses one explicit accumulation model for Section A and one e
 - This cap is a correctness requirement, not a soft limit. A sufficiently high post-retirement return rate relative to the monthly withdrawal will cause the stays-invested balance to grow rather than deplete. The system must handle this case explicitly and report it clearly.
 - The fully-withdrawn scenario always depletes within a finite number of months given any positive monthly withdrawal; the 100-year cap applies as a general safety constraint and is most relevant for the stays-invested scenario.
 
-#### Summary Metrics — Section B
+#### Summary Metrics - Section B
 
 - time to fund depletion for each scenario: expressed as years and months from the start of Section B until the balance first reaches zero; if the stays-invested scenario does not deplete within 100 years, the output states this explicitly in place of a numeric depletion time
 - depletion table for each scenario: one row per month showing month number, lump-sum withdrawal (month 1 only), recurring withdrawal for that month, return credited in that period (stays-invested only, credited as a single entry at year-end), and closing balance; for long simulations this table may aggregate results per year instead of per month
@@ -132,7 +132,7 @@ The initial release uses one explicit accumulation model for Section A and one e
 
 ### Side-by-Side Drawdown Comparison
 
-- Section B always presents both drawdown scenarios — stays invested and fully withdrawn — side by side in one comparison view. The user does not need to toggle between scenarios to see both outcomes; both results are visible simultaneously at all times after calculation.
+- Section B always presents both drawdown scenarios - stays invested and fully withdrawn - side by side in one comparison view. The user does not need to toggle between scenarios to see both outcomes; both results are visible simultaneously at all times after calculation.
 - The time-to-depletion result is the primary metric displayed prominently for each scenario in the comparison view.
 - This matches the multi-strategy side-by-side presentation pattern established in the ASB financing comparison and the property-investment comparison features.
 
@@ -151,7 +151,7 @@ The initial release uses one explicit accumulation model for Section A and one e
 - the employer contribution rate has no effect in fixed ringgit amount mode
 - Section B uses a separate post-retirement annual return rate input rather than sharing Section A's accumulation rate; each phase of the model has its own rate assumption, consistent with the repo convention of giving distinct phases and strategies distinct rate inputs
 - Section B's starting balance defaults to Section A's final capital but is independently editable; Section B can be calculated without running Section A
-- annual return in Section B's stays-invested scenario is credited once per year while withdrawals are deducted every month — the same mixed cadence as the ASB financing dividend model
+- annual return in Section B's stays-invested scenario is credited once per year while withdrawals are deducted every month - the same mixed cadence as the ASB financing dividend model
 - the fully-withdrawn scenario applies exactly zero growth; the post-retirement return rate has no effect on this scenario by design
 - all outputs are nominal and do not adjust for inflation
 - the simulation in Section B runs for a maximum of 100 years; if the stays-invested balance does not deplete within that horizon, the system reports a non-depletion outcome rather than an undefined or unbounded result
@@ -216,7 +216,7 @@ The initial release uses one explicit accumulation model for Section A and one e
 
 ## Acceptance Criteria
 
-- The feature provides two connected sections — Retirement Savings Projection and Retirement Fund Longevity Simulation — within one bounded calculator workflow.
+- The feature provides two connected sections - Retirement Savings Projection and Retirement Fund Longevity Simulation - within one bounded calculator workflow.
 - Section A supports both percentage-of-salary and fixed ringgit amount contribution input modes; exactly one mode is active at any time, and only the inputs that belong to the active mode are required.
 - In percentage-of-salary mode, the total monthly contribution is the sum of the employee and employer contribution rates applied to the current monthly salary; the employer contribution rate defaults to zero when not entered and has no effect in fixed ringgit amount mode.
 - The combined employee and employer contribution rate must not exceed 100; the system rejects the input before results are shown if it does.

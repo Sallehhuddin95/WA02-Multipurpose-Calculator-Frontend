@@ -80,7 +80,7 @@ const metricDefinitions: ReadonlyArray<{ term: string; definition: string }> = [
   {
     term: "Total growth",
     definition:
-      "Final capital minus the initial savings balance minus total contributions — the portion of the ending balance that came from investment return alone.",
+      "Final capital minus the initial savings balance minus total contributions - the portion of the ending balance that came from investment return alone.",
   },
   {
     term: "Time to depletion",
