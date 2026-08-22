@@ -2,6 +2,16 @@
 
 import React, { useState, type FormEvent, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { compoundInterestFormSchema } from "@/features/compound-interest/schemas/compound-interest-form";
 import { projectCompoundInterest } from "@/features/compound-interest/services/project-compound-interest";
 import type {
@@ -98,7 +108,7 @@ export function CompoundInterestCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-[1.75rem] border border-(--line) bg-white/75 p-6"
+        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
       >
         <CalculatorField
           errorMessage={errors.startingPrincipal}
@@ -106,7 +116,7 @@ export function CompoundInterestCalculator() {
           inputId="startingPrincipal"
           label="Starting principal"
         >
-          <input
+          <Input
             id="startingPrincipal"
             name="startingPrincipal"
             type="number"
@@ -116,7 +126,7 @@ export function CompoundInterestCalculator() {
             onChange={(event) =>
               handleValueChange("startingPrincipal", Number(event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
@@ -126,7 +136,7 @@ export function CompoundInterestCalculator() {
           inputId="annualRate"
           label="Annual rate (%)"
         >
-          <input
+          <Input
             id="annualRate"
             name="annualRate"
             type="number"
@@ -136,7 +146,7 @@ export function CompoundInterestCalculator() {
             onChange={(event) =>
               handleValueChange("annualRate", Number(event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
@@ -147,7 +157,7 @@ export function CompoundInterestCalculator() {
             inputId="durationYears"
             label="Duration (years)"
           >
-            <input
+            <Input
               id="durationYears"
               name="durationYears"
               type="number"
@@ -157,7 +167,7 @@ export function CompoundInterestCalculator() {
               onChange={(event) =>
                 handleValueChange("durationYears", Number(event.target.value))
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
@@ -167,25 +177,29 @@ export function CompoundInterestCalculator() {
             inputId="compoundingFrequency"
             label="Compounding frequency"
           >
-            <select
-              id="compoundingFrequency"
-              name="compoundingFrequency"
+            <Select
               value={values.compoundingFrequency}
-              onChange={(event) =>
+              onValueChange={(nextValue) =>
                 handleValueChange(
                   "compoundingFrequency",
-                  event.target
-                    .value as CompoundInterestFormValues["compoundingFrequency"],
+                  nextValue as CompoundInterestFormValues["compoundingFrequency"],
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
             >
-              {frequencyOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                id="compoundingFrequency"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 text-base shadow-none"
+              >
+                <SelectValue placeholder="Select frequency" />
+              </SelectTrigger>
+              <SelectContent>
+                {frequencyOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CalculatorField>
         </div>
 
@@ -195,7 +209,7 @@ export function CompoundInterestCalculator() {
           inputId="monthlyContribution"
           label="Monthly contribution"
         >
-          <input
+          <Input
             id="monthlyContribution"
             name="monthlyContribution"
             type="number"
@@ -208,30 +222,31 @@ export function CompoundInterestCalculator() {
                 Number(event.target.value),
               )
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
         <div className="flex flex-wrap gap-3 pt-2">
-          <button
+          <Button
             type="submit"
-            className="bg-(--accent) hover:bg-(--accent-strong) rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+            className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
             Calculate growth
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={handleReset}
-            className="text-(--foreground) hover:border-(--accent) rounded-full border border-(--line) bg-white px-5 py-3 text-sm font-semibold transition"
+            className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
             Reset inputs
-          </button>
+          </Button>
         </div>
       </form>
 
       <div className="grid gap-5">
-        <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+        <section className="rounded-3xl border border-border bg-card/75 p-6">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Summary
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -248,17 +263,17 @@ export function CompoundInterestCalculator() {
               value={formatCurrency(summary.totalGrowth)}
             />
           </div>
-          <p className="text-(--muted) mt-5 text-sm leading-6">
+          <p className="text-muted-foreground mt-5 text-sm leading-6">
             Based on {formatPercentage(values.annualRate)} annual return,{" "}
             {values.compoundingFrequency} compounding, and a{" "}
             {formatCurrency(values.monthlyContribution)} monthly contribution.
           </p>
         </section>
 
-        <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+        <section className="rounded-3xl border border-border bg-card/75 p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-(--warning) text-sm font-medium uppercase tracking-[0.2em]">
+              <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
                 Latest projection point
               </p>
               <h2 className="mt-2 text-2xl font-semibold">
@@ -269,7 +284,7 @@ export function CompoundInterestCalculator() {
               </h2>
             </div>
             <div className="flex items-center gap-3">
-              <div className="bg-(--accent-soft) text-(--accent-strong) rounded-2xl px-4 py-3 text-sm">
+              <div className="bg-accent text-accent-foreground rounded-2xl px-4 py-3 text-sm">
                 Growth share:{" "}
                 {summary.finalProjectedBalance === 0
                   ? "0.0%"
@@ -278,8 +293,10 @@ export function CompoundInterestCalculator() {
                         100,
                     )}
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 aria-expanded={isTableOpen}
                 aria-label={
                   isTableOpen
@@ -287,7 +304,7 @@ export function CompoundInterestCalculator() {
                     : "Show projection table"
                 }
                 onClick={() => setIsTableOpen((prev) => !prev)}
-                className="text-(--muted) hover:text-(--foreground) hover:bg-(--panel) flex h-9 w-9 items-center justify-center rounded-full border border-(--line) transition"
+                className="rounded-full border border-border text-muted-foreground hover:bg-card hover:text-(--foreground)"
               >
                 <svg
                   viewBox="0 0 20 20"
@@ -303,14 +320,14 @@ export function CompoundInterestCalculator() {
                     clipRule="evenodd"
                   />
                 </svg>
-              </button>
+              </Button>
             </div>
           </div>
           {isTableOpen ? (
             <div className="mt-5 overflow-x-auto">
               <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                 <thead>
-                  <tr className="text-(--muted)">
+                  <tr className="text-muted-foreground">
                     <th className="pb-2 pr-4 font-medium">Period</th>
                     <th className="pb-2 pr-4 font-medium">Ending balance</th>
                     <th className="pb-2 pr-4 font-medium">
@@ -323,7 +340,7 @@ export function CompoundInterestCalculator() {
                   {summary.projection.map((projectionPoint) => (
                     <tr
                       key={projectionPoint.period}
-                      className="bg-(--panel) rounded-2xl"
+                      className="bg-card rounded-2xl"
                     >
                       <td className="rounded-l-2xl px-4 py-3 whitespace-nowrap">
                         {formatPeriodLabel(
@@ -372,18 +389,15 @@ function CalculatorField({
 
   return (
     <div>
-      <label
-        htmlFor={inputId}
-        className="text-(--foreground) text-sm font-semibold"
-      >
+      <Label htmlFor={inputId} className="font-semibold text-(--foreground)">
         {label}
-      </label>
+      </Label>
       {children}
-      <p id={helperId} className="text-(--muted) mt-2 text-sm">
+      <p id={helperId} className="text-muted-foreground mt-2 text-sm">
         {helperText}
       </p>
       {errorMessage ? (
-        <p id={errorId} className="mt-1 text-sm font-medium text-[#9f2f27]">
+        <p id={errorId} className="mt-1 text-sm font-medium text-destructive">
           {errorMessage}
         </p>
       ) : null}
@@ -398,8 +412,8 @@ interface MetricCardProps {
 
 function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
-    <div className="bg-(--panel) min-w-0 rounded-3xl border border-(--line) p-4">
-      <p className="text-(--muted) text-sm leading-5">{label}</p>
+    <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
+      <p className="text-muted-foreground text-sm leading-5">{label}</p>
       <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
         {value}
       </p>

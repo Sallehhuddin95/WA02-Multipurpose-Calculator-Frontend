@@ -2,6 +2,9 @@
 
 import React, { useState, type FormEvent, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { carLoanFormSchema } from "@/features/car-loan/schemas/car-loan-form";
 import { projectCarLoan } from "@/features/car-loan/services/project-car-loan";
 import type {
@@ -122,7 +125,7 @@ export function CarLoanCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-[1.75rem] border border-(--line) bg-white/75 p-6"
+        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
       >
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
@@ -160,7 +163,7 @@ export function CarLoanCalculator() {
               onClick={() => handleValueChange("rateMode", "fixed-rate")}
             />
           </div>
-          <p className="text-(--muted) mt-2 text-sm leading-6">
+          <p className="text-muted-foreground mt-2 text-sm leading-6">
             Variable rate reflects the reducing-balance method required for new
             hire-purchase agreements under the Hire-Purchase (Amendment) Act
             2026. Fixed rate is kept for comparing against an older-style
@@ -176,7 +179,7 @@ export function CarLoanCalculator() {
               inputId="vehiclePrice"
               label="Vehicle price"
             >
-              <input
+              <Input
                 id="vehiclePrice"
                 name="vehiclePrice"
                 type="number"
@@ -186,7 +189,7 @@ export function CarLoanCalculator() {
                 onChange={(event) =>
                   handleValueChange("vehiclePrice", Number(event.target.value))
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -196,7 +199,7 @@ export function CarLoanCalculator() {
               inputId="downPayment"
               label="Down payment"
             >
-              <input
+              <Input
                 id="downPayment"
                 name="downPayment"
                 type="number"
@@ -206,7 +209,7 @@ export function CarLoanCalculator() {
                 onChange={(event) =>
                   handleValueChange("downPayment", Number(event.target.value))
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
@@ -217,7 +220,7 @@ export function CarLoanCalculator() {
             inputId="financedPrincipal"
             label="Financed principal"
           >
-            <input
+            <Input
               id="financedPrincipal"
               name="financedPrincipal"
               type="number"
@@ -230,7 +233,7 @@ export function CarLoanCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         )}
@@ -243,7 +246,7 @@ export function CarLoanCalculator() {
               inputId="variableAnnualInterestRate"
               label="Annual interest rate (EIR) (%)"
             >
-              <input
+              <Input
                 id="variableAnnualInterestRate"
                 name="variableAnnualInterestRate"
                 type="number"
@@ -256,7 +259,7 @@ export function CarLoanCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           ) : (
@@ -266,7 +269,7 @@ export function CarLoanCalculator() {
               inputId="fixedAnnualInterestRate"
               label="Flat annual interest rate (%)"
             >
-              <input
+              <Input
                 id="fixedAnnualInterestRate"
                 name="fixedAnnualInterestRate"
                 type="number"
@@ -279,7 +282,7 @@ export function CarLoanCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           )}
@@ -290,7 +293,7 @@ export function CarLoanCalculator() {
             inputId="tenureYears"
             label="Tenure (years)"
           >
-            <input
+            <Input
               id="tenureYears"
               name="tenureYears"
               type="number"
@@ -300,19 +303,19 @@ export function CarLoanCalculator() {
               onChange={(event) =>
                 handleValueChange("tenureYears", Number(event.target.value))
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         </div>
 
-        <label className="flex items-center gap-3 rounded-2xl border border-(--line) bg-white/60 px-4 py-3">
+        <label className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 px-4 py-3">
           <input
             type="checkbox"
             checked={values.earlySettlementEnabled}
             onChange={(event) =>
               handleValueChange("earlySettlementEnabled", event.target.checked)
             }
-            className="text-(--accent) focus:ring-(--accent) h-4 w-4 rounded border-(--line)"
+            className="text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background h-4 w-4 rounded border-border"
           />
           <span className="text-(--foreground) text-sm font-semibold">
             I want to check an early settlement estimate
@@ -326,7 +329,7 @@ export function CarLoanCalculator() {
             inputId="earlySettlementMonth"
             label="Early settlement month"
           >
-            <input
+            <Input
               id="earlySettlementMonth"
               name="earlySettlementMonth"
               type="number"
@@ -339,31 +342,32 @@ export function CarLoanCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         ) : null}
 
         <div className="flex flex-wrap gap-3 pt-2">
-          <button
+          <Button
             type="submit"
-            className="bg-(--accent) hover:bg-(--accent-strong) rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+            className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
             Calculate loan
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={handleReset}
-            className="text-(--foreground) hover:border-(--accent) rounded-full border border-(--line) bg-white px-5 py-3 text-sm font-semibold transition"
+            className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
             Reset inputs
-          </button>
+          </Button>
         </div>
       </form>
 
       <div className="grid gap-5">
-        <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+        <section className="rounded-3xl border border-border bg-card/75 p-6">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Loan Summary
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -386,7 +390,7 @@ export function CarLoanCalculator() {
               value={formatCurrency(projection.loanSummary.monthlyInstalment)}
             />
           </div>
-          <p className="text-(--muted) mt-5 text-sm leading-6">
+          <p className="text-muted-foreground mt-5 text-sm leading-6">
             {values.rateMode === "variable-rate"
               ? `Based on ${formatPercentage(values.variableAnnualInterestRate)} EIR under the reducing-balance method over ${projection.loanSummary.totalMonths} months.`
               : `Based on ${formatPercentage(values.fixedAnnualInterestRate)} flat annual interest over ${projection.loanSummary.totalMonths} months.`}
@@ -394,17 +398,17 @@ export function CarLoanCalculator() {
         </section>
 
         {projection.settlement ? (
-          <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+          <section className="rounded-3xl border border-border bg-card/75 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-(--warning) text-sm font-medium uppercase tracking-[0.2em]">
+                <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
                   Early Settlement Estimate
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold">
                   Month {projection.settlement.summary.settlementMonth}
                 </h2>
               </div>
-              <div className="bg-(--accent-soft) text-(--accent-strong) rounded-2xl px-4 py-3 text-sm">
+              <div className="bg-accent text-accent-foreground rounded-2xl px-4 py-3 text-sm">
                 {projection.settlement.rateMode === "variable-rate"
                   ? "Outstanding-balance settlement (reducing balance)"
                   : "Rule of 78 style rebate projection"}
@@ -455,7 +459,7 @@ export function CarLoanCalculator() {
               </div>
             )}
 
-            <p className="text-(--muted) mt-5 text-sm leading-6">
+            <p className="text-muted-foreground mt-5 text-sm leading-6">
               {projection.settlement.rateMode === "variable-rate"
                 ? "Under the reducing-balance method, the settlement amount is simply the outstanding loan balance at this month, not a lender-issued payoff quote."
                 : "This estimate applies the documented Rule of 78 weighting from the spec and should be treated as planning guidance rather than a lender-issued statement."}
@@ -471,9 +475,9 @@ export function CarLoanCalculator() {
 
 function MetricGlossary() {
   return (
-    <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+    <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
-        <summary className="text-(--accent) cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
+        <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           What do these numbers mean?
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -482,7 +486,7 @@ function MetricGlossary() {
               <dt className="text-(--foreground) text-sm font-semibold">
                 {term}
               </dt>
-              <dd className="text-(--muted) mt-1 text-sm leading-6">
+              <dd className="text-muted-foreground mt-1 text-sm leading-6">
                 {definition}
               </dd>
             </div>
@@ -510,16 +514,13 @@ function CalculatorField({
 }: Readonly<CalculatorFieldProps>) {
   return (
     <div>
-      <label
-        htmlFor={inputId}
-        className="text-(--foreground) text-sm font-semibold"
-      >
+      <Label htmlFor={inputId} className="font-semibold text-(--foreground)">
         {label}
-      </label>
+      </Label>
       {children}
-      <p className="text-(--muted) mt-2 text-sm">{helperText}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{helperText}</p>
       {errorMessage ? (
-        <p className="mt-1 text-sm font-medium text-[#9f2f27]">
+        <p className="mt-1 text-sm font-medium text-destructive">
           {errorMessage}
         </p>
       ) : null}
@@ -534,8 +535,8 @@ interface MetricCardProps {
 
 function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
-    <div className="bg-(--panel) min-w-0 rounded-3xl border border-(--line) p-4">
-      <p className="text-(--muted) text-sm leading-5">{label}</p>
+    <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
+      <p className="text-muted-foreground text-sm leading-5">{label}</p>
       <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
         {value}
       </p>
@@ -551,17 +552,18 @@ interface ModeButtonProps {
 
 function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
   return (
-    <button
+    <Button
       type="button"
+      variant={isActive ? "default" : "outline"}
       onClick={onClick}
       className={[
-        "rounded-full border px-4 py-2 text-sm font-medium transition",
+        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
         isActive
-          ? "bg-(--accent) border-(--accent) text-white"
-          : "text-(--foreground) border-(--line) bg-white/60 hover:border-(--accent)",
+          ? ""
+          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
       ].join(" ")}
     >
       {label}
-    </button>
+    </Button>
   );
 }

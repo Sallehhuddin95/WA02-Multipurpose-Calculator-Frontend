@@ -2,6 +2,9 @@
 
 import React, { useState, type FormEvent, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { asbFinancingFormSchema } from "@/features/asb-financing/schemas/asb-financing-form";
 import { projectAsbFinancing } from "@/features/asb-financing/services/project-asb-financing";
 import {
@@ -134,7 +137,7 @@ export function AsbFinancingCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-[1.75rem] border border-(--line) bg-white/75 p-6"
+        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
       >
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
@@ -143,7 +146,7 @@ export function AsbFinancingCalculator() {
             inputId="financingPrincipal"
             label="Financing principal"
           >
-            <input
+            <Input
               id="financingPrincipal"
               name="financingPrincipal"
               type="number"
@@ -156,7 +159,7 @@ export function AsbFinancingCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
@@ -166,7 +169,7 @@ export function AsbFinancingCalculator() {
             inputId="financingTenureYears"
             label="Financing tenure (years)"
           >
-            <input
+            <Input
               id="financingTenureYears"
               name="financingTenureYears"
               type="number"
@@ -179,7 +182,7 @@ export function AsbFinancingCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         </div>
@@ -191,7 +194,7 @@ export function AsbFinancingCalculator() {
             inputId="annualFinancingRate"
             label="Annual financing rate (%)"
           >
-            <input
+            <Input
               id="annualFinancingRate"
               name="annualFinancingRate"
               type="number"
@@ -204,7 +207,7 @@ export function AsbFinancingCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
@@ -214,7 +217,7 @@ export function AsbFinancingCalculator() {
             inputId="annualDividendRate"
             label="Annual ASB dividend rate (%)"
           >
-            <input
+            <Input
               id="annualDividendRate"
               name="annualDividendRate"
               type="number"
@@ -227,7 +230,7 @@ export function AsbFinancingCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         </div>
@@ -238,7 +241,7 @@ export function AsbFinancingCalculator() {
           inputId="annualSideInvestmentReturnRate"
           label="Annual side-investment return rate (%)"
         >
-          <input
+          <Input
             id="annualSideInvestmentReturnRate"
             name="annualSideInvestmentReturnRate"
             type="number"
@@ -251,7 +254,7 @@ export function AsbFinancingCalculator() {
                 Number(event.target.value),
               )
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
@@ -261,7 +264,7 @@ export function AsbFinancingCalculator() {
           inputId="analysisHorizonYears"
           label="Analysis horizon (years)"
         >
-          <input
+          <Input
             id="analysisHorizonYears"
             name="analysisHorizonYears"
             type="number"
@@ -274,30 +277,31 @@ export function AsbFinancingCalculator() {
                 Number(event.target.value),
               )
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
         <div className="flex flex-wrap gap-3 pt-2">
-          <button
+          <Button
             type="submit"
-            className="bg-(--accent) hover:bg-(--accent-strong) rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+            className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
             Compare strategies
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={handleReset}
-            className="text-(--foreground) hover:border-(--accent) rounded-full border border-(--line) bg-white px-5 py-3 text-sm font-semibold transition"
+            className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
             Reset inputs
-          </button>
+          </Button>
         </div>
       </form>
 
       <div className="grid gap-5">
-        <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+        <section className="rounded-3xl border border-border bg-card/75 p-6">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Financing Overview
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -310,7 +314,7 @@ export function AsbFinancingCalculator() {
               value={`${values.analysisHorizonYears} of ${values.financingTenureYears} years`}
             />
           </div>
-          <p className="text-(--muted) mt-5 text-sm leading-6">
+          <p className="text-muted-foreground mt-5 text-sm leading-6">
             Based on a reducing-balance amortized loan at{" "}
             {formatPercentage(values.annualFinancingRate)} and a fixed{" "}
             {formatPercentage(values.annualDividendRate)} annual dividend
@@ -327,19 +331,19 @@ export function AsbFinancingCalculator() {
           return (
             <section
               key={strategyId}
-              className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6"
+              className="rounded-3xl border border-border bg-card/75 p-6"
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+                  <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
                     {strategyLabels[strategyId]}
                   </p>
-                  <p className="text-(--muted) mt-2 max-w-md text-sm leading-6">
+                  <p className="text-muted-foreground mt-2 max-w-md text-sm leading-6">
                     {strategyDescriptions[strategyId]}
                   </p>
                 </div>
                 {isLeading ? (
-                  <div className="bg-(--accent-soft) text-(--accent-strong) rounded-2xl px-4 py-3 text-sm font-semibold">
+                  <div className="bg-accent text-accent-foreground rounded-2xl px-4 py-3 text-sm font-semibold">
                     Leading for this horizon
                   </div>
                 ) : null}
@@ -383,7 +387,7 @@ export function AsbFinancingCalculator() {
           );
         })}
 
-        <p className="text-(--muted) text-sm leading-6">
+        <p className="text-muted-foreground text-sm leading-6">
           This comparison applies the documented reducing-balance financing
           model and annual dividend-crediting assumption from the spec. It is
           planning guidance, not a bank-issued ASBF quote.
@@ -408,17 +412,17 @@ function StrategyRankingTable({
   })).sort((a, b) => b.netPosition - a.netPosition);
 
   return (
-    <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-      <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+    <section className="rounded-3xl border border-border bg-card/75 p-6">
+      <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
         Strategy Ranking
       </p>
-      <p className="text-(--muted) mt-2 text-sm leading-6">
+      <p className="text-muted-foreground mt-2 text-sm leading-6">
         Strategies ranked by final profit (net position) for this horizon.
       </p>
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[420px] border-collapse text-left text-sm">
           <thead>
-            <tr className="text-(--muted) text-xs uppercase tracking-[0.14em]">
+            <tr className="text-muted-foreground text-xs uppercase tracking-[0.14em]">
               <th className="pb-3 pr-4 font-semibold">Rank</th>
               <th className="pb-3 pr-4 font-semibold">Strategy</th>
               <th className="pb-3 font-semibold">Final profit</th>
@@ -434,16 +438,16 @@ function StrategyRankingTable({
                   key={strategyId}
                   className={
                     isTopRank
-                      ? "bg-(--accent-soft)"
-                      : "border-t border-(--line)"
+                      ? "bg-accent"
+                      : "border-t border-border"
                   }
                 >
                   <td className="py-3 pr-4">
                     <span
                       className={
                         isTopRank
-                          ? "bg-(--accent) rounded-full px-3 py-1 text-xs font-semibold text-white"
-                          : "text-(--foreground) rounded-full border border-(--line) px-3 py-1 text-xs font-semibold"
+                          ? "bg-primary rounded-full px-3 py-1 text-xs font-semibold text-primary-foreground"
+                          : "text-(--foreground) rounded-full border border-border px-3 py-1 text-xs font-semibold"
                       }
                     >
                       #{rank}
@@ -467,9 +471,9 @@ function StrategyRankingTable({
 
 function MetricGlossary() {
   return (
-    <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+    <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
-        <summary className="text-(--accent) cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
+        <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           What do these numbers mean?
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -478,7 +482,7 @@ function MetricGlossary() {
               <dt className="text-(--foreground) text-sm font-semibold">
                 {term}
               </dt>
-              <dd className="text-(--muted) mt-1 text-sm leading-6">
+              <dd className="text-muted-foreground mt-1 text-sm leading-6">
                 {definition}
               </dd>
             </div>
@@ -506,16 +510,13 @@ function CalculatorField({
 }: Readonly<CalculatorFieldProps>) {
   return (
     <div>
-      <label
-        htmlFor={inputId}
-        className="text-(--foreground) text-sm font-semibold"
-      >
+      <Label htmlFor={inputId} className="font-semibold text-(--foreground)">
         {label}
-      </label>
+      </Label>
       {children}
-      <p className="text-(--muted) mt-2 text-sm">{helperText}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{helperText}</p>
       {errorMessage ? (
-        <p className="mt-1 text-sm font-medium text-[#9f2f27]">
+        <p className="mt-1 text-sm font-medium text-destructive">
           {errorMessage}
         </p>
       ) : null}
@@ -530,8 +531,8 @@ interface MetricCardProps {
 
 function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
-    <div className="bg-(--panel) min-w-0 rounded-3xl border border-(--line) p-4">
-      <p className="text-(--muted) text-sm leading-5">{label}</p>
+    <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
+      <p className="text-muted-foreground text-sm leading-5">{label}</p>
       <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
         {value}
       </p>

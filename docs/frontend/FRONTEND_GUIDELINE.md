@@ -266,6 +266,10 @@ Optimize performance with architectural decisions first, then apply targeted mic
 - Defer non-critical scripts and heavy non-essential UI.
 - Keep loading, retry, and background refresh states localized so the whole screen does not block unnecessarily.
 
+### Motion and Reduced Motion
+
+- Hover and motion effects must use Tailwind's `motion-safe:`/`motion-reduce:` variants so they respect the user's `prefers-reduced-motion` setting.
+
 ---
 
 ## 9. Authentication and Authorization

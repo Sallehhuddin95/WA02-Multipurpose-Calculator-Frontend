@@ -2,6 +2,9 @@
 
 import React, { useState, type FormEvent, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   retirementAccumulationFormSchema,
   retirementDrawdownFormSchema,
@@ -247,9 +250,9 @@ export function RetirementFundCalculator() {
         <form
           noValidate
           onSubmit={handleAccumulationSubmit}
-          className="grid content-start gap-5 self-start rounded-[1.75rem] border border-(--line) bg-white/75 p-6"
+          className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
         >
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Section A · Retirement Savings Projection
           </p>
 
@@ -260,7 +263,7 @@ export function RetirementFundCalculator() {
               inputId="initialBalance"
               label="Initial savings balance (RM)"
             >
-              <input
+              <Input
                 id="initialBalance"
                 name="initialBalance"
                 type="number"
@@ -273,7 +276,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -283,7 +286,7 @@ export function RetirementFundCalculator() {
               inputId="yearsToRetirement"
               label="Years to retirement"
             >
-              <input
+              <Input
                 id="yearsToRetirement"
                 name="yearsToRetirement"
                 type="number"
@@ -296,7 +299,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
@@ -308,7 +311,7 @@ export function RetirementFundCalculator() {
               inputId="annualReturnRate"
               label="Annual return rate (%)"
             >
-              <input
+              <Input
                 id="annualReturnRate"
                 name="annualReturnRate"
                 type="number"
@@ -321,7 +324,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -331,7 +334,7 @@ export function RetirementFundCalculator() {
               inputId="currentMonthlySalary"
               label="Current monthly salary (RM)"
             >
-              <input
+              <Input
                 id="currentMonthlySalary"
                 name="currentMonthlySalary"
                 type="number"
@@ -344,7 +347,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
@@ -380,7 +383,7 @@ export function RetirementFundCalculator() {
               inputId="annualSalaryIncrementRate"
               label="Annual salary increment rate (%)"
             >
-              <input
+              <Input
                 id="annualSalaryIncrementRate"
                 name="annualSalaryIncrementRate"
                 type="number"
@@ -393,7 +396,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           ) : (
@@ -403,7 +406,7 @@ export function RetirementFundCalculator() {
               inputId="fixedAnnualSalaryIncrement"
               label="Fixed annual salary increase (RM)"
             >
-              <input
+              <Input
                 id="fixedAnnualSalaryIncrement"
                 name="fixedAnnualSalaryIncrement"
                 type="number"
@@ -416,7 +419,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           )}
@@ -428,7 +431,7 @@ export function RetirementFundCalculator() {
               inputId="employeeContributionRate"
               label="Employee contribution rate (%)"
             >
-              <input
+              <Input
                 id="employeeContributionRate"
                 name="employeeContributionRate"
                 type="number"
@@ -442,7 +445,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -452,7 +455,7 @@ export function RetirementFundCalculator() {
               inputId="employerContributionRate"
               label="Employer contribution rate (%)"
             >
-              <input
+              <Input
                 id="employerContributionRate"
                 name="employerContributionRate"
                 type="number"
@@ -466,31 +469,32 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <button
+            <Button
               type="submit"
-              className="bg-(--accent) hover:bg-(--accent-strong) rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+              className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
             >
               Project savings
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               onClick={handleAccumulationReset}
-              className="text-(--foreground) hover:border-(--accent) rounded-full border border-(--line) bg-white px-5 py-3 text-sm font-semibold transition"
+              className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
             >
               Reset inputs
-            </button>
+            </Button>
           </div>
         </form>
 
         <div className="grid min-w-0 gap-5">
-          <section className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-            <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+          <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
+            <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
               Projection Summary
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -509,7 +513,7 @@ export function RetirementFundCalculator() {
             </div>
 
             <div className="mt-5 flex items-center justify-between gap-4">
-              <p className="text-(--muted) text-sm leading-6">
+              <p className="text-muted-foreground text-sm leading-6">
                 Annual return credited once per year on the end-of-year balance;
                 contributions accumulate monthly throughout each year.
               </p>
@@ -523,7 +527,7 @@ export function RetirementFundCalculator() {
               <div className="mt-5 overflow-x-auto">
                 <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                   <thead>
-                    <tr className="text-(--muted)">
+                    <tr className="text-muted-foreground">
                       <th className="pb-2 pr-4 font-medium">Year</th>
                       <th className="pb-2 pr-4 font-medium">Monthly salary</th>
                       <th className="pb-2 pr-4 font-medium">
@@ -534,7 +538,7 @@ export function RetirementFundCalculator() {
                   </thead>
                   <tbody>
                     {accumulation.yearlyProjection.map((row) => (
-                      <tr key={row.year} className="bg-(--panel) rounded-2xl">
+                      <tr key={row.year} className="bg-card rounded-2xl">
                         <td className="rounded-l-2xl px-4 py-3 whitespace-nowrap">
                           {row.year}
                         </td>
@@ -561,9 +565,9 @@ export function RetirementFundCalculator() {
         <form
           noValidate
           onSubmit={handleDrawdownSubmit}
-          className="grid content-start gap-5 self-start rounded-[1.75rem] border border-(--line) bg-white/75 p-6"
+          className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
         >
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Section B · Retirement Fund Longevity Simulation
           </p>
 
@@ -573,7 +577,7 @@ export function RetirementFundCalculator() {
             inputId="startingBalance"
             label="Starting balance (RM)"
           >
-            <input
+            <Input
               id="startingBalance"
               name="startingBalance"
               type="number"
@@ -586,7 +590,7 @@ export function RetirementFundCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
@@ -597,7 +601,7 @@ export function RetirementFundCalculator() {
               inputId="lumpSumWithdrawal"
               label="Lump-sum withdrawal (RM)"
             >
-              <input
+              <Input
                 id="lumpSumWithdrawal"
                 name="lumpSumWithdrawal"
                 type="number"
@@ -610,7 +614,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -620,7 +624,7 @@ export function RetirementFundCalculator() {
               inputId="monthlyWithdrawal"
               label="Monthly withdrawal (RM)"
             >
-              <input
+              <Input
                 id="monthlyWithdrawal"
                 name="monthlyWithdrawal"
                 type="number"
@@ -633,7 +637,7 @@ export function RetirementFundCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
@@ -644,7 +648,7 @@ export function RetirementFundCalculator() {
             inputId="postRetirementAnnualReturnRate"
             label="Post-retirement annual return rate (%)"
           >
-            <input
+            <Input
               id="postRetirementAnnualReturnRate"
               name="postRetirementAnnualReturnRate"
               type="number"
@@ -657,24 +661,25 @@ export function RetirementFundCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <button
+            <Button
               type="submit"
-              className="bg-(--accent) hover:bg-(--accent-strong) rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+              className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
             >
               Simulate longevity
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               onClick={handleDrawdownReset}
-              className="text-(--foreground) hover:border-(--accent) rounded-full border border-(--line) bg-white px-5 py-3 text-sm font-semibold transition"
+              className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
             >
               Reset inputs
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -691,12 +696,12 @@ export function RetirementFundCalculator() {
             return (
               <section
                 key={scenarioId}
-                className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6"
+                className="min-w-0 rounded-3xl border border-border bg-card/75 p-6"
               >
-                <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+                <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
                   {scenarioLabels[scenarioId]}
                 </p>
-                <p className="text-(--muted) mt-2 text-sm leading-6">
+                <p className="text-muted-foreground mt-2 text-sm leading-6">
                   {scenarioDescriptions[scenarioId]}
                 </p>
 
@@ -724,7 +729,7 @@ export function RetirementFundCalculator() {
                   <div className="mt-5 overflow-x-auto">
                     <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                       <thead>
-                        <tr className="text-(--muted)">
+                        <tr className="text-muted-foreground">
                           <th className="pb-2 pr-4 font-medium">Month</th>
                           <th className="pb-2 pr-4 font-medium">Lump sum</th>
                           <th className="pb-2 pr-4 font-medium">Recurring</th>
@@ -738,7 +743,7 @@ export function RetirementFundCalculator() {
                         {scenario.monthlyRows.map((row) => (
                           <tr
                             key={row.month}
-                            className="bg-(--panel) rounded-2xl"
+                            className="bg-card rounded-2xl"
                           >
                             <td className="rounded-l-2xl px-4 py-3 whitespace-nowrap">
                               {row.month}
@@ -765,7 +770,7 @@ export function RetirementFundCalculator() {
             );
           })}
 
-          <p className="text-(--muted) text-sm leading-6">
+          <p className="text-muted-foreground text-sm leading-6">
             Month 1 deducts the lump-sum withdrawal and the first monthly
             withdrawal together. The simulation runs for a maximum of 100 years
             (1,200 months).
@@ -805,9 +810,9 @@ function formatDepletionLabel(scenario: {
 
 function MetricGlossary() {
   return (
-    <section className="rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+    <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
-        <summary className="text-(--accent) cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
+        <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           What do these numbers mean?
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -816,7 +821,7 @@ function MetricGlossary() {
               <dt className="text-(--foreground) text-sm font-semibold">
                 {term}
               </dt>
-              <dd className="text-(--muted) mt-1 text-sm leading-6">
+              <dd className="text-muted-foreground mt-1 text-sm leading-6">
                 {definition}
               </dd>
             </div>
@@ -844,16 +849,13 @@ function CalculatorField({
 }: Readonly<CalculatorFieldProps>) {
   return (
     <div>
-      <label
-        htmlFor={inputId}
-        className="text-(--foreground) text-sm font-semibold"
-      >
+      <Label htmlFor={inputId} className="font-semibold text-(--foreground)">
         {label}
-      </label>
+      </Label>
       {children}
-      <p className="text-(--muted) mt-2 text-sm">{helperText}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{helperText}</p>
       {errorMessage ? (
-        <p className="mt-1 text-sm font-medium text-[#9f2f27]">
+        <p className="mt-1 text-sm font-medium text-destructive">
           {errorMessage}
         </p>
       ) : null}
@@ -868,8 +870,8 @@ interface MetricCardProps {
 
 function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
-    <div className="bg-(--panel) min-w-0 rounded-3xl border border-(--line) p-4">
-      <p className="text-(--muted) text-sm leading-5">{label}</p>
+    <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
+      <p className="text-muted-foreground text-sm leading-5">{label}</p>
       <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
         {value}
       </p>
@@ -885,18 +887,19 @@ interface ModeButtonProps {
 
 function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
   return (
-    <button
+    <Button
       type="button"
+      variant={isActive ? "default" : "outline"}
       onClick={onClick}
       className={[
-        "rounded-full border px-4 py-2 text-sm font-medium transition",
+        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
         isActive
-          ? "bg-(--accent) border-(--accent) text-white"
-          : "text-(--foreground) border-(--line) bg-white/60 hover:border-(--accent)",
+          ? ""
+          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
       ].join(" ")}
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -910,12 +913,14 @@ function ToggleTableButton({
   onClick,
 }: Readonly<ToggleTableButtonProps>) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-expanded={isOpen}
       aria-label={isOpen ? "Hide projection table" : "Show projection table"}
       onClick={onClick}
-      className="text-(--muted) hover:text-(--foreground) hover:bg-(--panel) flex h-9 w-9 items-center justify-center rounded-full border border-(--line) transition"
+      className="rounded-full border border-border text-muted-foreground hover:bg-card hover:text-(--foreground)"
     >
       <svg
         viewBox="0 0 20 20"
@@ -931,6 +936,6 @@ function ToggleTableButton({
           clipRule="evenodd"
         />
       </svg>
-    </button>
+    </Button>
   );
 }

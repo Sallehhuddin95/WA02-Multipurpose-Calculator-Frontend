@@ -24,23 +24,22 @@ It applies to:
 Given the user opens the app home page
 When the page finishes rendering
 Then the user sees the initial calculator collection
-And the user can navigate to ASB financing, compound interest, car loan, and property investment versus REIT
+And the user can navigate to ASB financing, compound interest, car loan, property investment versus REIT, retirement fund, and salary calculator
 
-### Scenario: Home-page copy reflects calculator value rather than implementation internals
+### Scenario: Header branding copy reflects calculator value rather than implementation internals
+
+Given the user opens any page in the app
+When the global Header is visible
+Then the site name "Multipurpose Calculators" explains user-facing calculator value and decision support
+And the home page hero tagline uses plain-language product copy rather than delivery-slice wording
+
+### Scenario: Home page presents app context and completion state
 
 Given the user opens the app home page
-When the hero section is visible
-Then the headline and supporting text explain user-facing calculator value and decision support
-And the copy does not rely on internal scaffold or implementation-progress language
-And the app shell tagline uses plain-language product copy rather than delivery-slice wording
-
-### Scenario: Home-page roadmap labels distinguish specified and planned calculators
-
-Given the user opens the app home page
-When the planned-next section is visible
-Then the roadmap includes Salary Calculator and Retirement Fund Calculator
-And any item that does not yet have a feature spec is marked with a planned label rather than a specified label
-And no roadmap item without a feature spec is presented as already specified
+When the page finishes rendering
+Then the home page shows an "All Shipped" completion heading above the calculator grid
+And a right-column "About this app" card states that results are estimates, that calculations run privately in the browser, and that assumptions are documented per calculator
+And a feedback CTA is present and clearly indicates that it is not yet active
 
 ### Scenario: Home-page CTA emphasis follows documented priority rules
 
@@ -49,10 +48,10 @@ When multiple live calculators are available
 Then CTA emphasis matches the documented priority rule from the UI spec
 And users can clearly identify available calculator routes from the CTA group
 
-### Scenario: Display-font headings render consistently across implemented routes
+### Scenario: Display-font headings render consistently across the Header and all implemented routes
 
 Given the user opens the home page, compound-interest page, and car-loan page
-When route-level headings are rendered on supported breakpoints
+When route-level headings and the Header site name are rendered on supported breakpoints
 Then heading text remains legible without clipped or malformed glyph combinations such as `f/fi`
 And heading rhythm remains readable without requiring zoom to interpret core page intent
 
@@ -138,12 +137,31 @@ And the property result includes loan balance, cash flow, exit proceeds, and use
 And each REIT strategy's monthly contribution is derived from the property strategy's scheduled monthly instalment, with the second REIT strategy also including the property's monthly-equivalent recurring costs
 And the result identifies the leading strategy among the property path and both REIT paths
 
+### Scenario: User can project salary growth with increments
+
+Given the user opens the salary calculator
+And the user enters a valid gross monthly salary, worker category, and age
+And the user selects a percentage increment mode and enters an annual increment rate
+And the user adds a one-off increment anchored to a future career year
+When the user runs the calculation
+Then the page shows a yearly projection table with one row per projected year
+And the page shows final-year gross monthly salary, final-year net monthly salary, cumulative net salary, and cumulative employer cost summary metrics
+And the yearly projection table is collapsed by default and can be expanded via a keyboard- and tap-reachable disclosure control
+
 ### Scenario: User can navigate between calculators without losing app-shell context
 
 Given the user is on any calculator page
 When the user navigates to another calculator using the app navigation
 Then the app shell remains consistent
 And the destination calculator page loads with its own feature-specific form and result structure
+
+### Scenario: User can open the mobile menu on a small screen and navigate to any calculator
+
+Given the user opens any page on a small-screen viewport below the `md` breakpoint
+When the user activates the hamburger disclosure in the Header
+Then the menu lists Overview and all six calculators
+And the user can navigate to any calculator without losing app-shell context
+And pressing ESC closes the menu and returns focus to the toggle
 
 ## Related Specs
 
@@ -155,3 +173,4 @@ And the destination calculator page loads with its own feature-specific form and
   - [specs/features/home-and-car-loan-ui-refinement.md](../features/home-and-car-loan-ui-refinement.md)
   - [specs/features/ui-readability-and-layout-consistency.md](../features/ui-readability-and-layout-consistency.md)
   - [specs/features/property-investment.md](../features/property-investment.md)
+  - [specs/features/salary-calculator.md](../features/salary-calculator.md)
