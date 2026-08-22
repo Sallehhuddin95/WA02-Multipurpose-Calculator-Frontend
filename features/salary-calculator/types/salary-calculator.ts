@@ -45,6 +45,48 @@ export interface SalaryAnnualProjection {
   totalEmployerCost: number;
 }
 
+export const SALARY_INCREMENT_MODES = [
+  "percentage",
+  "fixed-amount",
+  "none",
+] as const;
+
+export type SalaryIncrementMode = (typeof SALARY_INCREMENT_MODES)[number];
+
+export const ONE_OFF_INCREMENT_TYPES = ["amount", "percentage"] as const;
+
+export type OneOffIncrementType = (typeof ONE_OFF_INCREMENT_TYPES)[number];
+
+export interface OneOffIncrement {
+  year: number;
+  type: OneOffIncrementType;
+  value: number;
+}
+
+export interface SalaryProjectionFormValues {
+  projectionYears: number;
+  incrementMode: SalaryIncrementMode;
+  annualIncrementRate: number;
+  fixedAnnualIncrement: number;
+  oneOffIncrements: OneOffIncrement[];
+}
+
+export interface SalaryProjectionYearRow {
+  year: number;
+  grossMonthlySalary: number;
+  netMonthlySalary: number;
+  totalEmployeeDeductions: number;
+  totalEmployerCost: number;
+}
+
+export interface SalaryProjectionResult {
+  finalGrossMonthlySalary: number;
+  finalNetMonthlySalary: number;
+  cumulativeNetSalary: number;
+  cumulativeEmployerCost: number;
+  yearlyProjection: SalaryProjectionYearRow[];
+}
+
 export const EPF_STATUTORY_EMPLOYEE_RATE = 0.11;
 export const EPF_SENIOR_EMPLOYEE_RATE = 0.055;
 export const EPF_FOREIGN_WORKER_EMPLOYER_FLAT = 5;

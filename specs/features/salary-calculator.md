@@ -6,11 +6,13 @@ Draft
 
 ## Goal
 
-Help a user calculate the net take-home salary and employer cost for a given monthly gross salary under the Malaysian statutory payroll framework.
+Help a user calculate the net take-home salary and employer cost for a given monthly gross salary under the Malaysian statutory payroll framework, and project how that salary and its statutory breakdown evolve over future years under a chosen increment pattern.
 
 The feature decomposes a gross salary into all mandatory and optional deductions - EPF (KWSP), SOCSO (PERKESO), EIS (SIP), and PCB (MTD) - plus the optional Lindung24 protection scheme. It supports three worker categories (Malaysian citizen, permanent resident, and foreign worker) with different deduction applicability rules per category, and surfaces both the employee-side net salary and the employer-side total cost in one view.
 
 The feature exists to make the full statutory picture visible so a user can understand what they actually take home, what their employer actually pays, and how optional items like Lindung24 affect the monthly outcome.
+
+The projection capability extends the same breakdown forward in time. The user chooses how salary grows each year (percentage, fixed amount, or none) and may anchor one-off increments to specific career years, and the feature recomputes the full statutory breakdown for each projected year using a single rate schedule snapshot. This lets a user see how future salary changes affect take-home pay and employer cost year by year.
 
 ## Scope
 
@@ -30,10 +32,16 @@ This feature includes:
 - an employer cost summary showing gross salary, employer EPF, employer SOCSO, employer EIS, and total employer cost
 - an employee-side result panel showing gross salary, each deduction line with its amount and a brief label, Lindung24 premium (if opted in), and net take-home salary
 - an annualised projection table showing the same breakdown summed over 12 months to give a full-year view
+- a multi-year salary projection that recomputes the full statutory breakdown for each projected year
+- an increment mode selector with three options: percentage per year, fixed MYR per year, or none
+- optional one-off increments anchored to specific career years, each as a fixed RM amount or a percentage of the then-current salary
+- a yearly projection table and summary metrics covering the projection horizon
 
 ## Out of Scope
 
 - variable or mid-year rate changes; v1 uses a single rate schedule snapshot
+- age advancement in the projection - worker age stays constant across all projected years, so a single rate schedule snapshot applies to every projected year
+- intra-year or mid-year increment timing - recurring increments apply once per year and one-off increments apply only at their anchored year
 - multiple concurrent employments or secondary income streams
 - PCB with spousal relief, child relief, or other personal tax relief inputs beyond the default single-status treatment
 - zakat, tabung haji, union fees, cooperative deductions, or other non-statutory salary deductions
@@ -75,6 +83,19 @@ This feature includes:
 ### Optional
 
 - Lindung24 opt-in checkbox - visible for all categories; defaults to off
+
+### Projection
+
+Projection inputs drive the multi-year salary projection. They are optional in the sense that the projection can be left in "none" mode with an empty one-off list, in which case every projected year repeats the base salary breakdown.
+
+- projectionYears - whole years only; must be at least 1 and no more than 40
+- incrementMode - exactly one of percentage, fixed-amount, or none; defaults to none
+- annualIncrementRate (%) - used when incrementMode is percentage; the recurring year-over-year salary growth rate
+- fixedAnnualIncrement (RM) - used when incrementMode is fixed-amount; the recurring year-over-year salary increase
+- oneOffIncrements - an ordered list of one-off increments, each with:
+  - year - the career year (1-based, within the projection horizon) at which the increment applies
+  - type - either amount (a fixed RM increase) or percentage (a percentage increase on the then-current salary)
+  - value - the RM amount for amount type or the percentage for percentage type
 
 ## Calculation Model
 
@@ -141,6 +162,26 @@ The initial release uses one explicit, deterministic salary-breakdown model so r
 - The Lindung24 premium is deducted from the net salary after all statutory deductions have been applied, so it does not affect EPF, SOCSO, EIS, or PCB calculations.
 - When the opt-in is unchecked, no Lindung24 premium is deducted.
 
+### Salary Projection Model
+
+The projection extends the monthly breakdown across multiple future years using a single rate schedule snapshot and a constant worker age. It reuses the existing breakdown calculation service unchanged; the only input that varies from year to year is the gross monthly salary.
+
+- The base salary s(0) is the existing grossMonthlySalary input.
+- For each projected year y from 1 to projectionYears:
+  - set s(y) = s(y-1)
+  - if y > 1, apply the recurring increment mode once:
+    - percentage: s(y) = s(y) × (1 + annualIncrementRate / 100)
+    - fixed-amount: s(y) = s(y) + fixedAnnualIncrement
+    - none: s(y) is unchanged
+  - then apply each one-off increment whose year equals y, in the order they appear in the one-off list:
+    - amount: s(y) = s(y) + value
+    - percentage: s(y) = s(y) × (1 + value / 100)
+- Year 1 therefore equals the base salary with only year-1 one-off increments applied; no recurring growth is applied in year 1.
+- For every projected year, the feature recomputes the full statutory breakdown at s(y) using the existing calculation service, holding worker age and all rate schedules constant. There is no age advancement, so EPF and SOCSO age tiers, EIS eligibility, and PCB relief rules use the same snapshot for every year.
+- Each year's annualised figures equal that year's monthly figures multiplied by 12.
+- All monetary values are rounded to cents.
+- projectionYears is capped at 40.
+
 ### Rate Schedule Currency
 
 - All statutory rate tables (EPF, SOCSO, EIS, PCB brackets, Lindung24 premiums) must use the latest published schedules. The feature should reference the schedule publication date or effective date so the currency of the data is transparent to the user.
@@ -172,10 +213,34 @@ An annualised projection table shows each of the above employee line items and e
 
 The annualised projection table is collapsed and hidden by default. The user can expand it by activating a keyboard- and tap-reachable disclosure control on the same page. This matches the accessible expand/collapse convention used for projection tables across other calculator features in this repo.
 
+### Yearly Salary Projection Table and Summary
+
+The projection result presents a yearly projection table, one row per projected year, showing at minimum:
+
+- year number
+- gross monthly salary for that year
+- net monthly salary for that year
+- total employer cost per month for that year
+
+The yearly projection table is collapsed and hidden by default. The user can expand it by activating a keyboard- and tap-reachable disclosure control on the same page. This matches the accessible expand/collapse convention used for projection tables across other calculator features in this repo.
+
+Alongside the table, the projection summary shows:
+
+- final-year gross monthly salary - the gross monthly salary in the last projected year
+- final-year net monthly salary - the net monthly salary in the last projected year
+- cumulative net salary - the sum of each year's annualised net salary over the projection horizon
+- cumulative employer cost - the sum of each year's annualised total employer cost over the projection horizon
+
+### Spacing and Presentation
+
+The projection section reads as one grouped panel rather than disconnected floating blocks. The projection form and result panel use tightened gaps and paddings, with `divide-y divide-border` separators between the projection controls, the yearly table, and the summary metrics. No sub-tabs are used: the yearly table and summary metrics must remain visible together to satisfy the acceptance criteria. The current-month breakdown section's spacing and behavior are unchanged.
+
 ## Assumptions
 
 - v1 uses a single point-in-time rate schedule snapshot for all statutory contributions and tax brackets.
 - The feature does not simulate monthly payroll runs across a full calendar year; the annualised view is a straight 12× multiplication of the monthly figures.
+- The projection holds the worker's age constant across all projected years, so every projected year uses the same EPF and SOCSO age tiers, EIS eligibility, and PCB relief rules.
+- Recurring increments apply once per year starting from year 2, and one-off increments apply only at their anchored year in list order; no intra-year increment timing is modelled.
 - The EPF employee rate selector for Malaysians and permanent residents offers only the rates the EPF currently allows members to elect above the statutory minimum; rates below the statutory minimum are not offered.
 - Foreign worker EPF participation defaults to off and uses the statutory foreign-worker EPF schedule when toggled on.
 - PCB for Malaysians and permanent residents uses the single-status (unmarried, no children) default from the LHDN schedule; no additional personal relief inputs are exposed in v1.
@@ -193,12 +258,15 @@ The annualised projection table is collapsed and hidden by default. The user can
 4. If the selected category is Malaysian citizen or permanent resident, the EPF employee contribution rate selector appears with the statutory rate pre-selected. The user may change the rate to a higher election-eligible rate.
 5. If the selected category is foreign worker, the EPF participation toggle appears, defaulting to off. The user may toggle it on.
 6. The user may check the Lindung24 opt-in checkbox.
-7. The system determines the applicable deductions based on the category, age, EPF participation toggle (if foreign worker), and EPF employee rate selection.
-8. The system calculates each applicable deduction: employee EPF, employer EPF, employee SOCSO (Employment Injury plus Invalidity where applicable), employer SOCSO, employee EIS where applicable, employer EIS, and PCB using the category-appropriate PCB model.
-9. If Lindung24 is opted in, the system determines the SOCSO contribution bracket, reads the premium, and adds it to the employee-side deductions.
-10. The system computes the employee net salary and total employer cost.
-11. The system populates the employee result panel, employer cost panel, and annualised projection table.
-12. The annualised projection table is collapsed by default; the user may expand it via the disclosure control.
+7. The user sets the projection horizon (projectionYears) and selects an increment mode: percentage, fixed-amount, or none. When percentage is selected, the user enters the annual increment rate; when fixed-amount is selected, the user enters the fixed annual increment.
+8. The user may add one-off increments, each with a career year, a type (amount or percentage), and a value.
+9. The system determines the applicable deductions based on the category, age, EPF participation toggle (if foreign worker), and EPF employee rate selection.
+10. The system calculates each applicable deduction: employee EPF, employer EPF, employee SOCSO (Employment Injury plus Invalidity where applicable), employer SOCSO, employee EIS where applicable, employer EIS, and PCB using the category-appropriate PCB model.
+11. If Lindung24 is opted in, the system determines the SOCSO contribution bracket, reads the premium, and adds it to the employee-side deductions.
+12. The system computes the employee net salary and total employer cost.
+13. The system populates the employee result panel, employer cost panel, and annualised projection table.
+14. The system computes the salary projection: for each projected year it grows the salary per the increment mode, applies any anchored one-off increments, and recomputes the full breakdown at the resulting salary. It populates the yearly projection table and summary metrics.
+15. The annualised projection table and the yearly projection table are collapsed by default; the user may expand either via its disclosure control.
 
 ## Alternate Flows
 
@@ -210,6 +278,9 @@ The annualised projection table is collapsed and hidden by default. The user can
 - If the gross salary is zero or negative, the system rejects the input before any calculation and highlights the field.
 - If the age is below 16, the system rejects the input before any calculation and highlights the field.
 - If the age is above a reasonable upper bound (e.g., 100), the system does not reject the input but may display a non-blocking advisory note; this is a UX decision for implementation.
+- If the increment mode is switched from percentage to fixed-amount, or to none, the system reads the appropriate increment input for the new mode and ignores the input belonging to the previous mode; the projection recalculates on the next run.
+- If the user adds or removes a one-off increment, the system reapplies the one-off list for each affected year on the next calculation.
+- If a one-off increment references a year outside the projection horizon (less than 1 or greater than projectionYears), the system rejects that entry before calculation and highlights it.
 
 ## Error and Empty States
 
@@ -231,6 +302,15 @@ The annualised projection table is collapsed and hidden by default. The user can
 ### Lindung24
 
 - Lindung24 has no blocking validation; it is purely optional. If the opt-in is checked but the system cannot determine a SOCSO contribution bracket (e.g., because gross salary is not yet entered), the Lindung24 premium line item shows a dash or is hidden until all prerequisite inputs are valid.
+
+### Projection
+
+- If projectionYears is missing, the system blocks the projection calculation and highlights the field.
+- If projectionYears is not a whole number, is less than 1, or is greater than 40, the system rejects the input with an inline validation message and blocks the projection calculation.
+- If incrementMode is percentage and annualIncrementRate is negative, the system rejects the input.
+- If incrementMode is fixed-amount and fixedAnnualIncrement is negative, the system rejects the input.
+- If a one-off increment has a year less than 1 or greater than projectionYears, the system rejects that entry and highlights it.
+- If a one-off increment has a value of zero or less, the system rejects that entry and highlights it.
 
 ### General Empty State
 
@@ -257,6 +337,13 @@ The annualised projection table is collapsed and hidden by default. The user can
 - Changing the worker category, age, EPF rate, or foreign worker EPF toggle after calculation recalculates all affected deductions and updates all result panels.
 - Toggling Lindung24 on or off after calculation adds or removes only the Lindung24 line item without affecting the other deductions.
 - All rate schedule lookups use the latest published statutory schedules at the time of implementation; the implementation must document which schedule publication date or effective date it references.
+- The salary projection supports three increment modes - percentage, fixed-amount, and none - and applies the selected recurring mode once per year for every year after the first.
+- One-off increments apply at their anchored year in list order, compounding on top of the recurring increment for that year; year 1 applies only year-1 one-off increments with no recurring growth.
+- The yearly projection table shows at minimum the year number, gross monthly salary, net monthly salary, and total employer cost for each projected year.
+- The projection summary shows final-year gross monthly salary, final-year net monthly salary, cumulative net salary, and cumulative employer cost over the horizon, with the cumulative figures annualised.
+- The yearly projection table is collapsed by default and is expandable via a keyboard- and tap-reachable disclosure control.
+- Projection validation rejects a non-integer or out-of-range horizon (1 to 40), a negative annual increment rate or fixed increment amount, a one-off increment with a year outside the horizon, and a one-off increment with a value of zero or less.
+- Entering projection inputs and enabling increments does not change the current-month employee result panel or employer cost panel; the monthly breakdown remains based solely on the entered gross monthly salary, worker category, age, EPF choices, and Lindung24 opt-in.
 
 ## Related Specs
 

@@ -10,7 +10,7 @@ Ensure all current calculator pages and the home page present text, numeric valu
 
 ## Scope
 
-- heading typography consistency on all route-level pages using the display font
+- heading typography consistency on all route-level pages and the global header using the display font
 - summary-card value spacing and containment consistency across implemented calculators
 - compound-interest period-label readability in the projection table
 - compound-interest input-column spacing and section rhythm refinement
@@ -30,12 +30,13 @@ Ensure all current calculator pages and the home page present text, numeric valu
 ## Preconditions
 
 - home, compound-interest, and car-loan routes are available
+- the global header (`components/layout/Header.tsx`) is rendered on all pages with the site name using the display font
 - existing projection and formatting logic is already integrated
 - app shell navigation remains in use
 
 ## Main Flow
 
-1. User opens home, compound-interest, or car-loan page and sees heading text rendered clearly with no odd `f/fi` glyph behavior.
+1. User opens any page and sees heading text (including the Header site name) rendered clearly with no odd `f/fi` glyph behavior.
 2. User reads summaries and metric cards where values remain visually separated from borders and are easy to scan.
 3. User opens compound-interest results and sees period labels that are understandable to non-technical users.
 4. User uses compound-interest form and sees balanced spacing with no excessive blank columns or dead zones.
@@ -54,7 +55,7 @@ Ensure all current calculator pages and the home page present text, numeric valu
 
 ## Acceptance Criteria
 
-- display-font headings on home, compound-interest, and car-loan pages render without clipped or malformed glyph combinations such as `f/fi`
+- display-font headings on the Header, home, compound-interest, and car-loan pages render without clipped or malformed glyph combinations such as `f/fi`, and with correct optical rendering of the display-font `f` at supported sizes; both properties are enforced through the shared `display-heading` utility (single source of truth) rather than inline `[font-feature-settings:...]` guards
 - compound-interest projection period column does not show raw floating-point year ratios; it shows user-readable period labels
 - compound-interest input panel does not leave disproportionate blank vertical regions due to excessive field spacing
 - summary metric values in compound-interest and car-loan keep visible breathing room from card borders on supported breakpoints

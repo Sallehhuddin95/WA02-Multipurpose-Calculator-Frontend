@@ -10,16 +10,19 @@ Define the shared user interface behavior for the initial calculator release so 
 
 ## Entry Points
 
-- home route that introduces the calculator collection
-- direct navigation to each calculator route from the app shell
+- home route that introduces the calculator collection (via the tagline hero heading, the calculator grid, an "All Shipped" completion heading, and an "About this app" card; the site name is in the global Header)
+- direct navigation to each calculator route from the Header navigation links
 - direct deep link to a calculator route by URL
 
 ## Layout and Sections
 
 The initial release UI consists of:
 
-- a top-level app shell with project title and calculator navigation
-- a home surface that lists the available calculators with short descriptions
+- three shared layout components composed in the root layout via `AppShell`:
+  - `components/layout/Header.tsx` — a Server Component with the site name "Multipurpose Calculators" and navigation links to all calculator routes; uses `position: sticky` via CSS (no JS) so the header remains visible during scroll. On `md+` viewports the horizontal navigation is rendered by a Client Component island (`PrimaryNav`) that uses `usePathname()` to set `aria-current="page"` on the active link. Below `md`, the horizontal nav is replaced by a hamburger disclosure menu (`MobileMenu`, a Client Component island) that opens a panel listing Overview and all six calculators. The shared navigation entries live in `components/layout/navigation-items.ts` and are consumed by both `PrimaryNav` and `MobileMenu`
+  - `components/layout/Footer.tsx` — a Server Component with copyright text and a `CurrentYear.tsx` Client Component island for dynamic year rendering (`new Date().getFullYear()`)
+  - `components/layout/AppShell.tsx` — composes Header + `<main>{children}</main>` + Footer
+- a home surface that lists the available calculators with short descriptions and an "All Shipped" completion heading above the grid; the home page renders the tagline "Practical calculators to help you make clearer money decisions." as a hero heading, and a right-column "About this app" card with a feedback CTA; the site name "Multipurpose Calculators" is rendered in the global Header
 - one calculator page per feature:
   - ASB financing
   - compound interest
@@ -35,12 +38,13 @@ The initial release UI consists of:
 
 ## Interactive Elements
 
-- calculator navigation links must let the user move between calculators without losing global shell context
-- home-page hero messaging must describe user value and calculator purpose rather than internal implementation progress
+- calculator navigation links must let the user move between calculators without losing global shell context; navigation links live in the Header component and are available on every page
+- the Header component's site name and the home page hero tagline must describe user value and calculator purpose rather than internal implementation progress
 - app shell tagline must use user-facing language and avoid internal delivery or implementation wording
-- home-page roadmap items must distinguish fully specified calculators from calculators that are still only planned
-- any route-level heading that uses the shared display font must apply a typography configuration that prevents malformed contextual ligature rendering (for example `f/fi` combinations)
-- home-page primary and secondary CTA styling must follow a documented product-priority rule:
+- the home page "About this app" card must state that results are estimates (not financial advice), that calculations run privately in the browser, and that assumptions are documented per calculator
+- the home page feedback CTA must be present and clearly indicate that it is not yet active (the Telegram bot transport is a future integration)
+- any route-level heading and the Header site name that use the shared display font must apply the `display-heading` utility (defined in `app/globals.css`) rather than an inline `[font-feature-settings:...]` guard string; the utility bundles the display font family with the ligature guard so malformed contextual ligature rendering (for example `f/fi` combinations) is prevented from one shared source of truth
+- home-page calculator grid CTA styling must follow a documented product-priority rule:
   - if one calculator is intentionally prioritized, only that route gets primary emphasis
   - if live calculators are equal priority, use visual parity treatment for CTAs
 - each calculator page must expose all required inputs defined by its feature spec
@@ -88,7 +92,7 @@ The initial release UI consists of:
   - primary actions
   - summary results
   - detailed charts and tables
-- navigation must remain usable on small screens without hiding access to any calculator
+- navigation must remain usable on small screens without hiding access to any calculator; below `md` the horizontal nav collapses into a hamburger disclosure menu that lists Overview and all six calculators, is keyboard-reachable, closes on ESC with focus returned to the toggle, and closes on click-outside and on route change
 - tables with many columns must remain readable on smaller screens through responsive stacking, selective summarization, or horizontal overflow handling
 - summary metric cards for calculators must remain readable on smaller screens and must not leak text beyond card edges
 - heading typography should preserve legibility and rhythm on small screens without clipped or awkward glyph presentation
@@ -97,6 +101,7 @@ The initial release UI consists of:
 ## Accessibility Notes
 
 - calculator navigation must be keyboard reachable and expose the current page state
+- the mobile navigation disclosure button must expose `aria-expanded` and `aria-controls`, close on ESC with focus returned to the toggle, close on click-outside and on route change, and respect `prefers-reduced-motion`
 - all form inputs must have visible labels
 - validation messaging must be programmatically associated with the relevant field
 - summary values and comparison outcomes must not rely on color alone to communicate meaning
@@ -106,7 +111,7 @@ The initial release UI consists of:
 ## Related Specs
 
 - Features:
-  - [specs/features/home-overview-copy.md](../features/home-overview-copy.md)
+  - [specs/features/home-overview-copy.md](../features/home-overview-copy.md) (header branding and home page copy requirements)
   - [specs/features/asb-financing.md](../features/asb-financing.md)
   - [specs/features/compound-interest.md](../features/compound-interest.md)
   - [specs/features/car-loan.md](../features/car-loan.md)
@@ -114,3 +119,4 @@ The initial release UI consists of:
   - [specs/features/ui-readability-and-layout-consistency.md](../features/ui-readability-and-layout-consistency.md)
   - [specs/features/property-investment.md](../features/property-investment.md)
 - Acceptance: [specs/acceptance/initial-calculator-release.md](../acceptance/initial-calculator-release.md)
+- UI: [specs/ui/design-tokens-and-theme.md](./design-tokens-and-theme.md)

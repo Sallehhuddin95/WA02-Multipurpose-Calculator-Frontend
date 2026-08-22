@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const liveCalculators = [
   {
@@ -39,39 +40,106 @@ const liveCalculators = [
   },
 ];
 
-const upcomingCalculators: Array<{
-  name: string;
-  status: string;
-  summary: string;
-}> = [];
+function CheckmarkIcon() {
+  return (
+    <svg
+      width="28"
+      height="28"
+      viewBox="0 0 28 28"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="14" cy="14" r="14" fill="var(--accent)" />
+      <path
+        d="M8 14l4 4 8-8"
+        stroke="var(--accent-foreground)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function AboutCard() {
+  const notes = [
+    {
+      title: "Estimates only",
+      body: "Results are approximations for planning, not financial or tax advice.",
+    },
+    {
+      title: "Private by design",
+      body: "Everything is calculated in your browser - nothing you enter is stored or sent.",
+    },
+    {
+      title: "Check the assumptions",
+      body: "Each calculator documents its formulas and assumptions next to its results.",
+    },
+  ];
+
+  return (
+    <div>
+      <p className="text-primary mb-5 text-sm font-medium uppercase tracking-[0.22em]">
+        About this app
+      </p>
+
+      <ul className="space-y-5">
+        {notes.map((note) => (
+          <li key={note.title}>
+            <p className="font-semibold text-(--foreground)">{note.title}</p>
+            <p className="text-muted-foreground mt-1 text-sm leading-6">{note.body}</p>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-8 border-t border-border pt-6">
+        <Button variant="secondary" disabled>
+          Send feedback
+        </Button>
+        <p className="text-muted-foreground mt-3 text-sm leading-6">
+          The feedback form will connect to our Telegram bot soon.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
-    <main className="page-shell pb-16 pt-10 md:pb-24 md:pt-14">
+    <main className="mx-auto w-[min(1180px,calc(100%_-_2rem))] pb-16 pt-10 md:pb-24 md:pt-14">
+      <section className="mb-10 md:mb-14">
+        <h1 className="display-heading text-(--foreground) text-3xl font-semibold leading-tight md:text-4xl">
+          Practical calculators to help you make clearer money decisions.
+        </h1>
+      </section>
+
       <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="surface-card rounded-[2rem] p-8 md:p-10">
-          <p className="text-(--accent) mb-4 text-sm font-medium uppercase tracking-[0.22em]">
-            Multipurpose Calculators
-          </p>
-          <h1 className="display-heading max-w-2xl text-4xl leading-[1.08] md:text-6xl">
-            Make clearer money decisions with fast, practical calculators.
-          </h1>
-          <p className="text-(--muted) mt-5 max-w-xl text-base leading-7 md:text-lg">
-            Start with compound interest, car-loan, ASB financing,
-            property-versus-REIT, retirement fund, and salary calculator
-            scenarios today, with more everyday money calculators on the way.
-          </p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="rounded-4xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-lg md:p-10">
+          <div className="mb-8">
+            <p className="text-primary mb-4 text-sm font-medium uppercase tracking-[0.22em]">
+              All Shipped
+            </p>
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-accent">
+              <CheckmarkIcon />
+            </div>
+            <h2 className="text-2xl font-semibold leading-tight text-(--foreground)">
+              Every planned calculator is now live and ready to use.
+            </h2>
+            <p className="text-muted-foreground mt-3 text-sm leading-6">
+              All six calculators have shipped and are available below. Click
+              any one to get started.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {liveCalculators.map((calculator) => (
               <Link
                 key={calculator.name}
                 href={calculator.href}
-                className="group rounded-3xl border border-(--line) bg-white/78 px-5 py-4 transition hover:border-(--accent) hover:bg-white"
+                className="group rounded-3xl border border-border bg-card/80 px-5 py-4 transition hover:border-primary hover:bg-card motion-safe:hover:scale-[1.03] motion-reduce:transform-none"
               >
-                <p className="text-base font-semibold">
-                  Open {calculator.name}
-                </p>
-                <p className="text-(--muted) mt-2 text-sm leading-6">
+                <p className="text-base font-semibold">{calculator.name}</p>
+                <p className="text-muted-foreground mt-2 text-sm leading-6">
                   {calculator.summary}
                 </p>
               </Link>
@@ -79,37 +147,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {upcomingCalculators.length > 0 ? (
-          <aside className="surface-card rounded-[2rem] p-8 md:p-10">
-            <p className="text-(--warning) text-sm font-medium uppercase tracking-[0.2em]">
-              Planned Next
-            </p>
-            <ul className="mt-5 grid gap-4">
-              {upcomingCalculators.map((calculator) => (
-                <li
-                  key={calculator.name}
-                  className="rounded-3xl border border-(--line) bg-white/70 p-5"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-lg font-semibold">{calculator.name}</h2>
-                    <span
-                      className={
-                        calculator.status === "Specified"
-                          ? "bg-(--accent-soft) text-(--accent-strong) rounded-full px-3 py-1 text-xs font-semibold"
-                          : "text-(--muted) rounded-full border border-(--line) bg-white/60 px-3 py-1 text-xs font-semibold"
-                      }
-                    >
-                      {calculator.status}
-                    </span>
-                  </div>
-                  <p className="text-(--muted) mt-3 text-sm leading-6">
-                    {calculator.summary}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </aside>
-        ) : null}
+        <aside className="rounded-4xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-lg md:p-10">
+          <AboutCard />
+        </aside>
       </section>
     </main>
   );

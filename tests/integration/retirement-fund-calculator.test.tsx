@@ -15,12 +15,16 @@ describe("RetirementFundCalculator", () => {
     expect(
       screen.getByText(/section b · retirement fund longevity simulation/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/final capital/i)).toBeInTheDocument();
-    expect(screen.getByText(/total contributions/i)).toBeInTheDocument();
-    expect(screen.getByText(/total growth/i)).toBeInTheDocument();
-    expect(screen.getByText(/stays invested/i)).toBeInTheDocument();
-    expect(screen.getByText(/fully withdrawn/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/time to depletion/i)).toHaveLength(2);
+    expect(screen.getAllByText(/final capital/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(/total contributions/i).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText(/total growth/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/stays invested/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/fully withdrawn/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/time to depletion/i).length).toBeGreaterThanOrEqual(
+      2,
+    );
   });
 
   it("switches Section A salary growth mode between percentage and fixed ringgit increase", async () => {

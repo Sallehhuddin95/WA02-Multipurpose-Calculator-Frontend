@@ -87,7 +87,7 @@ function simulateDividendOffsetStrategy({
   analysisHorizonYears,
   amortizationSchedule,
 }: DividendOffsetStrategyParams): AsbStrategySummary {
-  let asbBalance = financingPrincipal;
+  const asbBalance = financingPrincipal;
   let reserve = 0;
   let sideInvestmentBalance = 0;
   let cumulativeDividends = 0;

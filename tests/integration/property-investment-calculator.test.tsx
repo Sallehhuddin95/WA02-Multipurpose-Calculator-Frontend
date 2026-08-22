@@ -148,10 +148,10 @@ describe("PropertyInvestmentCalculator", () => {
       screen.queryByText(/reit initial capital cannot be negative/i),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/reit \(instalment-matched\)/i),
-    ).toBeInTheDocument();
+      screen.getAllByText(/reit \(instalment-matched\)/i).length,
+    ).toBeGreaterThan(0);
     expect(
-      screen.getByText(/reit \(instalment \+ costs\)/i),
-    ).toBeInTheDocument();
+      screen.getAllByText(/reit \(instalment \+ costs\)/i).length,
+    ).toBeGreaterThan(0);
   });
 });

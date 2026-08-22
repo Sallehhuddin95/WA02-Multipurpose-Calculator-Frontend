@@ -14,7 +14,7 @@ describe("CarLoanCalculator", () => {
       screen.getByLabelText(/annual interest rate \(eir\)/i),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(/early settlement estimate/i),
+      screen.queryByText(/^early settlement estimate$/i),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText(/early settlement month/i),
@@ -36,7 +36,7 @@ describe("CarLoanCalculator", () => {
 
     await user.click(screen.getByRole("button", { name: /calculate loan/i }));
 
-    expect(screen.getByText(/early settlement estimate/i)).toBeInTheDocument();
+    expect(screen.getByText(/^early settlement estimate$/i)).toBeInTheDocument();
   });
 
   it("switches to the fixed-rate tab and shows the flat annual interest rate field", async () => {

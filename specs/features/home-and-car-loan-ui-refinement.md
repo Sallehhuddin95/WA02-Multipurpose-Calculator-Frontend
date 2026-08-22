@@ -10,7 +10,7 @@ Refine the home page and car-loan calculator presentation so the product feels m
 
 ## Scope
 
-- rewrite home hero copy to user-value language
+- ensure header branding copy (site name and tagline in `components/layout/Header.tsx`) uses user-value language
 - define home CTA hierarchy for live calculators
 - fix car-loan heading readability and text rhythm
 - ensure car-loan result values remain contained inside metric cards on supported breakpoints
@@ -38,7 +38,7 @@ Refine the home page and car-loan calculator presentation so the product feels m
 
 ## Main Flow
 
-1. User opens the home page and sees value-focused copy that explains what the calculators help them decide.
+1. User opens any page and sees the global header with value-focused copy that explains what the calculators help them decide.
 2. User sees CTA treatment that reflects documented product priority rules rather than scaffold status language.
 3. User opens the car-loan page and can read heading and assumptions text without clipped or awkward glyph rendering.
 4. User runs a valid loan calculation and sees summary and settlement values fully contained within their cards.
@@ -58,7 +58,7 @@ Refine the home page and car-loan calculator presentation so the product feels m
 
 ## Acceptance Criteria
 
-- home hero text describes user outcomes and calculator value, not internal scaffold or implementation status
+- header branding text (site name and tagline) describes user outcomes and calculator value, not internal scaffold or implementation status
 - CTA emphasis on the home page follows a documented hierarchy rule
 - car-loan heading and assumptions text render cleanly on supported desktop and mobile breakpoints
 - loan-summary and settlement metric values do not overflow card boundaries on supported breakpoints

@@ -2,6 +2,9 @@
 
 import React, { useState, type FormEvent, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { propertyInvestmentFormSchema } from "@/features/property-investment/schemas/property-investment-form";
 import { projectPropertyInvestment } from "@/features/property-investment/services/project-property-investment";
 import type {
@@ -168,7 +171,7 @@ export function PropertyInvestmentCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-[1.75rem] border border-(--line) bg-white/75 p-6"
+        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
       >
         <CalculatorField
           errorMessage={errors.purchasePrice}
@@ -176,7 +179,7 @@ export function PropertyInvestmentCalculator() {
           inputId="purchasePrice"
           label="Purchase price"
         >
-          <input
+          <Input
             id="purchasePrice"
             name="purchasePrice"
             type="number"
@@ -186,7 +189,7 @@ export function PropertyInvestmentCalculator() {
             onChange={(event) =>
               handleValueChange("purchasePrice", Number(event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
@@ -215,7 +218,7 @@ export function PropertyInvestmentCalculator() {
             inputId="downPayment"
             label="Down payment"
           >
-            <input
+            <Input
               id="downPayment"
               name="downPayment"
               type="number"
@@ -225,7 +228,7 @@ export function PropertyInvestmentCalculator() {
               onChange={(event) =>
                 handleValueChange("downPayment", Number(event.target.value))
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         ) : (
@@ -235,7 +238,7 @@ export function PropertyInvestmentCalculator() {
             inputId="loanPrincipal"
             label="Loan principal"
           >
-            <input
+            <Input
               id="loanPrincipal"
               name="loanPrincipal"
               type="number"
@@ -245,7 +248,7 @@ export function PropertyInvestmentCalculator() {
               onChange={(event) =>
                 handleValueChange("loanPrincipal", Number(event.target.value))
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         )}
@@ -257,7 +260,7 @@ export function PropertyInvestmentCalculator() {
             inputId="annualFinancingRate"
             label="Annual financing rate (%)"
           >
-            <input
+            <Input
               id="annualFinancingRate"
               name="annualFinancingRate"
               type="number"
@@ -270,7 +273,7 @@ export function PropertyInvestmentCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
@@ -280,7 +283,7 @@ export function PropertyInvestmentCalculator() {
             inputId="financingTenureYears"
             label="Financing tenure (years)"
           >
-            <input
+            <Input
               id="financingTenureYears"
               name="financingTenureYears"
               type="number"
@@ -293,7 +296,7 @@ export function PropertyInvestmentCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         </div>
@@ -304,7 +307,7 @@ export function PropertyInvestmentCalculator() {
           inputId="holdingPeriodYears"
           label="Holding period (years)"
         >
-          <input
+          <Input
             id="holdingPeriodYears"
             name="holdingPeriodYears"
             type="number"
@@ -317,7 +320,7 @@ export function PropertyInvestmentCalculator() {
                 Number(event.target.value),
               )
             }
-            className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+            className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
 
@@ -328,7 +331,7 @@ export function PropertyInvestmentCalculator() {
             inputId="monthlyRent"
             label="Monthly rent"
           >
-            <input
+            <Input
               id="monthlyRent"
               name="monthlyRent"
               type="number"
@@ -338,7 +341,7 @@ export function PropertyInvestmentCalculator() {
               onChange={(event) =>
                 handleValueChange("monthlyRent", Number(event.target.value))
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
@@ -348,7 +351,7 @@ export function PropertyInvestmentCalculator() {
             inputId="occupancyRatePercent"
             label="Occupancy rate (%)"
           >
-            <input
+            <Input
               id="occupancyRatePercent"
               name="occupancyRatePercent"
               type="number"
@@ -362,7 +365,7 @@ export function PropertyInvestmentCalculator() {
                   Number(event.target.value),
                 )
               }
-              className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
         </div>
@@ -378,7 +381,7 @@ export function PropertyInvestmentCalculator() {
               inputId="monthlyMaintenanceAllowance"
               label="Maintenance allowance (monthly)"
             >
-              <input
+              <Input
                 id="monthlyMaintenanceAllowance"
                 name="monthlyMaintenanceAllowance"
                 type="number"
@@ -391,7 +394,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -401,7 +404,7 @@ export function PropertyInvestmentCalculator() {
               inputId="monthlySinkingFund"
               label="Sinking fund (monthly)"
             >
-              <input
+              <Input
                 id="monthlySinkingFund"
                 name="monthlySinkingFund"
                 type="number"
@@ -414,7 +417,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -424,7 +427,7 @@ export function PropertyInvestmentCalculator() {
               inputId="annualCukaiTaksiran"
               label="Cukai taksiran"
             >
-              <input
+              <Input
                 id="annualCukaiTaksiran"
                 name="annualCukaiTaksiran"
                 type="number"
@@ -437,7 +440,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -447,7 +450,7 @@ export function PropertyInvestmentCalculator() {
               inputId="annualCukaiTanahOrPetak"
               label="Cukai tanah or petak"
             >
-              <input
+              <Input
                 id="annualCukaiTanahOrPetak"
                 name="annualCukaiTanahOrPetak"
                 type="number"
@@ -460,7 +463,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -470,7 +473,7 @@ export function PropertyInvestmentCalculator() {
               inputId="annualIndahWaterCost"
               label="Indah Water cost"
             >
-              <input
+              <Input
                 id="annualIndahWaterCost"
                 name="annualIndahWaterCost"
                 type="number"
@@ -483,7 +486,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -493,7 +496,7 @@ export function PropertyInvestmentCalculator() {
               inputId="annualRepairAllowance"
               label="Repair allowance"
             >
-              <input
+              <Input
                 id="annualRepairAllowance"
                 name="annualRepairAllowance"
                 type="number"
@@ -506,7 +509,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -516,7 +519,7 @@ export function PropertyInvestmentCalculator() {
               inputId="annualFireInsurance"
               label="Fire insurance"
             >
-              <input
+              <Input
                 id="annualFireInsurance"
                 name="annualFireInsurance"
                 type="number"
@@ -529,7 +532,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -539,7 +542,7 @@ export function PropertyInvestmentCalculator() {
               inputId="annualOtherCosts"
               label="Other costs"
             >
-              <input
+              <Input
                 id="annualOtherCosts"
                 name="annualOtherCosts"
                 type="number"
@@ -552,7 +555,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
@@ -600,7 +603,7 @@ export function PropertyInvestmentCalculator() {
                   inputId="mrttCost"
                   label="MRTT cost"
                 >
-                  <input
+                  <Input
                     id="mrttCost"
                     name="mrttCost"
                     type="number"
@@ -610,7 +613,7 @@ export function PropertyInvestmentCalculator() {
                     onChange={(event) =>
                       handleValueChange("mrttCost", Number(event.target.value))
                     }
-                    className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                    className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                   />
                 </CalculatorField>
               </div>
@@ -623,7 +626,7 @@ export function PropertyInvestmentCalculator() {
                 inputId="annualMlttCost"
                 label="Annual MLTT cost"
               >
-                <input
+                <Input
                   id="annualMlttCost"
                   name="annualMlttCost"
                   type="number"
@@ -636,7 +639,7 @@ export function PropertyInvestmentCalculator() {
                       Number(event.target.value),
                     )
                   }
-                  className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                  className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                 />
               </CalculatorField>
             </div>
@@ -669,7 +672,7 @@ export function PropertyInvestmentCalculator() {
                 inputId="annualAppreciationRate"
                 label="Annual appreciation rate (%)"
               >
-                <input
+                <Input
                   id="annualAppreciationRate"
                   name="annualAppreciationRate"
                   type="number"
@@ -682,7 +685,7 @@ export function PropertyInvestmentCalculator() {
                       Number(event.target.value),
                     )
                   }
-                  className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                  className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                 />
               </CalculatorField>
             ) : (
@@ -692,7 +695,7 @@ export function PropertyInvestmentCalculator() {
                 inputId="expectedExitPrice"
                 label="Expected exit price"
               >
-                <input
+                <Input
                   id="expectedExitPrice"
                   name="expectedExitPrice"
                   type="number"
@@ -705,7 +708,7 @@ export function PropertyInvestmentCalculator() {
                       Number(event.target.value),
                     )
                   }
-                  className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                  className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                 />
               </CalculatorField>
             )}
@@ -723,7 +726,7 @@ export function PropertyInvestmentCalculator() {
               inputId="reitInitialCapital"
               label="REIT initial capital"
             >
-              <input
+              <Input
                 id="reitInitialCapital"
                 name="reitInitialCapital"
                 type="number"
@@ -736,7 +739,7 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
 
@@ -746,7 +749,7 @@ export function PropertyInvestmentCalculator() {
               inputId="reitAnnualReturnRate"
               label="REIT annual return rate (%)"
             >
-              <input
+              <Input
                 id="reitAnnualReturnRate"
                 name="reitAnnualReturnRate"
                 type="number"
@@ -759,32 +762,33 @@ export function PropertyInvestmentCalculator() {
                     Number(event.target.value),
                   )
                 }
-                className="mt-2 w-full rounded-2xl border border-(--line) bg-(--panel-strong) px-4 py-3"
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
           </div>
         </fieldset>
 
         <div className="flex flex-wrap gap-3 pt-2">
-          <button
+          <Button
             type="submit"
-            className="bg-(--accent) hover:bg-(--accent-strong) rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+            className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
             Compare property and REIT
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={handleReset}
-            className="text-(--foreground) hover:border-(--accent) rounded-full border border-(--line) bg-white px-5 py-3 text-sm font-semibold transition"
+            className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
             Reset inputs
-          </button>
+          </Button>
         </div>
       </form>
 
       <div className="grid min-w-0 gap-5">
-        <section className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Property Overview
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -821,7 +825,7 @@ export function PropertyInvestmentCalculator() {
               )}
             />
           </div>
-          <p className="text-(--muted) mt-5 text-sm leading-6">
+          <p className="text-muted-foreground mt-5 text-sm leading-6">
             Based on a reducing-balance amortized loan at{" "}
             {formatPercentage(submittedValues.annualFinancingRate)} over a{" "}
             {submittedValues.holdingPeriodYears}-year holding period within a{" "}
@@ -829,11 +833,11 @@ export function PropertyInvestmentCalculator() {
           </p>
         </section>
 
-        <section className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             REIT Overview
           </p>
-          <p className="text-(--muted) mt-2 text-sm leading-6">
+          <p className="text-muted-foreground mt-2 text-sm leading-6">
             Both strategies start from the same capital and grow monthly; only
             the monthly contribution amount differs.
           </p>
@@ -844,7 +848,7 @@ export function PropertyInvestmentCalculator() {
               return (
                 <div
                   key={strategyId}
-                  className="rounded-2xl border border-(--line) bg-(--panel) p-5"
+                  className="rounded-2xl border border-border bg-card p-5"
                 >
                   <p className="text-(--foreground) text-sm font-semibold">
                     {strategyLabels[strategyId]}
@@ -869,7 +873,7 @@ export function PropertyInvestmentCalculator() {
               );
             })}
           </div>
-          <p className="text-(--muted) mt-5 text-sm leading-6">
+          <p className="text-muted-foreground mt-5 text-sm leading-6">
             Based on {formatCurrency(submittedValues.reitInitialCapital)}{" "}
             starting capital at a fixed{" "}
             {formatPercentage(submittedValues.reitAnnualReturnRate)} annual
@@ -877,17 +881,17 @@ export function PropertyInvestmentCalculator() {
           </p>
         </section>
 
-        <section className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
-          <p className="text-(--accent) text-sm font-medium uppercase tracking-[0.2em]">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
+          <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             Strategy Ranking
           </p>
-          <p className="text-(--muted) mt-2 text-sm leading-6">
+          <p className="text-muted-foreground mt-2 text-sm leading-6">
             Strategies ranked by net return for this holding period.
           </p>
           <div className="mt-5 overflow-x-auto">
             <table className="w-full min-w-[420px] border-collapse text-left text-sm">
               <thead>
-                <tr className="text-(--muted) text-xs uppercase tracking-[0.14em]">
+                <tr className="text-muted-foreground text-xs uppercase tracking-[0.14em]">
                   <th className="pb-3 pr-4 font-semibold">Rank</th>
                   <th className="pb-3 pr-4 font-semibold">Strategy</th>
                   <th className="pb-3 font-semibold">Net return</th>
@@ -903,16 +907,16 @@ export function PropertyInvestmentCalculator() {
                       key={strategyId}
                       className={
                         isTopRank
-                          ? "bg-(--accent-soft)"
-                          : "border-t border-(--line)"
+                          ? "bg-accent"
+                          : "border-t border-border"
                       }
                     >
                       <td className="py-3 pr-4">
                         <span
                           className={
                             isTopRank
-                              ? "bg-(--accent) rounded-full px-3 py-1 text-xs font-semibold text-white"
-                              : "text-(--foreground) rounded-full border border-(--line) px-3 py-1 text-xs font-semibold"
+                              ? "bg-primary rounded-full px-3 py-1 text-xs font-semibold text-primary-foreground"
+                              : "text-(--foreground) rounded-full border border-border px-3 py-1 text-xs font-semibold"
                           }
                         >
                           #{rank}
@@ -932,18 +936,20 @@ export function PropertyInvestmentCalculator() {
           </div>
         </section>
 
-        <section className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-(--warning) text-sm font-medium uppercase tracking-[0.2em]">
+              <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
                 Yearly Projection
               </p>
               <h2 className="mt-2 text-2xl font-semibold">
                 Year 1 to {comparison.property.yearlyProjection.length}
               </h2>
             </div>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               aria-expanded={isTableOpen}
               aria-label={
                 isTableOpen
@@ -951,7 +957,7 @@ export function PropertyInvestmentCalculator() {
                   : "Show yearly projection"
               }
               onClick={() => setIsTableOpen((prev) => !prev)}
-              className="text-(--muted) hover:text-(--foreground) hover:bg-(--panel) flex h-9 w-9 items-center justify-center rounded-full border border-(--line) transition"
+              className="rounded-full border border-border text-muted-foreground hover:bg-card hover:text-(--foreground)"
             >
               <svg
                 viewBox="0 0 20 20"
@@ -967,13 +973,13 @@ export function PropertyInvestmentCalculator() {
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </Button>
           </div>
           {isTableOpen ? (
             <div className="mt-5 overflow-x-auto">
               <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                 <thead>
-                  <tr className="text-(--muted)">
+                  <tr className="text-muted-foreground">
                     <th className="pb-2 pr-4 font-medium">Year</th>
                     <th className="pb-2 pr-4 font-medium">Loan balance</th>
                     <th className="pb-2 pr-4 font-medium">
@@ -990,7 +996,7 @@ export function PropertyInvestmentCalculator() {
                 </thead>
                 <tbody>
                   {comparison.property.yearlyProjection.map((row) => (
-                    <tr key={row.year} className="bg-(--panel) rounded-2xl">
+                    <tr key={row.year} className="bg-card rounded-2xl">
                       <td className="rounded-l-2xl px-4 py-3 whitespace-nowrap">
                         Year {row.year}
                       </td>
@@ -1037,9 +1043,9 @@ const REIT_STRATEGY_ORDER: readonly Exclude<
 
 function MetricGlossary() {
   return (
-    <section className="min-w-0 rounded-[1.75rem] border border-(--line) bg-white/78 p-6">
+    <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <details>
-        <summary className="text-(--accent) cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
+        <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           What do these numbers mean?
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -1048,7 +1054,7 @@ function MetricGlossary() {
               <dt className="text-(--foreground) text-sm font-semibold">
                 {term}
               </dt>
-              <dd className="text-(--muted) mt-1 text-sm leading-6">
+              <dd className="text-muted-foreground mt-1 text-sm leading-6">
                 {definition}
               </dd>
             </div>
@@ -1076,16 +1082,13 @@ function CalculatorField({
 }: Readonly<CalculatorFieldProps>) {
   return (
     <div>
-      <label
-        htmlFor={inputId}
-        className="text-(--foreground) text-sm font-semibold"
-      >
+      <Label htmlFor={inputId} className="font-semibold text-(--foreground)">
         {label}
-      </label>
+      </Label>
       {children}
-      <p className="text-(--muted) mt-2 text-sm">{helperText}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{helperText}</p>
       {errorMessage ? (
-        <p className="mt-1 text-sm font-medium text-[#9f2f27]">
+        <p className="mt-1 text-sm font-medium text-destructive">
           {errorMessage}
         </p>
       ) : null}
@@ -1100,8 +1103,8 @@ interface MetricCardProps {
 
 function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
-    <div className="bg-(--panel) min-w-0 rounded-3xl border border-(--line) p-4">
-      <p className="text-(--muted) text-sm leading-5">{label}</p>
+    <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
+      <p className="text-muted-foreground text-sm leading-5">{label}</p>
       <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
         {value}
       </p>
@@ -1117,17 +1120,18 @@ interface ModeButtonProps {
 
 function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
   return (
-    <button
+    <Button
       type="button"
+      variant={isActive ? "default" : "outline"}
       onClick={onClick}
       className={[
-        "rounded-full border px-4 py-2 text-sm font-medium transition",
+        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
         isActive
-          ? "bg-(--accent) border-(--accent) text-white"
-          : "text-(--foreground) border-(--line) bg-white/60 hover:border-(--accent)",
+          ? ""
+          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
       ].join(" ")}
     >
       {label}
-    </button>
+    </Button>
   );
 }

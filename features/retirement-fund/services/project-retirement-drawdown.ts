@@ -4,7 +4,7 @@ import type {
   RetirementDrawdownFormValues,
   RetirementDrawdownResult,
 } from "@/features/retirement-fund/types/retirement-fund";
-import { roundToCents } from "@/features/retirement-fund/utils/round-to-cents";
+import { roundToCents } from "@/utils/round-to-cents";
 
 const MAX_MONTHS = 1200; // 100-year cap - spec correctness requirement
 

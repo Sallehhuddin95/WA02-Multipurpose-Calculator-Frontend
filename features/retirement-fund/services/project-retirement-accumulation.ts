@@ -3,7 +3,7 @@ import type {
   RetirementAccumulationFormValues,
   RetirementAccumulationResult,
 } from "@/features/retirement-fund/types/retirement-fund";
-import { roundToCents } from "@/features/retirement-fund/utils/round-to-cents";
+import { roundToCents } from "@/utils/round-to-cents";
 
 export function projectRetirementAccumulation(
   values: RetirementAccumulationFormValues,
