@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { Fraunces, Space_Grotesk } from "next/font/google";
+import { Geist, Space_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { I18nProvider } from "@/lib/i18n/I18nProvider";
+import { getServerTranslations } from "@/lib/i18n/get-server-translations";
 
-const displayFont = Fraunces({
+const displayFont = Geist({
   subsets: ["latin"],
   variable: "--font-display",
-  axes: ["opsz"],
 });
 
 const bodyFont = Space_Grotesk({
@@ -16,25 +18,40 @@ const bodyFont = Space_Grotesk({
   variable: "--font-body",
 });
 
-export const metadata: Metadata = {
-  title: "Multipurpose Calculators",
-  description:
-    "Financial calculators for compound growth, loans, and strategy comparison.",
-};
-
 interface RootLayoutProps {
   readonly children: ReactNode;
 }
 
-export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerTranslations();
+
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+  };
+}
+
+export default async function RootLayout({
+  children,
+}: Readonly<RootLayoutProps>) {
+  const { locale } = await getServerTranslations();
+
   return (
-    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={`${displayFont.variable} ${bodyFont.variable}`}
+    >
       <body className="[font-family:var(--font-body)]">
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 opacity-20 dot-grid"
         />
-        <AppShell>{children}</AppShell>
+        <ThemeProvider>
+          <I18nProvider initialLocale={locale}>
+            <AppShell>{children}</AppShell>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

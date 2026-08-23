@@ -6,6 +6,9 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { navigationItems } from "@/components/layout/navigation-items";
+import { getMessages } from "@/lib/i18n/messages";
+
+const messages = getMessages("en");
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/car-loan",
@@ -45,7 +48,9 @@ describe("MobileMenu", () => {
 
     expect(navigationItems).toHaveLength(7);
     navigationItems.forEach((item) => {
-      expect(screen.getByRole("link", { name: item.label })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: messages[item.labelKey] }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -86,10 +91,9 @@ describe("MobileMenu", () => {
     await user.click(screen.getByRole("button", { name: "Open menu" }));
 
     navigationItems.forEach((item) => {
-      expect(screen.getByRole("link", { name: item.label })).toHaveAttribute(
-        "href",
-        item.href,
-      );
+      expect(
+        screen.getByRole("link", { name: messages[item.labelKey] }),
+      ).toHaveAttribute("href", item.href);
     });
   });
 });

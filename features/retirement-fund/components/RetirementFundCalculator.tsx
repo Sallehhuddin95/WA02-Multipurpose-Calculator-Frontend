@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState, type FormEvent, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  retirementAccumulationFormSchema,
-  retirementDrawdownFormSchema,
+  createRetirementAccumulationFormSchema,
+  createRetirementDrawdownFormSchema,
 } from "@/features/retirement-fund/schemas/retirement-fund-form";
 import { projectRetirementAccumulation } from "@/features/retirement-fund/services/project-retirement-accumulation";
 import { projectRetirementDrawdown } from "@/features/retirement-fund/services/project-retirement-drawdown";
@@ -18,13 +24,18 @@ import {
   type RetirementAccumulationResult,
   type RetirementDrawdownFormValues,
   type RetirementDrawdownResult,
+  type SalaryGrowthMode,
 } from "@/features/retirement-fund/types/retirement-fund";
+import { formatDepletionLabel } from "@/features/retirement-fund/utils/format-depletion-label";
+import { usePersistedState } from "@/hooks/use-persisted-state";
+import { createTranslator, type MessageKey } from "@/lib/i18n/messages";
+import { useTranslations } from "@/lib/i18n/use-i18n";
 import { formatCurrency } from "@/utils/format-currency";
 
-const SALARY_GROWTH_MODE_LABELS = {
-  percentage: "Percentage increment",
-  "fixed-amount": "Fixed ringgit increase",
-} as const;
+const salaryGrowthModeLabelKeys: Record<SalaryGrowthMode, MessageKey> = {
+  percentage: "retirement.mode.percentage",
+  "fixed-amount": "retirement.mode.fixedAmount",
+};
 
 type AccumulationErrorMap = Partial<
   Record<keyof RetirementAccumulationFormValues, string>
@@ -57,38 +68,35 @@ function getDefaultDrawdownValues(
   };
 }
 
-const scenarioLabels: Record<DrawdownScenario, string> = {
-  "stays-invested": "Stays invested",
-  "fully-withdrawn": "Fully withdrawn",
+const scenarioLabelKeys: Record<DrawdownScenario, MessageKey> = {
+  "stays-invested": "retirement.scenario.staysInvested.label",
+  "fully-withdrawn": "retirement.scenario.fullyWithdrawn.label",
 };
 
-const scenarioDescriptions: Record<DrawdownScenario, string> = {
-  "stays-invested":
-    "The remaining balance stays invested and continues to earn the post-retirement return rate, credited once per year, while monthly withdrawals continue every month.",
-  "fully-withdrawn":
-    "The entire sum is withdrawn into cash. No investment return continues to accrue; the balance simply decreases by the monthly withdrawal each month.",
+const scenarioDescriptionKeys: Record<DrawdownScenario, MessageKey> = {
+  "stays-invested": "retirement.scenario.staysInvested.description",
+  "fully-withdrawn": "retirement.scenario.fullyWithdrawn.description",
 };
 
-const metricDefinitions: ReadonlyArray<{ term: string; definition: string }> = [
+const metricDefinitionKeys: ReadonlyArray<{
+  termKey: MessageKey;
+  definitionKey: MessageKey;
+}> = [
   {
-    term: "Final capital",
-    definition:
-      "The ending retirement savings balance at the close of the last projection year, after the final year's return is credited.",
+    termKey: "retirement.metric.finalCapital.term",
+    definitionKey: "retirement.metric.finalCapital.definition",
   },
   {
-    term: "Total contributions",
-    definition:
-      "The cumulative sum of every monthly contribution paid in across all years, including both employee and employer portions.",
+    termKey: "retirement.metric.totalContributions.term",
+    definitionKey: "retirement.metric.totalContributions.definition",
   },
   {
-    term: "Total growth",
-    definition:
-      "Final capital minus the initial savings balance minus total contributions - the portion of the ending balance that came from investment return alone.",
+    termKey: "retirement.metric.totalGrowth.term",
+    definitionKey: "retirement.metric.totalGrowth.definition",
   },
   {
-    term: "Time to depletion",
-    definition:
-      "How long the retirement fund lasts under the entered withdrawal pattern before the balance reaches zero, or a report that it does not deplete within 100 years.",
+    termKey: "retirement.metric.timeToDepletion.term",
+    definitionKey: "retirement.metric.timeToDepletion.definition",
   },
 ];
 
@@ -105,22 +113,62 @@ function getInitialDrawdown(startingBalance: number): RetirementDrawdownResult {
   );
 }
 
+const ACCUMULATION_STORAGE_KEY = "retirement-fund:accumulation:form:v1";
+const DRAWDOWN_STORAGE_KEY = "retirement-fund:drawdown:form:v1";
+
+const accumulationFormSchema = createRetirementAccumulationFormSchema(
+  createTranslator("en"),
+);
+const drawdownFormSchema = createRetirementDrawdownFormSchema(
+  createTranslator("en"),
+);
+
+function validateRetirementAccumulationForm(
+  value: unknown,
+): RetirementAccumulationFormValues | null {
+  const parsed = accumulationFormSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function validateRetirementDrawdownForm(
+  value: unknown,
+): RetirementDrawdownFormValues | null {
+  const parsed = drawdownFormSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+const defaultDrawdownValues: RetirementDrawdownFormValues =
+  getDefaultDrawdownValues(
+    getInitialAccumulation().finalCapital,
+    defaultAccumulationValues.annualReturnRate,
+  );
+
 export function RetirementFundCalculator() {
-  const [accumulationValues, setAccumulationValues] =
-    useState<RetirementAccumulationFormValues>(defaultAccumulationValues);
+  const t = useTranslations();
+  const [
+    accumulationValues,
+    setAccumulationValues,
+    { reset: resetAccumulation, isHydrated: isAccumulationHydrated },
+  ] = usePersistedState(
+    ACCUMULATION_STORAGE_KEY,
+    defaultAccumulationValues,
+    validateRetirementAccumulationForm,
+  );
   const [accumulationErrors, setAccumulationErrors] =
     useState<AccumulationErrorMap>({});
   const [accumulation, setAccumulation] =
     useState<RetirementAccumulationResult>(getInitialAccumulation);
   const [isAccumulationTableOpen, setIsAccumulationTableOpen] = useState(false);
 
-  const [drawdownValues, setDrawdownValues] =
-    useState<RetirementDrawdownFormValues>(() =>
-      getDefaultDrawdownValues(
-        accumulation.finalCapital,
-        defaultAccumulationValues.annualReturnRate,
-      ),
-    );
+  const [
+    drawdownValues,
+    setDrawdownValues,
+    { reset: resetDrawdown, isHydrated: isDrawdownHydrated },
+  ] = usePersistedState(
+    DRAWDOWN_STORAGE_KEY,
+    defaultDrawdownValues,
+    validateRetirementDrawdownForm,
+  );
   const [hasEditedStartingBalance, setHasEditedStartingBalance] =
     useState(false);
   const [drawdownErrors, setDrawdownErrors] = useState<DrawdownErrorMap>({});
@@ -134,6 +182,27 @@ export function RetirementFundCalculator() {
     "fully-withdrawn": false,
   });
 
+  const recomputedAccumulationRef = useRef(false);
+  const recomputedDrawdownRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAccumulationHydrated || recomputedAccumulationRef.current) {
+      return;
+    }
+
+    recomputedAccumulationRef.current = true;
+    setAccumulation(projectRetirementAccumulation(accumulationValues));
+  }, [isAccumulationHydrated, accumulationValues]);
+
+  useEffect(() => {
+    if (!isDrawdownHydrated || recomputedDrawdownRef.current) {
+      return;
+    }
+
+    recomputedDrawdownRef.current = true;
+    setDrawdown(projectRetirementDrawdown(drawdownValues));
+  }, [isDrawdownHydrated, drawdownValues]);
+
   function handleAccumulationChange<
     K extends keyof RetirementAccumulationFormValues,
   >(key: K, nextValue: RetirementAccumulationFormValues[K]) {
@@ -144,7 +213,7 @@ export function RetirementFundCalculator() {
   }
 
   function handleAccumulationReset() {
-    setAccumulationValues(defaultAccumulationValues);
+    resetAccumulation();
     setAccumulationErrors({});
     setAccumulation(getInitialAccumulation());
   }
@@ -153,7 +222,7 @@ export function RetirementFundCalculator() {
     event.preventDefault();
 
     const parsedValues =
-      retirementAccumulationFormSchema.safeParse(accumulationValues);
+      createRetirementAccumulationFormSchema(t).safeParse(accumulationValues);
 
     if (!parsedValues.success) {
       const nextErrors: AccumulationErrorMap = {};
@@ -205,6 +274,7 @@ export function RetirementFundCalculator() {
       accumulation.finalCapital,
       accumulationValues.annualReturnRate,
     );
+    resetDrawdown();
     setDrawdownValues(resetValues);
     setHasEditedStartingBalance(false);
     setDrawdownErrors({});
@@ -214,7 +284,9 @@ export function RetirementFundCalculator() {
   function handleDrawdownSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = retirementDrawdownFormSchema.safeParse(drawdownValues);
+    const parsedValues = createRetirementDrawdownFormSchema(t).safeParse(
+      drawdownValues,
+    );
 
     if (!parsedValues.success) {
       const nextErrors: DrawdownErrorMap = {};
@@ -253,15 +325,15 @@ export function RetirementFundCalculator() {
           className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
         >
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Section A · Retirement Savings Projection
+            {t("retirement.sectionA")}
           </p>
 
           <div className="grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={accumulationErrors.initialBalance}
-              helperText="Current retirement savings; may be zero."
+              helperText={t("retirement.field.initialBalance.helper")}
               inputId="initialBalance"
-              label="Initial savings balance (RM)"
+              label={t("retirement.field.initialBalance.label")}
             >
               <Input
                 id="initialBalance"
@@ -282,9 +354,9 @@ export function RetirementFundCalculator() {
 
             <CalculatorField
               errorMessage={accumulationErrors.yearsToRetirement}
-              helperText="Whole number of years, at least 1."
+              helperText={t("retirement.field.yearsToRetirement.helper")}
               inputId="yearsToRetirement"
-              label="Years to retirement"
+              label={t("retirement.field.yearsToRetirement.label")}
             >
               <Input
                 id="yearsToRetirement"
@@ -307,9 +379,9 @@ export function RetirementFundCalculator() {
           <div className="grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={accumulationErrors.annualReturnRate}
-              helperText="Fixed for the full accumulation horizon, credited once per year."
+              helperText={t("retirement.field.annualReturnRate.helper")}
               inputId="annualReturnRate"
-              label="Annual return rate (%)"
+              label={t("retirement.field.annualReturnRate.label")}
             >
               <Input
                 id="annualReturnRate"
@@ -330,9 +402,9 @@ export function RetirementFundCalculator() {
 
             <CalculatorField
               errorMessage={accumulationErrors.currentMonthlySalary}
-              helperText="Current gross monthly salary."
+              helperText={t("retirement.field.currentMonthlySalary.helper")}
               inputId="currentMonthlySalary"
-              label="Current monthly salary (RM)"
+              label={t("retirement.field.currentMonthlySalary.label")}
             >
               <Input
                 id="currentMonthlySalary"
@@ -354,12 +426,12 @@ export function RetirementFundCalculator() {
 
           <div>
             <p className="text-(--foreground) text-sm font-semibold">
-              Salary growth mode
+              {t("retirement.salaryGrowthMode")}
             </p>
             <div className="mt-2 flex flex-wrap gap-3">
               <ModeButton
                 isActive={accumulationValues.salaryGrowthMode === "percentage"}
-                label={SALARY_GROWTH_MODE_LABELS.percentage}
+                label={t(salaryGrowthModeLabelKeys.percentage)}
                 onClick={() =>
                   handleAccumulationChange("salaryGrowthMode", "percentage")
                 }
@@ -368,7 +440,7 @@ export function RetirementFundCalculator() {
                 isActive={
                   accumulationValues.salaryGrowthMode === "fixed-amount"
                 }
-                label={SALARY_GROWTH_MODE_LABELS["fixed-amount"]}
+                label={t(salaryGrowthModeLabelKeys["fixed-amount"])}
                 onClick={() =>
                   handleAccumulationChange("salaryGrowthMode", "fixed-amount")
                 }
@@ -379,9 +451,9 @@ export function RetirementFundCalculator() {
           {accumulationValues.salaryGrowthMode === "percentage" ? (
             <CalculatorField
               errorMessage={accumulationErrors.annualSalaryIncrementRate}
-              helperText="May be zero; grows monthly salary once per year."
+              helperText={t("retirement.field.annualSalaryIncrementRate.helper")}
               inputId="annualSalaryIncrementRate"
-              label="Annual salary increment rate (%)"
+              label={t("retirement.field.annualSalaryIncrementRate.label")}
             >
               <Input
                 id="annualSalaryIncrementRate"
@@ -402,9 +474,9 @@ export function RetirementFundCalculator() {
           ) : (
             <CalculatorField
               errorMessage={accumulationErrors.fixedAnnualSalaryIncrement}
-              helperText="May be zero; added to monthly salary once per year."
+              helperText={t("retirement.field.fixedAnnualSalaryIncrement.helper")}
               inputId="fixedAnnualSalaryIncrement"
-              label="Fixed annual salary increase (RM)"
+              label={t("retirement.field.fixedAnnualSalaryIncrement.label")}
             >
               <Input
                 id="fixedAnnualSalaryIncrement"
@@ -427,9 +499,9 @@ export function RetirementFundCalculator() {
           <div className="grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={accumulationErrors.employeeContributionRate}
-              helperText="Applied to current monthly salary."
+              helperText={t("retirement.field.employeeContributionRate.helper")}
               inputId="employeeContributionRate"
-              label="Employee contribution rate (%)"
+              label={t("retirement.field.employeeContributionRate.label")}
             >
               <Input
                 id="employeeContributionRate"
@@ -451,9 +523,9 @@ export function RetirementFundCalculator() {
 
             <CalculatorField
               errorMessage={accumulationErrors.employerContributionRate}
-              helperText="Optional; defaults to 0. Combined rate must not exceed 100%."
+              helperText={t("retirement.field.employerContributionRate.helper")}
               inputId="employerContributionRate"
-              label="Employer contribution rate (%)"
+              label={t("retirement.field.employerContributionRate.label")}
             >
               <Input
                 id="employerContributionRate"
@@ -479,7 +551,7 @@ export function RetirementFundCalculator() {
               type="submit"
               className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
             >
-              Project savings
+              {t("retirement.button.project")}
             </Button>
             <Button
               type="button"
@@ -487,7 +559,7 @@ export function RetirementFundCalculator() {
               onClick={handleAccumulationReset}
               className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
             >
-              Reset inputs
+              {t("common.reset")}
             </Button>
           </div>
         </form>
@@ -495,27 +567,26 @@ export function RetirementFundCalculator() {
         <div className="grid min-w-0 gap-5">
           <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
             <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-              Projection Summary
+              {t("retirement.summary.heading")}
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <MetricCard
-                label="Final capital"
+                label={t("retirement.metric.finalCapital.term")}
                 value={formatCurrency(accumulation.finalCapital)}
               />
               <MetricCard
-                label="Total contributions"
+                label={t("retirement.metric.totalContributions.term")}
                 value={formatCurrency(accumulation.totalContributions)}
               />
               <MetricCard
-                label="Total growth"
+                label={t("retirement.metric.totalGrowth.term")}
                 value={formatCurrency(accumulation.totalGrowth)}
               />
             </div>
 
             <div className="mt-5 flex items-center justify-between gap-4">
               <p className="text-muted-foreground text-sm leading-6">
-                Annual return credited once per year on the end-of-year balance;
-                contributions accumulate monthly throughout each year.
+                {t("retirement.summary.note")}
               </p>
               <ToggleTableButton
                 isOpen={isAccumulationTableOpen}
@@ -528,12 +599,18 @@ export function RetirementFundCalculator() {
                 <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                   <thead>
                     <tr className="text-muted-foreground">
-                      <th className="pb-2 pr-4 font-medium">Year</th>
-                      <th className="pb-2 pr-4 font-medium">Monthly salary</th>
                       <th className="pb-2 pr-4 font-medium">
-                        Monthly contribution
+                        {t("retirement.table.year")}
                       </th>
-                      <th className="pb-2 font-medium">Ending balance</th>
+                      <th className="pb-2 pr-4 font-medium">
+                        {t("retirement.table.monthlySalary")}
+                      </th>
+                      <th className="pb-2 pr-4 font-medium">
+                        {t("retirement.table.monthlyContribution")}
+                      </th>
+                      <th className="pb-2 font-medium">
+                        {t("retirement.table.endingBalance")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -568,14 +645,14 @@ export function RetirementFundCalculator() {
           className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
         >
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Section B · Retirement Fund Longevity Simulation
+            {t("retirement.sectionB")}
           </p>
 
           <CalculatorField
             errorMessage={drawdownErrors.startingBalance}
-            helperText="Defaults to Section A's final capital; editable directly."
+            helperText={t("retirement.field.startingBalance.helper")}
             inputId="startingBalance"
-            label="Starting balance (RM)"
+            label={t("retirement.field.startingBalance.label")}
           >
             <Input
               id="startingBalance"
@@ -597,9 +674,9 @@ export function RetirementFundCalculator() {
           <div className="grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={drawdownErrors.lumpSumWithdrawal}
-              helperText="One-time withdrawal deducted at the start of month 1; may be zero."
+              helperText={t("retirement.field.lumpSumWithdrawal.helper")}
               inputId="lumpSumWithdrawal"
-              label="Lump-sum withdrawal (RM)"
+              label={t("retirement.field.lumpSumWithdrawal.label")}
             >
               <Input
                 id="lumpSumWithdrawal"
@@ -620,9 +697,9 @@ export function RetirementFundCalculator() {
 
             <CalculatorField
               errorMessage={drawdownErrors.monthlyWithdrawal}
-              helperText="Deducted every month starting month 1; may be zero."
+              helperText={t("retirement.field.monthlyWithdrawal.helper")}
               inputId="monthlyWithdrawal"
-              label="Monthly withdrawal (RM)"
+              label={t("retirement.field.monthlyWithdrawal.label")}
             >
               <Input
                 id="monthlyWithdrawal"
@@ -644,9 +721,11 @@ export function RetirementFundCalculator() {
 
           <CalculatorField
             errorMessage={drawdownErrors.postRetirementAnnualReturnRate}
-            helperText="Applies to the stays-invested scenario only; separate from Section A's rate."
+            helperText={t(
+              "retirement.field.postRetirementAnnualReturnRate.helper",
+            )}
             inputId="postRetirementAnnualReturnRate"
-            label="Post-retirement annual return rate (%)"
+            label={t("retirement.field.postRetirementAnnualReturnRate.label")}
           >
             <Input
               id="postRetirementAnnualReturnRate"
@@ -670,7 +749,7 @@ export function RetirementFundCalculator() {
               type="submit"
               className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
             >
-              Simulate longevity
+              {t("retirement.button.simulate")}
             </Button>
             <Button
               type="button"
@@ -678,7 +757,7 @@ export function RetirementFundCalculator() {
               onClick={handleDrawdownReset}
               className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
             >
-              Reset inputs
+              {t("common.reset")}
             </Button>
           </div>
         </form>
@@ -699,19 +778,19 @@ export function RetirementFundCalculator() {
                 className="min-w-0 rounded-3xl border border-border bg-card/75 p-6"
               >
                 <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-                  {scenarioLabels[scenarioId]}
+                  {t(scenarioLabelKeys[scenarioId])}
                 </p>
                 <p className="text-muted-foreground mt-2 text-sm leading-6">
-                  {scenarioDescriptions[scenarioId]}
+                  {t(scenarioDescriptionKeys[scenarioId])}
                 </p>
 
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   <MetricCard
-                    label="Time to depletion"
-                    value={formatDepletionLabel(scenario)}
+                    label={t("retirement.metric.timeToDepletion.term")}
+                    value={formatDepletionLabel(scenario, t)}
                   />
                   <MetricCard
-                    label="Balance at 100-year cap"
+                    label={t("retirement.metric.balanceAtCap")}
                     value={formatCurrency(
                       scenario.monthlyRows.at(-1)?.closingBalance ?? 0,
                     )}
@@ -730,13 +809,21 @@ export function RetirementFundCalculator() {
                     <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                       <thead>
                         <tr className="text-muted-foreground">
-                          <th className="pb-2 pr-4 font-medium">Month</th>
-                          <th className="pb-2 pr-4 font-medium">Lump sum</th>
-                          <th className="pb-2 pr-4 font-medium">Recurring</th>
                           <th className="pb-2 pr-4 font-medium">
-                            Return credited
+                            {t("retirement.table.month")}
                           </th>
-                          <th className="pb-2 font-medium">Closing balance</th>
+                          <th className="pb-2 pr-4 font-medium">
+                            {t("retirement.table.lumpSum")}
+                          </th>
+                          <th className="pb-2 pr-4 font-medium">
+                            {t("retirement.table.recurring")}
+                          </th>
+                          <th className="pb-2 pr-4 font-medium">
+                            {t("retirement.table.returnCredited")}
+                          </th>
+                          <th className="pb-2 font-medium">
+                            {t("retirement.table.closingBalance")}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -771,9 +858,7 @@ export function RetirementFundCalculator() {
           })}
 
           <p className="text-muted-foreground text-sm leading-6">
-            Month 1 deducts the lump-sum withdrawal and the first monthly
-            withdrawal together. The simulation runs for a maximum of 100 years
-            (1,200 months).
+            {t("retirement.footerNote")}
           </p>
 
           <MetricGlossary />
@@ -783,46 +868,23 @@ export function RetirementFundCalculator() {
   );
 }
 
-function formatDepletionLabel(scenario: {
-  didNotDeplete: boolean;
-  depletionYears: number | null;
-  depletionRemainingMonths: number | null;
-}) {
-  if (scenario.didNotDeplete) {
-    return "Does not deplete within 100 years";
-  }
-
-  const years = scenario.depletionYears ?? 0;
-  const months = scenario.depletionRemainingMonths ?? 0;
-
-  if (years === 0) {
-    return `${months} month${months === 1 ? "" : "s"}`;
-  }
-
-  if (months === 0) {
-    return `${years} year${years === 1 ? "" : "s"}`;
-  }
-
-  return `${years} year${years === 1 ? "" : "s"} ${months} month${
-    months === 1 ? "" : "s"
-  }`;
-}
-
 function MetricGlossary() {
+  const t = useTranslations();
+
   return (
     <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
-          What do these numbers mean?
+          {t("common.whatDoTheseNumbersMean")}
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          {metricDefinitions.map(({ term, definition }) => (
-            <div key={term}>
+          {metricDefinitionKeys.map(({ termKey, definitionKey }) => (
+            <div key={termKey}>
               <dt className="text-(--foreground) text-sm font-semibold">
-                {term}
+                {t(termKey)}
               </dt>
               <dd className="text-muted-foreground mt-1 text-sm leading-6">
-                {definition}
+                {t(definitionKey)}
               </dd>
             </div>
           ))}
@@ -912,13 +974,17 @@ function ToggleTableButton({
   isOpen,
   onClick,
 }: Readonly<ToggleTableButtonProps>) {
+  const t = useTranslations();
+
   return (
     <Button
       type="button"
       variant="ghost"
       size="icon"
       aria-expanded={isOpen}
-      aria-label={isOpen ? "Hide projection table" : "Show projection table"}
+      aria-label={
+        isOpen ? t("common.hideProjectionTable") : t("common.showProjectionTable")
+      }
       onClick={onClick}
       className="rounded-full border border-border text-muted-foreground hover:bg-card hover:text-(--foreground)"
     >

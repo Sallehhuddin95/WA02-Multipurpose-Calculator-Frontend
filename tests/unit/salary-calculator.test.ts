@@ -18,8 +18,8 @@ describe("calculateSalaryBreakdown", () => {
     it("calculates EPF employee 11% and employer 12% for salary > 5000", () => {
       const result = calculateSalaryBreakdown(makeValues({ grossMonthlySalary: 6000 }));
 
-      const epfEmployee = result.employeeDeductions.find((d) => d.label === "EPF (Employee)");
-      const epfEmployer = result.employerContributions.find((c) => c.label === "EPF (Employer)");
+      const epfEmployee = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.epfEmployee");
+      const epfEmployer = result.employerContributions.find((c) => c.labelKey === "salary.deduction.epfEmployer");
 
       expect(epfEmployee?.employeeAmount).toBeCloseTo(660, 2);
       expect(epfEmployer?.employerAmount).toBeCloseTo(720, 2);
@@ -28,14 +28,14 @@ describe("calculateSalaryBreakdown", () => {
     it("calculates EPF employee 11% and employer 13% for salary <= 5000", () => {
       const result = calculateSalaryBreakdown(makeValues({ grossMonthlySalary: 4000 }));
 
-      const epfEmployer = result.employerContributions.find((c) => c.label === "EPF (Employer)");
+      const epfEmployer = result.employerContributions.find((c) => c.labelKey === "salary.deduction.epfEmployer");
       expect(epfEmployer?.employerAmount).toBeCloseTo(520, 2);
     });
 
     it("calculates SOCSO using First Category schedule", () => {
       const result = calculateSalaryBreakdown(makeValues({ grossMonthlySalary: 3000 }));
 
-      const socso = result.employeeDeductions.find((d) => d.label === "SOCSO");
+      const socso = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.socso");
       expect(socso).toBeDefined();
       expect(socso!.employeeAmount).toBeGreaterThan(0);
     });
@@ -43,14 +43,14 @@ describe("calculateSalaryBreakdown", () => {
     it("calculates EIS at 0.2% capped at RM4000", () => {
       const result = calculateSalaryBreakdown(makeValues({ grossMonthlySalary: 5000 }));
 
-      const eis = result.employeeDeductions.find((d) => d.label === "EIS (SIP)");
+      const eis = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.eis");
       expect(eis?.employeeAmount).toBeCloseTo(8, 2);
     });
 
     it("calculates PCB progressively with EPF relief", () => {
       const result = calculateSalaryBreakdown(makeValues({ grossMonthlySalary: 5000 }));
 
-      const pcb = result.employeeDeductions.find((d) => d.label === "PCB (MTD)");
+      const pcb = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.pcb");
       expect(pcb).toBeDefined();
       expect(pcb!.employeeAmount).toBeGreaterThan(0);
     });
@@ -82,8 +82,8 @@ describe("calculateSalaryBreakdown", () => {
         makeValues({ grossMonthlySalary: 5000, employeeEpfRate: 9, employerEpfRate: 14 }),
       );
 
-      const epfEmployee = result.employeeDeductions.find((d) => d.label === "EPF (Employee)");
-      const epfEmployer = result.employerContributions.find((c) => c.label === "EPF (Employer)");
+      const epfEmployee = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.epfEmployee");
+      const epfEmployer = result.employerContributions.find((c) => c.labelKey === "salary.deduction.epfEmployer");
 
       expect(epfEmployee?.employeeAmount).toBeCloseTo(450, 2);
       expect(epfEmployer?.employerAmount).toBeCloseTo(700, 2);
@@ -92,7 +92,7 @@ describe("calculateSalaryBreakdown", () => {
     it("falls back to statutory rates when custom rates are not provided", () => {
       const result = calculateSalaryBreakdown(makeValues({ grossMonthlySalary: 5000 }));
 
-      const epfEmployee = result.employeeDeductions.find((d) => d.label === "EPF (Employee)");
+      const epfEmployee = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.epfEmployee");
       expect(epfEmployee?.employeeAmount).toBeCloseTo(550, 2);
     });
   });
@@ -103,7 +103,7 @@ describe("calculateSalaryBreakdown", () => {
         makeValues({ workerCategory: "foreign-worker", grossMonthlySalary: 4000 }),
       );
 
-      const epf = result.employeeDeductions.find((d) => d.label === "EPF (Employee)");
+      const epf = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.epfEmployee");
       expect(epf).toBeUndefined();
     });
 
@@ -116,8 +116,8 @@ describe("calculateSalaryBreakdown", () => {
         }),
       );
 
-      const epfEmployee = result.employeeDeductions.find((d) => d.label === "EPF (Employee)");
-      const epfEmployer = result.employerContributions.find((c) => c.label === "EPF (Employer)");
+      const epfEmployee = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.epfEmployee");
+      const epfEmployer = result.employerContributions.find((c) => c.labelKey === "salary.deduction.epfEmployer");
 
       expect(epfEmployee?.employeeAmount).toBeCloseTo(440, 2);
       expect(epfEmployer?.employerAmount).toBe(5);
@@ -128,8 +128,8 @@ describe("calculateSalaryBreakdown", () => {
         makeValues({ workerCategory: "foreign-worker", grossMonthlySalary: 3000 }),
       );
 
-      const socso = result.employeeDeductions.find((d) =>
-        d.label.includes("SOCSO"),
+      const socso = result.employeeDeductions.find(
+        (d) => d.labelKey === "salary.deduction.socsoEmploymentInjury",
       );
       expect(socso).toBeDefined();
       expect(socso!.employeeAmount).toBeGreaterThan(0);
@@ -140,7 +140,7 @@ describe("calculateSalaryBreakdown", () => {
         makeValues({ workerCategory: "foreign-worker" }),
       );
 
-      const eis = result.employeeDeductions.find((d) => d.label === "EIS (SIP)");
+      const eis = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.eis");
       expect(eis).toBeUndefined();
     });
 
@@ -153,7 +153,7 @@ describe("calculateSalaryBreakdown", () => {
         }),
       );
 
-      const pcb = result.employeeDeductions.find((d) => d.label === "PCB (MTD)");
+      const pcb = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.pcb");
       expect(pcb?.employeeAmount).toBeCloseTo(1200, 2);
     });
   });
@@ -164,7 +164,7 @@ describe("calculateSalaryBreakdown", () => {
         makeValues({ lindung24OptIn: true, grossMonthlySalary: 3000 }),
       );
 
-      const lindung = result.employeeDeductions.find((d) => d.label === "Lindung24");
+      const lindung = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.lindung24");
       expect(lindung).toBeDefined();
       expect(lindung!.employeeAmount).toBeGreaterThan(0);
     });
@@ -172,7 +172,7 @@ describe("calculateSalaryBreakdown", () => {
     it("does not add Lindung24 when opted out", () => {
       const result = calculateSalaryBreakdown(makeValues({ lindung24OptIn: false }));
 
-      const lindung = result.employeeDeductions.find((d) => d.label === "Lindung24");
+      const lindung = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.lindung24");
       expect(lindung).toBeUndefined();
     });
 
@@ -180,8 +180,8 @@ describe("calculateSalaryBreakdown", () => {
       const without = calculateSalaryBreakdown(makeValues({ lindung24OptIn: false }));
       const withLindung = calculateSalaryBreakdown(makeValues({ lindung24OptIn: true }));
 
-      const withoutPcb = without.employeeDeductions.find((d) => d.label === "PCB (MTD)");
-      const withPcb = withLindung.employeeDeductions.find((d) => d.label === "PCB (MTD)");
+      const withoutPcb = without.employeeDeductions.find((d) => d.labelKey === "salary.deduction.pcb");
+      const withPcb = withLindung.employeeDeductions.find((d) => d.labelKey === "salary.deduction.pcb");
       expect(withoutPcb?.employeeAmount).toBe(withPcb?.employeeAmount);
     });
   });
@@ -192,7 +192,7 @@ describe("calculateSalaryBreakdown", () => {
         makeValues({ grossMonthlySalary: 300 }),
       );
 
-      const pcb = result.employeeDeductions.find((d) => d.label === "PCB (MTD)");
+      const pcb = result.employeeDeductions.find((d) => d.labelKey === "salary.deduction.pcb");
       expect(pcb?.employeeAmount).toBe(0);
     });
 

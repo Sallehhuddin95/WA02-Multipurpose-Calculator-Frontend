@@ -1,36 +1,42 @@
 import { z } from "zod";
 
-export const asbFinancingFormSchema = z
-  .object({
-    financingPrincipal: z.coerce
-      .number()
-      .gt(0, "Financing principal must be greater than zero."),
-    financingTenureYears: z.coerce
-      .number()
-      .int("Financing tenure must be a whole number of years.")
-      .min(1, "Financing tenure must be at least 1 year."),
-    annualFinancingRate: z.coerce
-      .number()
-      .min(0, "Annual financing rate cannot be negative."),
-    annualDividendRate: z.coerce
-      .number()
-      .min(0, "Annual dividend rate cannot be negative."),
-    annualSideInvestmentReturnRate: z.coerce
-      .number()
-      .min(0, "Annual side-investment return rate cannot be negative."),
-    analysisHorizonYears: z.coerce
-      .number()
-      .int("Analysis horizon must be a whole number of years.")
-      .min(1, "Analysis horizon must be at least 1 year."),
-  })
-  .superRefine((values, context) => {
-    if (values.analysisHorizonYears > values.financingTenureYears) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Analysis horizon cannot exceed the financing tenure.",
-        path: ["analysisHorizonYears"],
-      });
-    }
-  });
+import type { Translator } from "@/lib/i18n/messages";
 
-export type AsbFinancingFormSchema = z.infer<typeof asbFinancingFormSchema>;
+export function createAsbFinancingFormSchema(t: Translator) {
+  return z
+    .object({
+      financingPrincipal: z.coerce
+        .number()
+        .gt(0, t("asb.error.financingPrincipal")),
+      financingTenureYears: z.coerce
+        .number()
+        .int(t("asb.error.financingTenureYears.int"))
+        .min(1, t("asb.error.financingTenureYears.min")),
+      annualFinancingRate: z.coerce
+        .number()
+        .min(0, t("asb.error.annualFinancingRate")),
+      annualDividendRate: z.coerce
+        .number()
+        .min(0, t("asb.error.annualDividendRate")),
+      annualSideInvestmentReturnRate: z.coerce
+        .number()
+        .min(0, t("asb.error.annualSideInvestmentReturnRate")),
+      analysisHorizonYears: z.coerce
+        .number()
+        .int(t("asb.error.analysisHorizonYears.int"))
+        .min(1, t("asb.error.analysisHorizonYears.min")),
+    })
+    .superRefine((values, context) => {
+      if (values.analysisHorizonYears > values.financingTenureYears) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("asb.error.analysisHorizonYears.exceeds"),
+          path: ["analysisHorizonYears"],
+        });
+      }
+    });
+}
+
+export type AsbFinancingFormSchema = z.infer<
+  ReturnType<typeof createAsbFinancingFormSchema>
+>;

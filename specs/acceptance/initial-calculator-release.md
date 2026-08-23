@@ -16,6 +16,8 @@ It applies to:
 - compound interest projection
 - car loan and early settlement calculation
 - property investment versus REIT comparison
+- theme switching
+- language switching
 
 ## Scenarios
 
@@ -162,6 +164,36 @@ When the user activates the hamburger disclosure in the Header
 Then the menu lists Overview and all six calculators
 And the user can navigate to any calculator without losing app-shell context
 And pressing ESC closes the menu and returns focus to the toggle
+
+### Scenario: User can toggle between light and dark theme
+
+Given the user opens any page in the app
+When the user activates the theme toggle
+Then the `<html>` element gains the `dark` class and the palette switches to the dark token values
+And activating the toggle again removes the `dark` class and restores the light palette
+And the user's choice persists after a page reload
+
+### Scenario: User can switch the app language
+
+Given the user opens any page in the app
+When the user switches the language to Malay
+Then all seven navigation labels and the current page labels render in Malay
+And the `<html lang>` attribute updates to `ms`
+And the user's choice persists after a page reload
+
+### Scenario: App defaults to English on first visit
+
+Given the user opens the app with no language cookie set
+When the page finishes rendering
+Then the app renders in English
+And the `<html lang>` attribute is `en`
+
+### Scenario: User can refresh a calculator page and keep their entered values and results
+
+Given the user has entered values and run a calculation on any calculator
+When the user refreshes the page
+Then the entered values and calculation results are restored
+And pressing Reset clears both and starts fresh
 
 ## Related Specs
 

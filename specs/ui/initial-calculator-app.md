@@ -20,6 +20,7 @@ The initial release UI consists of:
 
 - three shared layout components composed in the root layout via `AppShell`:
   - `components/layout/Header.tsx` — a Server Component with the site name "Multipurpose Calculators" and navigation links to all calculator routes; uses `position: sticky` via CSS (no JS) so the header remains visible during scroll. On `md+` viewports the horizontal navigation is rendered by a Client Component island (`PrimaryNav`) that uses `usePathname()` to set `aria-current="page"` on the active link. Below `md`, the horizontal nav is replaced by a hamburger disclosure menu (`MobileMenu`, a Client Component island) that opens a panel listing Overview and all six calculators. The shared navigation entries live in `components/layout/navigation-items.ts` and are consumed by both `PrimaryNav` and `MobileMenu`
+  - a Header controls cluster (Client Component islands) holding the theme toggle and the language switch; the `MobileMenu` panel repeats both controls below `md` so theme and language stay reachable on small screens
   - `components/layout/Footer.tsx` — a Server Component with copyright text and a `CurrentYear.tsx` Client Component island for dynamic year rendering (`new Date().getFullYear()`)
   - `components/layout/AppShell.tsx` — composes Header + `<main>{children}</main>` + Footer
 - a home surface that lists the available calculators with short descriptions and an "All Shipped" completion heading above the grid; the home page renders the tagline "Practical calculators to help you make clearer money decisions." as a hero heading, and a right-column "About this app" card with a feedback CTA; the site name "Multipurpose Calculators" is rendered in the global Header
@@ -63,6 +64,7 @@ The initial release UI consists of:
 - projection tables must use user-readable period labels and must not display raw floating-point period ratios as primary user-facing labels
 - calculator pages that present multiple result metric labels must provide a plain-language glossary defining each label, consolidated in one section on the same page rather than repeated per metric card instance; each definition is one short, plain-language sentence matching the tone of existing form helper text, and must not use jargon to explain jargon
 - the metric glossary must be reachable via a keyboard- and tap-reachable UI element (for example an expandable disclosure); hover-only tooltips are not sufficient on their own
+- the Header controls cluster (theme toggle and language switch) must be keyboard-reachable, expose localized `aria-label`s, and use token-only styling with a visible `ring-2` focus ring
 
 ## Loading State
 
@@ -92,7 +94,7 @@ The initial release UI consists of:
   - primary actions
   - summary results
   - detailed charts and tables
-- navigation must remain usable on small screens without hiding access to any calculator; below `md` the horizontal nav collapses into a hamburger disclosure menu that lists Overview and all six calculators, is keyboard-reachable, closes on ESC with focus returned to the toggle, and closes on click-outside and on route change
+- navigation must remain usable on small screens without hiding access to any calculator; below `md` the horizontal nav collapses into a hamburger disclosure menu that lists Overview and all six calculators plus the theme toggle and language switch, is keyboard-reachable, closes on ESC with focus returned to the toggle, and closes on click-outside and on route change
 - tables with many columns must remain readable on smaller screens through responsive stacking, selective summarization, or horizontal overflow handling
 - summary metric cards for calculators must remain readable on smaller screens and must not leak text beyond card edges
 - heading typography should preserve legibility and rhythm on small screens without clipped or awkward glyph presentation
@@ -102,6 +104,7 @@ The initial release UI consists of:
 
 - calculator navigation must be keyboard reachable and expose the current page state
 - the mobile navigation disclosure button must expose `aria-expanded` and `aria-controls`, close on ESC with focus returned to the toggle, close on click-outside and on route change, and respect `prefers-reduced-motion`
+- the theme toggle and language switch are keyboard-reachable, expose localized `aria-label`s, and show a visible `ring-2` focus ring
 - all form inputs must have visible labels
 - validation messaging must be programmatically associated with the relevant field
 - summary values and comparison outcomes must not rely on color alone to communicate meaning

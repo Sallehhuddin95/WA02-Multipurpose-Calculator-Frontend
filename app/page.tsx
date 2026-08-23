@@ -1,42 +1,44 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getServerTranslations } from "@/lib/i18n/get-server-translations";
+import type { MessageKey, Translator } from "@/lib/i18n/messages";
 
-const liveCalculators = [
+interface CalculatorCard {
+  readonly href: string;
+  readonly nameKey: MessageKey;
+  readonly summaryKey: MessageKey;
+}
+
+const liveCalculators: readonly CalculatorCard[] = [
   {
-    name: "Compound Interest",
+    nameKey: "home.compoundInterest.name",
+    summaryKey: "home.compoundInterest.summary",
     href: "/compound-interest",
-    summary:
-      "Project future savings growth with fixed annual rates and configurable compounding frequency.",
   },
   {
-    name: "Car Loan",
+    nameKey: "home.carLoan.name",
+    summaryKey: "home.carLoan.summary",
     href: "/car-loan",
-    summary:
-      "Estimate monthly instalments and total repayment for variable-rate or fixed-rate financing, with an optional early-settlement estimate.",
   },
   {
-    name: "ASB Financing",
+    nameKey: "home.asbFinancing.name",
+    summaryKey: "home.asbFinancing.summary",
     href: "/asb-financing",
-    summary:
-      "Three-strategy comparison around leverage, dividends, and direct ASB contributions.",
   },
   {
-    name: "Property Investment vs REIT",
+    nameKey: "home.propertyInvestment.name",
+    summaryKey: "home.propertyInvestment.summary",
     href: "/property-investment",
-    summary:
-      "Rental-property cash flow, exit proceeds, and REIT benchmark comparison over the same holding period.",
   },
   {
-    name: "Retirement Fund",
+    nameKey: "home.retirementFund.name",
+    summaryKey: "home.retirementFund.summary",
     href: "/retirement-fund",
-    summary:
-      "Project EPF-style retirement savings growth, then simulate how long the fund lasts under a gratuity-and-pension withdrawal pattern.",
   },
   {
-    name: "Salary Calculator",
+    nameKey: "home.salaryCalculator.name",
+    summaryKey: "home.salaryCalculator.summary",
     href: "/salary-calculator",
-    summary:
-      "Break down gross salary into net take-home pay and employer cost with EPF, SOCSO, EIS, PCB, and optional Lindung24.",
   },
 ];
 
@@ -61,26 +63,17 @@ function CheckmarkIcon() {
   );
 }
 
-function AboutCard() {
+function AboutCard({ t }: { t: Translator }) {
   const notes = [
-    {
-      title: "Estimates only",
-      body: "Results are approximations for planning, not financial or tax advice.",
-    },
-    {
-      title: "Private by design",
-      body: "Everything is calculated in your browser - nothing you enter is stored or sent.",
-    },
-    {
-      title: "Check the assumptions",
-      body: "Each calculator documents its formulas and assumptions next to its results.",
-    },
+    { title: t("home.about.note1.title"), body: t("home.about.note1.body") },
+    { title: t("home.about.note2.title"), body: t("home.about.note2.body") },
+    { title: t("home.about.note3.title"), body: t("home.about.note3.body") },
   ];
 
   return (
     <div>
       <p className="text-primary mb-5 text-sm font-medium uppercase tracking-[0.22em]">
-        About this app
+        {t("home.about.heading")}
       </p>
 
       <ul className="space-y-5">
@@ -94,22 +87,24 @@ function AboutCard() {
 
       <div className="mt-8 border-t border-border pt-6">
         <Button variant="secondary" disabled>
-          Send feedback
+          {t("home.about.feedback")}
         </Button>
         <p className="text-muted-foreground mt-3 text-sm leading-6">
-          The feedback form will connect to our Telegram bot soon.
+          {t("home.about.feedbackNote")}
         </p>
       </div>
     </div>
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { t } = await getServerTranslations();
+
   return (
     <main className="mx-auto w-[min(1180px,calc(100%_-_2rem))] pb-16 pt-10 md:pb-24 md:pt-14">
       <section className="mb-10 md:mb-14">
         <h1 className="display-heading text-(--foreground) text-3xl font-semibold leading-tight md:text-4xl">
-          Practical calculators to help you make clearer money decisions.
+          {t("home.hero")}
         </h1>
       </section>
 
@@ -117,30 +112,31 @@ export default function HomePage() {
         <div className="rounded-4xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-lg md:p-10">
           <div className="mb-8">
             <p className="text-primary mb-4 text-sm font-medium uppercase tracking-[0.22em]">
-              All Shipped
+              {t("home.allShipped")}
             </p>
             <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-accent">
               <CheckmarkIcon />
             </div>
             <h2 className="text-2xl font-semibold leading-tight text-(--foreground)">
-              Every planned calculator is now live and ready to use.
+              {t("home.allShippedHeading")}
             </h2>
             <p className="text-muted-foreground mt-3 text-sm leading-6">
-              All six calculators have shipped and are available below. Click
-              any one to get started.
+              {t("home.allShippedParagraph")}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {liveCalculators.map((calculator) => (
               <Link
-                key={calculator.name}
+                key={calculator.nameKey}
                 href={calculator.href}
                 className="group rounded-3xl border border-border bg-card/80 px-5 py-4 transition hover:border-primary hover:bg-card motion-safe:hover:scale-[1.03] motion-reduce:transform-none"
               >
-                <p className="text-base font-semibold">{calculator.name}</p>
+                <p className="text-base font-semibold">
+                  {t(calculator.nameKey)}
+                </p>
                 <p className="text-muted-foreground mt-2 text-sm leading-6">
-                  {calculator.summary}
+                  {t(calculator.summaryKey)}
                 </p>
               </Link>
             ))}
@@ -148,7 +144,7 @@ export default function HomePage() {
         </div>
 
         <aside className="rounded-4xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-lg md:p-10">
-          <AboutCard />
+          <AboutCard t={t} />
         </aside>
       </section>
     </main>

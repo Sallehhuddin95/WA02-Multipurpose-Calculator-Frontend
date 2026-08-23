@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState, type FormEvent, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { asbFinancingFormSchema } from "@/features/asb-financing/schemas/asb-financing-form";
+import { createAsbFinancingFormSchema } from "@/features/asb-financing/schemas/asb-financing-form";
 import { projectAsbFinancing } from "@/features/asb-financing/services/project-asb-financing";
 import {
   ASB_STRATEGY_IDS,
@@ -13,10 +19,15 @@ import {
   type AsbFinancingFormValues,
   type AsbStrategyId,
 } from "@/features/asb-financing/types/asb-financing";
+import { usePersistedState } from "@/hooks/use-persisted-state";
+import { createTranslator, type MessageKey } from "@/lib/i18n/messages";
+import { useTranslations } from "@/lib/i18n/use-i18n";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatPercentage } from "@/utils/format-percentage";
 
 type FieldErrorMap = Partial<Record<keyof AsbFinancingFormValues, string>>;
+
+const STORAGE_KEY = "asb-financing:form:v1";
 
 const defaultValues: AsbFinancingFormValues = {
   financingPrincipal: 50000,
@@ -27,56 +38,58 @@ const defaultValues: AsbFinancingFormValues = {
   analysisHorizonYears: 10,
 };
 
-const strategyLabels: Record<AsbStrategyId, string> = {
-  compounding: "Compounding strategy",
-  "dividend-offset": "Dividend-offset strategy",
-  "direct-contribution": "Direct ASB strategy",
+const formSchema = createAsbFinancingFormSchema(createTranslator("en"));
+
+function validateAsbFinancingForm(
+  value: unknown,
+): AsbFinancingFormValues | null {
+  const parsed = formSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+const strategyLabelKeys: Record<AsbStrategyId, MessageKey> = {
+  compounding: "asb.strategy.compounding.label",
+  "dividend-offset": "asb.strategy.dividendOffset.label",
+  "direct-contribution": "asb.strategy.directContribution.label",
 };
 
-const strategyDescriptions: Record<AsbStrategyId, string> = {
-  compounding:
-    "Financed principal stays invested and dividends compound while you pay the full instalment out of pocket.",
-  "dividend-offset":
-    "Financed principal stays invested. Each month the dividend reserve covers as much of your instalment as it can, carrying forward until depleted, and frees your monthly money into a side investment.",
-  "direct-contribution":
-    "No financing is used. The same monthly instalment amount is contributed directly into ASB instead.",
+const strategyDescriptionKeys: Record<AsbStrategyId, MessageKey> = {
+  compounding: "asb.strategy.compounding.description",
+  "dividend-offset": "asb.strategy.dividendOffset.description",
+  "direct-contribution": "asb.strategy.directContribution.description",
 };
 
-const metricDefinitions: ReadonlyArray<{ term: string; definition: string }> = [
+const metricDefinitionKeys: ReadonlyArray<{
+  termKey: MessageKey;
+  definitionKey: MessageKey;
+}> = [
   {
-    term: "Final ASB value",
-    definition:
-      "Your total ASB unit balance at the end of the analysis horizon, including any dividends reinvested into the account.",
+    termKey: "asb.metric.finalAsbValue.term",
+    definitionKey: "asb.metric.finalAsbValue.definition",
   },
   {
-    term: "Cumulative dividends",
-    definition:
-      "The total dividends generated over the horizon, whether they stayed in ASB or were redirected to pay instalments.",
+    termKey: "asb.metric.cumulativeDividends.term",
+    definitionKey: "asb.metric.cumulativeDividends.definition",
   },
   {
-    term: "Side investment value",
-    definition:
-      "Money freed up from your monthly budget by the dividend-offset strategy, grown separately outside your ASB account.",
+    termKey: "asb.metric.sideInvestmentValue.term",
+    definitionKey: "asb.metric.sideInvestmentValue.definition",
   },
   {
-    term: "Cash paid by you",
-    definition:
-      "The total amount you paid out of your own pocket over the horizon, not counting money from dividends or financing.",
+    termKey: "asb.metric.cashPaidByYou.term",
+    definitionKey: "asb.metric.cashPaidByYou.definition",
   },
   {
-    term: "Remaining loan balance",
-    definition:
-      "How much you would still owe the bank if you stopped at the end of this horizon.",
+    termKey: "asb.metric.remainingLoanBalance.term",
+    definitionKey: "asb.metric.remainingLoanBalance.definition",
   },
   {
-    term: "Surrender value",
-    definition:
-      "The amount of your original financing you would get back from the bank if you ended the facility today, before counting any dividend or side-investment profit.",
+    termKey: "asb.metric.surrenderValue.term",
+    definitionKey: "asb.metric.surrenderValue.definition",
   },
   {
-    term: "Net position",
-    definition:
-      "Your total financial position if you ended everything today: surrender value plus dividend or side-investment profit.",
+    termKey: "asb.metric.netPosition.term",
+    definitionKey: "asb.metric.netPosition.definition",
   },
 ];
 
@@ -85,10 +98,26 @@ function getInitialComparison(): AsbFinancingComparisonResult {
 }
 
 export function AsbFinancingCalculator() {
-  const [values, setValues] = useState<AsbFinancingFormValues>(defaultValues);
+  const t = useTranslations();
+  const [values, setValues, { reset, isHydrated }] = usePersistedState(
+    STORAGE_KEY,
+    defaultValues,
+    validateAsbFinancingForm,
+  );
   const [errors, setErrors] = useState<FieldErrorMap>({});
   const [comparison, setComparison] =
     useState<AsbFinancingComparisonResult>(getInitialComparison);
+
+  const recomputedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isHydrated || recomputedRef.current) {
+      return;
+    }
+
+    recomputedRef.current = true;
+    setComparison(projectAsbFinancing(values));
+  }, [isHydrated, values]);
 
   function handleValueChange<K extends keyof AsbFinancingFormValues>(
     key: K,
@@ -101,7 +130,7 @@ export function AsbFinancingCalculator() {
   }
 
   function handleReset() {
-    setValues(defaultValues);
+    reset();
     setErrors({});
     setComparison(getInitialComparison());
   }
@@ -109,7 +138,7 @@ export function AsbFinancingCalculator() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = asbFinancingFormSchema.safeParse(values);
+    const parsedValues = createAsbFinancingFormSchema(t).safeParse(values);
 
     if (!parsedValues.success) {
       const nextErrors: FieldErrorMap = {};
@@ -142,9 +171,9 @@ export function AsbFinancingCalculator() {
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
             errorMessage={errors.financingPrincipal}
-            helperText="Amount financed through ASBF at the start of year 1."
+            helperText={t("asb.field.financingPrincipal.helper")}
             inputId="financingPrincipal"
-            label="Financing principal"
+            label={t("asb.field.financingPrincipal.label")}
           >
             <Input
               id="financingPrincipal"
@@ -165,9 +194,9 @@ export function AsbFinancingCalculator() {
 
           <CalculatorField
             errorMessage={errors.financingTenureYears}
-            helperText="Whole number of years."
+            helperText={t("asb.field.financingTenureYears.helper")}
             inputId="financingTenureYears"
-            label="Financing tenure (years)"
+            label={t("asb.field.financingTenureYears.label")}
           >
             <Input
               id="financingTenureYears"
@@ -190,9 +219,9 @@ export function AsbFinancingCalculator() {
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
             errorMessage={errors.annualFinancingRate}
-            helperText="Annual reducing-balance financing rate."
+            helperText={t("asb.field.annualFinancingRate.helper")}
             inputId="annualFinancingRate"
-            label="Annual financing rate (%)"
+            label={t("asb.field.annualFinancingRate.label")}
           >
             <Input
               id="annualFinancingRate"
@@ -213,9 +242,9 @@ export function AsbFinancingCalculator() {
 
           <CalculatorField
             errorMessage={errors.annualDividendRate}
-            helperText="Fixed annual ASB dividend assumption for the full horizon."
+            helperText={t("asb.field.annualDividendRate.helper")}
             inputId="annualDividendRate"
-            label="Annual ASB dividend rate (%)"
+            label={t("asb.field.annualDividendRate.label")}
           >
             <Input
               id="annualDividendRate"
@@ -237,9 +266,9 @@ export function AsbFinancingCalculator() {
 
         <CalculatorField
           errorMessage={errors.annualSideInvestmentReturnRate}
-          helperText="Fixed annual return assumed for cash the dividend-offset strategy frees up."
+          helperText={t("asb.field.annualSideInvestmentReturnRate.helper")}
           inputId="annualSideInvestmentReturnRate"
-          label="Annual side-investment return rate (%)"
+          label={t("asb.field.annualSideInvestmentReturnRate.label")}
         >
           <Input
             id="annualSideInvestmentReturnRate"
@@ -260,9 +289,9 @@ export function AsbFinancingCalculator() {
 
         <CalculatorField
           errorMessage={errors.analysisHorizonYears}
-          helperText="Cannot exceed the financing tenure."
+          helperText={t("asb.field.analysisHorizonYears.helper")}
           inputId="analysisHorizonYears"
-          label="Analysis horizon (years)"
+          label={t("asb.field.analysisHorizonYears.label")}
         >
           <Input
             id="analysisHorizonYears"
@@ -286,7 +315,7 @@ export function AsbFinancingCalculator() {
             type="submit"
             className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
-            Compare strategies
+            {t("asb.button.compare")}
           </Button>
           <Button
             type="button"
@@ -294,7 +323,7 @@ export function AsbFinancingCalculator() {
             onClick={handleReset}
             className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Reset inputs
+            {t("common.reset")}
           </Button>
         </div>
       </form>
@@ -302,23 +331,24 @@ export function AsbFinancingCalculator() {
       <div className="grid gap-5">
         <section className="rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Financing Overview
+            {t("asb.overview.heading")}
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <MetricCard
-              label="Scheduled monthly instalment"
+              label={t("asb.overview.monthlyInstalment")}
               value={formatCurrency(comparison.monthlyInstalment)}
             />
             <MetricCard
-              label="Analysis horizon"
-              value={`${values.analysisHorizonYears} of ${values.financingTenureYears} years`}
+              label={t("asb.overview.analysisHorizon")}
+              value={t("asb.overview.analysisHorizonValue")
+                .replace("{a}", String(values.analysisHorizonYears))
+                .replace("{b}", String(values.financingTenureYears))}
             />
           </div>
           <p className="text-muted-foreground mt-5 text-sm leading-6">
-            Based on a reducing-balance amortized loan at{" "}
-            {formatPercentage(values.annualFinancingRate)} and a fixed{" "}
-            {formatPercentage(values.annualDividendRate)} annual dividend
-            assumption for every strategy.
+            {t("asb.overview.basis")
+              .replace("{rate}", formatPercentage(values.annualFinancingRate))
+              .replace("{dividend}", formatPercentage(values.annualDividendRate))}
           </p>
         </section>
 
@@ -336,50 +366,50 @@ export function AsbFinancingCalculator() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-                    {strategyLabels[strategyId]}
+                    {t(strategyLabelKeys[strategyId])}
                   </p>
                   <p className="text-muted-foreground mt-2 max-w-md text-sm leading-6">
-                    {strategyDescriptions[strategyId]}
+                    {t(strategyDescriptionKeys[strategyId])}
                   </p>
                 </div>
                 {isLeading ? (
                   <div className="bg-accent text-accent-foreground rounded-2xl px-4 py-3 text-sm font-semibold">
-                    Leading for this horizon
+                    {t("asb.leading")}
                   </div>
                 ) : null}
               </div>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <MetricCard
-                  label="Final ASB value"
+                  label={t("asb.metric.finalAsbValue.term")}
                   value={formatCurrency(summary.finalAsbValue)}
                 />
                 <MetricCard
-                  label="Cumulative dividends"
+                  label={t("asb.metric.cumulativeDividends.term")}
                   value={formatCurrency(summary.cumulativeDividends)}
                 />
                 <MetricCard
-                  label="Side investment value"
+                  label={t("asb.metric.sideInvestmentValue.term")}
                   value={formatCurrency(summary.finalSideInvestmentValue)}
                 />
                 <MetricCard
-                  label="Cash paid by you"
+                  label={t("asb.metric.cashPaidByYou.term")}
                   value={formatCurrency(summary.cumulativeUserCashOutflow)}
                 />
                 <MetricCard
-                  label="Remaining loan balance"
+                  label={t("asb.metric.remainingLoanBalance.term")}
                   value={formatCurrency(summary.remainingLoanBalance)}
                 />
                 <MetricCard
-                  label="Surrender value"
+                  label={t("asb.metric.surrenderValue.term")}
                   value={
                     strategyId === "direct-contribution"
-                      ? "Not applicable"
+                      ? t("common.notApplicable")
                       : formatCurrency(summary.surrenderValue)
                   }
                 />
                 <MetricCard
-                  label="Net position"
+                  label={t("asb.metric.netPosition.term")}
                   value={formatCurrency(summary.netPosition)}
                 />
               </div>
@@ -388,9 +418,7 @@ export function AsbFinancingCalculator() {
         })}
 
         <p className="text-muted-foreground text-sm leading-6">
-          This comparison applies the documented reducing-balance financing
-          model and annual dividend-crediting assumption from the spec. It is
-          planning guidance, not a bank-issued ASBF quote.
+          {t("asb.disclaimer")}
         </p>
 
         <MetricGlossary />
@@ -406,6 +434,7 @@ interface StrategyRankingTableProps {
 function StrategyRankingTable({
   comparison,
 }: Readonly<StrategyRankingTableProps>) {
+  const t = useTranslations();
   const rankedStrategies = ASB_STRATEGY_IDS.map((strategyId) => ({
     strategyId,
     netPosition: comparison.strategies[strategyId].netPosition,
@@ -414,18 +443,22 @@ function StrategyRankingTable({
   return (
     <section className="rounded-3xl border border-border bg-card/75 p-6">
       <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-        Strategy Ranking
+        {t("asb.ranking.heading")}
       </p>
       <p className="text-muted-foreground mt-2 text-sm leading-6">
-        Strategies ranked by final profit (net position) for this horizon.
+        {t("asb.ranking.description")}
       </p>
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[420px] border-collapse text-left text-sm">
           <thead>
             <tr className="text-muted-foreground text-xs uppercase tracking-[0.14em]">
-              <th className="pb-3 pr-4 font-semibold">Rank</th>
-              <th className="pb-3 pr-4 font-semibold">Strategy</th>
-              <th className="pb-3 font-semibold">Final profit</th>
+              <th className="pb-3 pr-4 font-semibold">{t("asb.ranking.rank")}</th>
+              <th className="pb-3 pr-4 font-semibold">
+                {t("asb.ranking.strategy")}
+              </th>
+              <th className="pb-3 font-semibold">
+                {t("asb.ranking.finalProfit")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -454,7 +487,7 @@ function StrategyRankingTable({
                     </span>
                   </td>
                   <td className="text-(--foreground) py-3 pr-4 font-semibold">
-                    {strategyLabels[strategyId]}
+                    {t(strategyLabelKeys[strategyId])}
                   </td>
                   <td className="text-(--foreground) py-3 font-semibold">
                     {formatCurrency(netPosition)}
@@ -470,20 +503,22 @@ function StrategyRankingTable({
 }
 
 function MetricGlossary() {
+  const t = useTranslations();
+
   return (
     <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
-          What do these numbers mean?
+          {t("common.whatDoTheseNumbersMean")}
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          {metricDefinitions.map(({ term, definition }) => (
-            <div key={term}>
+          {metricDefinitionKeys.map(({ termKey, definitionKey }) => (
+            <div key={termKey}>
               <dt className="text-(--foreground) text-sm font-semibold">
-                {term}
+                {t(termKey)}
               </dt>
               <dd className="text-muted-foreground mt-1 text-sm leading-6">
-                {definition}
+                {t(definitionKey)}
               </dd>
             </div>
           ))}
