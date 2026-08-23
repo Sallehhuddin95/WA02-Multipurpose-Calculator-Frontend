@@ -1,30 +1,25 @@
 import { AsbFinancingCalculator } from "@/features/asb-financing";
+import { getServerTranslations } from "@/lib/i18n/get-server-translations";
 
-export default function AsbFinancingPage() {
+export default async function AsbFinancingPage() {
+  const { t } = await getServerTranslations();
+
   return (
     <main className="mx-auto w-[min(1180px,calc(100%_-_2rem))] pb-16 pt-10 md:pb-24 md:pt-14">
       <section className="border border-border bg-card/80 shadow-elevated backdrop-blur-lg rounded-4xl p-8 md:p-10">
         <p className="text-primary text-sm font-medium uppercase tracking-[0.22em]">
-          ASB Financing Comparison
+          {t("route.asbFinancing.kicker")}
         </p>
         <div className="mt-4 max-w-3xl">
           <h1 className="display-heading text-3xl leading-[1.14] md:text-5xl">
-            Compare leverage, dividends, and direct contributions before you
-            commit to ASB financing.
+            {t("route.asbFinancing.heading")}
           </h1>
           <p className="text-muted-foreground mt-4 text-base leading-7 md:text-lg">
-            See how a compounding strategy, a dividend-offset strategy, and
-            direct ASB contributions compare over the same analysis horizon.
+            {t("route.asbFinancing.intro")}
           </p>
         </div>
         <div className="bg-accent text-accent-foreground mt-6 rounded-3xl border border-border px-5 py-4 text-sm leading-6">
-          Assumptions: reducing-balance monthly amortized financing, a fixed
-          annual ASB dividend rate credited once per year, and dividends
-          reinvested unless a strategy explicitly redirects them. All three
-          strategies commit the same monthly cash amount; the dividend-offset
-          strategy tracks freed-up cash in a side investment with its own annual
-          return rate instead of letting it disappear from the comparison. This
-          is a planning projection, not a bank-issued ASBF quote.
+          {t("route.asbFinancing.assumptions")}
         </div>
         <div className="mt-8">
           <AsbFinancingCalculator />

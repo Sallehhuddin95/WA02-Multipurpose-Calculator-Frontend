@@ -55,7 +55,7 @@ Ensure all current calculator pages and the home page present text, numeric valu
 
 ## Acceptance Criteria
 
-- display-font headings on the Header, home, compound-interest, and car-loan pages render without clipped or malformed glyph combinations such as `f/fi`, and with correct optical rendering of the display-font `f` at supported sizes; both properties are enforced through the shared `display-heading` utility (single source of truth) rather than inline `[font-feature-settings:...]` guards
+- display-font headings on the Header, home, compound-interest, and car-loan pages render without clipped or malformed glyph combinations such as `f/fi`; the `display-heading` utility disables ligatures so display glyphs render cleanly regardless of the family, enforced from a single source of truth rather than inline `[font-feature-settings:...]` guards
 - compound-interest projection period column does not show raw floating-point year ratios; it shows user-readable period labels
 - compound-interest input panel does not leave disproportionate blank vertical regions due to excessive field spacing
 - summary metric values in compound-interest and car-loan keep visible breathing room from card borders on supported breakpoints

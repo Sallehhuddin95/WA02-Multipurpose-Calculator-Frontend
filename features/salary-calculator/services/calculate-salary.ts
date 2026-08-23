@@ -174,28 +174,28 @@ export function calculateSalaryBreakdown(
   const employerContributions: SalaryDeductionLine[] = [];
 
   if (epf.employeeAmount > 0) {
-    employeeDeductions.push({ label: "EPF (Employee)", employeeAmount: epf.employeeAmount, employerAmount: 0 });
-    employerContributions.push({ label: "EPF (Employer)", employeeAmount: 0, employerAmount: epf.employerAmount });
+    employeeDeductions.push({ labelKey: "salary.deduction.epfEmployee", employeeAmount: epf.employeeAmount, employerAmount: 0 });
+    employerContributions.push({ labelKey: "salary.deduction.epfEmployer", employeeAmount: 0, employerAmount: epf.employerAmount });
   }
 
   const socsoEmployeeTotal = socso.employeeEmploymentInjury + socso.employeeInvalidity;
   const socsoEmployerTotal = socso.employerEmploymentInjury + socso.employerInvalidity;
 
   if (workerCategory === "foreign-worker" || socso.employeeInvalidity > 0) {
-    const socsoLabel = socso.employeeInvalidity > 0 ? "SOCSO" : "SOCSO (Employment Injury)";
-    employeeDeductions.push({ label: socsoLabel, employeeAmount: socsoEmployeeTotal, employerAmount: 0 });
-    employerContributions.push({ label: "SOCSO (Employer)", employeeAmount: 0, employerAmount: socsoEmployerTotal });
+    const socsoLabelKey = socso.employeeInvalidity > 0 ? "salary.deduction.socso" : "salary.deduction.socsoEmploymentInjury";
+    employeeDeductions.push({ labelKey: socsoLabelKey, employeeAmount: socsoEmployeeTotal, employerAmount: 0 });
+    employerContributions.push({ labelKey: "salary.deduction.socsoEmployer", employeeAmount: 0, employerAmount: socsoEmployerTotal });
   }
 
   if (eis.employeeAmount > 0) {
-    employeeDeductions.push({ label: "EIS (SIP)", employeeAmount: eis.employeeAmount, employerAmount: 0 });
-    employerContributions.push({ label: "EIS (Employer)", employeeAmount: 0, employerAmount: eis.employerAmount });
+    employeeDeductions.push({ labelKey: "salary.deduction.eis", employeeAmount: eis.employeeAmount, employerAmount: 0 });
+    employerContributions.push({ labelKey: "salary.deduction.eisEmployer", employeeAmount: 0, employerAmount: eis.employerAmount });
   }
 
-  employeeDeductions.push({ label: "PCB (MTD)", employeeAmount: pcbAmount, employerAmount: 0 });
+  employeeDeductions.push({ labelKey: "salary.deduction.pcb", employeeAmount: pcbAmount, employerAmount: 0 });
 
   if (lindung24Amount > 0) {
-    employeeDeductions.push({ label: "Lindung24", employeeAmount: lindung24Amount, employerAmount: 0 });
+    employeeDeductions.push({ labelKey: "salary.deduction.lindung24", employeeAmount: lindung24Amount, employerAmount: 0 });
   }
 
   const totalEmployeeDeductions = employeeDeductions.reduce(

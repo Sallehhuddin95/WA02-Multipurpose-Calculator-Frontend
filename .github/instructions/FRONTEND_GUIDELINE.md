@@ -216,6 +216,7 @@ Separate state into clear ownership zones:
 - UI state:
   - Local interaction state (accordion open state, form draft mode, checkbox toggles).
   - Managed with React `useState` or `useReducer`.
+  - Persisted form draft values that must survive a refresh live in `localStorage` through the shared `usePersistedState` hook with per-feature versioned keys (ADR 0011); results are recomputed from those values on load and never stored.
 - Global UI state:
   - Thin cross-app concerns (navigation collapse, theme mode).
   - Managed in isolated Zustand stores.

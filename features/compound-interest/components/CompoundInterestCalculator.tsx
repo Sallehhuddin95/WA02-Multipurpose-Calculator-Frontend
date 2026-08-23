@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, type FormEvent, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,17 +18,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { compoundInterestFormSchema } from "@/features/compound-interest/schemas/compound-interest-form";
+import { createCompoundInterestFormSchema } from "@/features/compound-interest/schemas/compound-interest-form";
 import { projectCompoundInterest } from "@/features/compound-interest/services/project-compound-interest";
-import type {
-  CompoundInterestFormValues,
-  CompoundInterestSummary,
+import {
+  COMPOUNDING_FREQUENCIES,
+  type CompoundingFrequency,
+  type CompoundInterestFormValues,
+  type CompoundInterestSummary,
 } from "@/features/compound-interest/types/compound-interest";
 import { formatPeriodLabel } from "@/features/compound-interest/utils/format-period-label";
+import { usePersistedState } from "@/hooks/use-persisted-state";
+import { createTranslator, type MessageKey } from "@/lib/i18n/messages";
+import { useTranslations } from "@/lib/i18n/use-i18n";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatPercentage } from "@/utils/format-percentage";
 
 type FieldErrorMap = Partial<Record<keyof CompoundInterestFormValues, string>>;
+
+const STORAGE_KEY = "compound-interest:form:v1";
 
 const defaultValues: CompoundInterestFormValues = {
   startingPrincipal: 10000,
@@ -32,32 +45,47 @@ const defaultValues: CompoundInterestFormValues = {
   monthlyContribution: 250,
 };
 
-const frequencyOptions = [
-  {
-    value: "annually",
-    label: "Annually",
-  },
-  {
-    value: "quarterly",
-    label: "Quarterly",
-  },
-  {
-    value: "monthly",
-    label: "Monthly",
-  },
-] as const;
+const formSchema = createCompoundInterestFormSchema(createTranslator("en"));
+
+function validateCompoundInterestForm(
+  value: unknown,
+): CompoundInterestFormValues | null {
+  const parsed = formSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+const frequencyLabelKeys: Record<CompoundingFrequency, MessageKey> = {
+  annually: "compound.frequency.annually",
+  quarterly: "compound.frequency.quarterly",
+  monthly: "compound.frequency.monthly",
+};
 
 function getInitialSummary() {
   return projectCompoundInterest(defaultValues);
 }
 
 export function CompoundInterestCalculator() {
-  const [values, setValues] =
-    useState<CompoundInterestFormValues>(defaultValues);
+  const t = useTranslations();
+  const [values, setValues, { reset, isHydrated }] = usePersistedState(
+    STORAGE_KEY,
+    defaultValues,
+    validateCompoundInterestForm,
+  );
   const [errors, setErrors] = useState<FieldErrorMap>({});
   const [summary, setSummary] =
     useState<CompoundInterestSummary>(getInitialSummary);
   const [isTableOpen, setIsTableOpen] = useState(true);
+
+  const recomputedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isHydrated || recomputedRef.current) {
+      return;
+    }
+
+    recomputedRef.current = true;
+    setSummary(projectCompoundInterest(values));
+  }, [isHydrated, values]);
 
   function handleValueChange<K extends keyof CompoundInterestFormValues>(
     key: K,
@@ -70,7 +98,7 @@ export function CompoundInterestCalculator() {
   }
 
   function handleReset() {
-    setValues(defaultValues);
+    reset();
     setErrors({});
     setSummary(getInitialSummary());
   }
@@ -78,7 +106,7 @@ export function CompoundInterestCalculator() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = compoundInterestFormSchema.safeParse(values);
+    const parsedValues = createCompoundInterestFormSchema(t).safeParse(values);
 
     if (!parsedValues.success) {
       const nextErrors: FieldErrorMap = {};
@@ -112,9 +140,9 @@ export function CompoundInterestCalculator() {
       >
         <CalculatorField
           errorMessage={errors.startingPrincipal}
-          helperText="Initial amount invested before any recurring contribution."
+          helperText={t("compound.field.startingPrincipal.helper")}
           inputId="startingPrincipal"
-          label="Starting principal"
+          label={t("compound.field.startingPrincipal.label")}
         >
           <Input
             id="startingPrincipal"
@@ -132,9 +160,9 @@ export function CompoundInterestCalculator() {
 
         <CalculatorField
           errorMessage={errors.annualRate}
-          helperText="Fixed annual return used across the full duration."
+          helperText={t("compound.field.annualRate.helper")}
           inputId="annualRate"
-          label="Annual rate (%)"
+          label={t("compound.field.annualRate.label")}
         >
           <Input
             id="annualRate"
@@ -153,9 +181,9 @@ export function CompoundInterestCalculator() {
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
             errorMessage={errors.durationYears}
-            helperText="Whole or fractional years are supported in this slice."
+            helperText={t("compound.field.durationYears.helper")}
             inputId="durationYears"
-            label="Duration (years)"
+            label={t("compound.field.durationYears.label")}
           >
             <Input
               id="durationYears"
@@ -173,9 +201,9 @@ export function CompoundInterestCalculator() {
 
           <CalculatorField
             errorMessage={errors.compoundingFrequency}
-            helperText="Supported in this slice: annual, quarterly, and monthly."
+            helperText={t("compound.field.compoundingFrequency.helper")}
             inputId="compoundingFrequency"
-            label="Compounding frequency"
+            label={t("compound.field.compoundingFrequency.label")}
           >
             <Select
               value={values.compoundingFrequency}
@@ -190,12 +218,14 @@ export function CompoundInterestCalculator() {
                 id="compoundingFrequency"
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 text-base shadow-none"
               >
-                <SelectValue placeholder="Select frequency" />
+                <SelectValue
+                  placeholder={t("compound.field.compoundingFrequency.placeholder")}
+                />
               </SelectTrigger>
               <SelectContent>
-                {frequencyOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {COMPOUNDING_FREQUENCIES.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {t(frequencyLabelKeys[value])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -205,9 +235,9 @@ export function CompoundInterestCalculator() {
 
         <CalculatorField
           errorMessage={errors.monthlyContribution}
-          helperText="Optional contribution added at the end of each month."
+          helperText={t("compound.field.monthlyContribution.helper")}
           inputId="monthlyContribution"
-          label="Monthly contribution"
+          label={t("compound.field.monthlyContribution.label")}
         >
           <Input
             id="monthlyContribution"
@@ -231,7 +261,7 @@ export function CompoundInterestCalculator() {
             type="submit"
             className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
-            Calculate growth
+            {t("compound.button.calculate")}
           </Button>
           <Button
             type="button"
@@ -239,7 +269,7 @@ export function CompoundInterestCalculator() {
             onClick={handleReset}
             className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Reset inputs
+            {t("common.reset")}
           </Button>
         </div>
       </form>
@@ -247,26 +277,33 @@ export function CompoundInterestCalculator() {
       <div className="grid gap-5">
         <section className="rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Summary
+            {t("compound.summary.heading")}
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             <MetricCard
-              label="Projected balance"
+              label={t("compound.metric.projectedBalance")}
               value={formatCurrency(summary.finalProjectedBalance)}
             />
             <MetricCard
-              label="Total contributions"
+              label={t("compound.metric.totalContributions")}
               value={formatCurrency(summary.totalContributions)}
             />
             <MetricCard
-              label="Total growth"
+              label={t("compound.metric.totalGrowth")}
               value={formatCurrency(summary.totalGrowth)}
             />
           </div>
           <p className="text-muted-foreground mt-5 text-sm leading-6">
-            Based on {formatPercentage(values.annualRate)} annual return,{" "}
-            {values.compoundingFrequency} compounding, and a{" "}
-            {formatCurrency(values.monthlyContribution)} monthly contribution.
+            {t("compound.summary.basis")
+              .replace("{rate}", formatPercentage(values.annualRate))
+              .replace(
+                "{frequency}",
+                t(frequencyLabelKeys[values.compoundingFrequency]).toLowerCase(),
+              )
+              .replace(
+                "{contribution}",
+                formatCurrency(values.monthlyContribution),
+              )}
           </p>
         </section>
 
@@ -274,18 +311,19 @@ export function CompoundInterestCalculator() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-                Latest projection point
+                {t("compound.latestProjectionPoint")}
               </p>
               <h2 className="mt-2 text-2xl font-semibold">
                 {formatPeriodLabel(
                   lastProjectionPoint?.period ?? 0,
                   values.compoundingFrequency,
+                  t,
                 )}
               </h2>
             </div>
             <div className="flex items-center gap-3">
               <div className="bg-accent text-accent-foreground rounded-2xl px-4 py-3 text-sm">
-                Growth share:{" "}
+                {t("compound.growthShare")}{" "}
                 {summary.finalProjectedBalance === 0
                   ? "0.0%"
                   : formatPercentage(
@@ -300,8 +338,8 @@ export function CompoundInterestCalculator() {
                 aria-expanded={isTableOpen}
                 aria-label={
                   isTableOpen
-                    ? "Hide projection table"
-                    : "Show projection table"
+                    ? t("common.hideProjectionTable")
+                    : t("common.showProjectionTable")
                 }
                 onClick={() => setIsTableOpen((prev) => !prev)}
                 className="rounded-full border border-border text-muted-foreground hover:bg-card hover:text-(--foreground)"
@@ -328,12 +366,18 @@ export function CompoundInterestCalculator() {
               <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                 <thead>
                   <tr className="text-muted-foreground">
-                    <th className="pb-2 pr-4 font-medium">Period</th>
-                    <th className="pb-2 pr-4 font-medium">Ending balance</th>
                     <th className="pb-2 pr-4 font-medium">
-                      Contributed capital
+                      {t("compound.table.period")}
                     </th>
-                    <th className="pb-2 font-medium">Growth</th>
+                    <th className="pb-2 pr-4 font-medium">
+                      {t("compound.table.endingBalance")}
+                    </th>
+                    <th className="pb-2 pr-4 font-medium">
+                      {t("compound.table.contributedCapital")}
+                    </th>
+                    <th className="pb-2 font-medium">
+                      {t("compound.table.growth")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -346,6 +390,7 @@ export function CompoundInterestCalculator() {
                         {formatPeriodLabel(
                           projectionPoint.period,
                           values.compoundingFrequency,
+                          t,
                         )}
                       </td>
                       <td className="px-4 py-3">

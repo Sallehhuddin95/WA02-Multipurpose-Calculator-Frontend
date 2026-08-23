@@ -1,7 +1,7 @@
 ---
 description: "Architecture governance - boundaries, dependency rules, ADR-aware decisions, and spec compliance"
 mode: subagent
-model: opencode-go/deepseek-v4-pro
+model: opencode/deepseek-v4-flash-max
 permission:
   edit: deny
   bash: deny

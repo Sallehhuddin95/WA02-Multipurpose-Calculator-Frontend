@@ -1,3 +1,5 @@
+import type { MessageKey } from "@/lib/i18n/messages";
+
 export const WORKER_CATEGORIES = [
   "malaysian",
   "permanent-resident",
@@ -5,12 +7,6 @@ export const WORKER_CATEGORIES = [
 ] as const;
 
 export type WorkerCategory = (typeof WORKER_CATEGORIES)[number];
-
-export const WORKER_CATEGORY_LABELS: Record<WorkerCategory, string> = {
-  malaysian: "Malaysian citizen",
-  "permanent-resident": "Permanent resident",
-  "foreign-worker": "Foreign worker",
-};
 
 export interface SalaryCalculatorFormValues {
   grossMonthlySalary: number;
@@ -22,7 +18,7 @@ export interface SalaryCalculatorFormValues {
 }
 
 export interface SalaryDeductionLine {
-  label: string;
+  labelKey: MessageKey;
   employeeAmount: number;
   employerAmount: number;
 }

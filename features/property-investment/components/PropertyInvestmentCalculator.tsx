@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState, type FormEvent, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { propertyInvestmentFormSchema } from "@/features/property-investment/schemas/property-investment-form";
+import { createPropertyInvestmentFormSchema } from "@/features/property-investment/schemas/property-investment-form";
 import { projectPropertyInvestment } from "@/features/property-investment/services/project-property-investment";
 import type {
   PropertyInvestmentComparisonResult,
@@ -13,12 +19,17 @@ import type {
   PropertyInvestmentStrategyId,
 } from "@/features/property-investment/types/property-investment";
 import { PROPERTY_INVESTMENT_STRATEGY_IDS } from "@/features/property-investment/types/property-investment";
+import { usePersistedState } from "@/hooks/use-persisted-state";
+import { createTranslator, type MessageKey } from "@/lib/i18n/messages";
+import { useTranslations } from "@/lib/i18n/use-i18n";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatPercentage } from "@/utils/format-percentage";
 
 type FieldErrorMap = Partial<
   Record<keyof PropertyInvestmentFormValues, string>
 >;
+
+const STORAGE_KEY = "property-investment:form:v1";
 
 const defaultValues: PropertyInvestmentFormValues = {
   purchasePrice: 450000,
@@ -49,52 +60,57 @@ const defaultValues: PropertyInvestmentFormValues = {
   reitAnnualReturnRate: 6,
 };
 
-const strategyLabels: Record<PropertyInvestmentStrategyId, string> = {
-  property: "Buy-to-rent property",
-  "instalment-matched": "REIT (instalment-matched)",
-  "instalment-and-costs-matched": "REIT (instalment + costs)",
+const formSchema = createPropertyInvestmentFormSchema(createTranslator("en"));
+
+function validatePropertyInvestmentForm(
+  value: unknown,
+): PropertyInvestmentFormValues | null {
+  const parsed = formSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+const strategyLabelKeys: Record<PropertyInvestmentStrategyId, MessageKey> = {
+  property: "property.strategy.property.label",
+  "instalment-matched": "property.strategy.instalmentMatched.label",
+  "instalment-and-costs-matched":
+    "property.strategy.instalmentAndCostsMatched.label",
 };
 
-const metricDefinitions: ReadonlyArray<{ term: string; definition: string }> = [
+const metricDefinitionKeys: ReadonlyArray<{
+  termKey: MessageKey;
+  definitionKey: MessageKey;
+}> = [
   {
-    term: "Equity at sale",
-    definition:
-      "The projected sale value of the property minus the remaining loan balance at the end of the holding period.",
+    termKey: "property.metric.equityAtSale.term",
+    definitionKey: "property.metric.equityAtSale.definition",
   },
   {
-    term: "Net rental cash flow",
-    definition:
-      "Rental income minus property expenses and loan instalments for one year; negative years mean you cover the shortfall out of pocket.",
+    termKey: "property.metric.netRentalCashFlow.term",
+    definitionKey: "property.metric.netRentalCashFlow.definition",
   },
   {
-    term: "Cumulative user cash outflow",
-    definition:
-      "Total cash you put in: the initial down payment (and any upfront MRTT or MLTT cost) plus any yearly rental shortfalls.",
+    termKey: "property.metric.cumulativeUserCashOutflow.term",
+    definitionKey: "property.metric.cumulativeUserCashOutflow.definition",
   },
   {
-    term: "Net return",
-    definition:
-      "What a strategy nets overall: money received minus money you put in, over the same holding period.",
+    termKey: "property.metric.netReturn.term",
+    definitionKey: "property.metric.netReturn.definition",
   },
   {
-    term: "Total loan",
-    definition:
-      "The full loan principal used to calculate the instalment, including any MRTT premium you choose to finance.",
+    termKey: "property.metric.totalLoan.term",
+    definitionKey: "property.metric.totalLoan.definition",
   },
   {
-    term: "REIT monthly contribution",
-    definition:
-      "How much is added to each REIT strategy every month: the property's instalment alone, or the instalment plus its other monthly costs.",
+    termKey: "property.metric.reitMonthlyContribution.term",
+    definitionKey: "property.metric.reitMonthlyContribution.definition",
   },
   {
-    term: "MRTT",
-    definition:
-      "A one-time mortgage insurance premium you can pay upfront or add to the loan.",
+    termKey: "property.metric.mrtt.term",
+    definitionKey: "property.metric.mrtt.definition",
   },
   {
-    term: "MLTT",
-    definition:
-      "A recurring annual mortgage insurance premium paid alongside your other yearly property costs, not financed into the loan.",
+    termKey: "property.metric.mltt.term",
+    definitionKey: "property.metric.mltt.definition",
   },
 ];
 
@@ -103,14 +119,30 @@ function getInitialComparison(): PropertyInvestmentComparisonResult {
 }
 
 export function PropertyInvestmentCalculator() {
-  const [values, setValues] =
-    useState<PropertyInvestmentFormValues>(defaultValues);
+  const t = useTranslations();
+  const [values, setValues, { reset, isHydrated }] = usePersistedState(
+    STORAGE_KEY,
+    defaultValues,
+    validatePropertyInvestmentForm,
+  );
   const [errors, setErrors] = useState<FieldErrorMap>({});
   const [comparison, setComparison] =
     useState<PropertyInvestmentComparisonResult>(getInitialComparison);
   const [submittedValues, setSubmittedValues] =
     useState<PropertyInvestmentFormValues>(defaultValues);
   const [isTableOpen, setIsTableOpen] = useState(false);
+
+  const recomputedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isHydrated || recomputedRef.current) {
+      return;
+    }
+
+    recomputedRef.current = true;
+    setComparison(projectPropertyInvestment(values));
+    setSubmittedValues(values);
+  }, [isHydrated, values]);
 
   function handleValueChange<K extends keyof PropertyInvestmentFormValues>(
     key: K,
@@ -123,7 +155,7 @@ export function PropertyInvestmentCalculator() {
   }
 
   function handleReset() {
-    setValues(defaultValues);
+    reset();
     setErrors({});
     setComparison(getInitialComparison());
     setSubmittedValues(defaultValues);
@@ -132,7 +164,7 @@ export function PropertyInvestmentCalculator() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = propertyInvestmentFormSchema.safeParse(values);
+    const parsedValues = createPropertyInvestmentFormSchema(t).safeParse(values);
 
     if (!parsedValues.success) {
       const nextErrors: FieldErrorMap = {};
@@ -173,12 +205,12 @@ export function PropertyInvestmentCalculator() {
         onSubmit={handleSubmit}
         className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
       >
-        <CalculatorField
-          errorMessage={errors.purchasePrice}
-          helperText="The agreed property purchase price."
-          inputId="purchasePrice"
-          label="Purchase price"
-        >
+          <CalculatorField
+            errorMessage={errors.purchasePrice}
+            helperText={t("property.field.purchasePrice.helper")}
+            inputId="purchasePrice"
+            label={t("property.field.purchasePrice.label")}
+          >
           <Input
             id="purchasePrice"
             name="purchasePrice"
@@ -195,17 +227,17 @@ export function PropertyInvestmentCalculator() {
 
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            Financing input method
+            {t("property.field.inputMethod")}
           </legend>
           <div className="mt-3 flex flex-wrap gap-3">
             <ModeButton
               isActive={values.inputMode === "down-payment"}
-              label="Down payment"
+              label={t("property.mode.downPayment")}
               onClick={() => handleValueChange("inputMode", "down-payment")}
             />
             <ModeButton
               isActive={values.inputMode === "loan-principal"}
-              label="Loan principal directly"
+              label={t("property.mode.loanPrincipal")}
               onClick={() => handleValueChange("inputMode", "loan-principal")}
             />
           </div>
@@ -214,9 +246,9 @@ export function PropertyInvestmentCalculator() {
         {values.inputMode === "down-payment" ? (
           <CalculatorField
             errorMessage={errors.downPayment}
-            helperText="Cash paid up front before financing begins."
+            helperText={t("property.field.downPayment.helper")}
             inputId="downPayment"
-            label="Down payment"
+            label={t("property.field.downPayment.label")}
           >
             <Input
               id="downPayment"
@@ -234,9 +266,9 @@ export function PropertyInvestmentCalculator() {
         ) : (
           <CalculatorField
             errorMessage={errors.loanPrincipal}
-            helperText="Use this when you already know the exact loan amount."
+            helperText={t("property.field.loanPrincipal.helper")}
             inputId="loanPrincipal"
-            label="Loan principal"
+            label={t("property.field.loanPrincipal.label")}
           >
             <Input
               id="loanPrincipal"
@@ -256,9 +288,9 @@ export function PropertyInvestmentCalculator() {
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
             errorMessage={errors.annualFinancingRate}
-            helperText="Annual reducing-balance financing rate."
+            helperText={t("property.field.annualFinancingRate.helper")}
             inputId="annualFinancingRate"
-            label="Annual financing rate (%)"
+            label={t("property.field.annualFinancingRate.label")}
           >
             <Input
               id="annualFinancingRate"
@@ -279,9 +311,9 @@ export function PropertyInvestmentCalculator() {
 
           <CalculatorField
             errorMessage={errors.financingTenureYears}
-            helperText="Whole number of years for the property loan."
+            helperText={t("property.field.financingTenureYears.helper")}
             inputId="financingTenureYears"
-            label="Financing tenure (years)"
+            label={t("property.field.financingTenureYears.label")}
           >
             <Input
               id="financingTenureYears"
@@ -303,9 +335,9 @@ export function PropertyInvestmentCalculator() {
 
         <CalculatorField
           errorMessage={errors.holdingPeriodYears}
-          helperText="Cannot exceed the financing tenure."
+          helperText={t("property.field.holdingPeriodYears.helper")}
           inputId="holdingPeriodYears"
-          label="Holding period (years)"
+          label={t("property.field.holdingPeriodYears.label")}
         >
           <Input
             id="holdingPeriodYears"
@@ -327,9 +359,9 @@ export function PropertyInvestmentCalculator() {
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
             errorMessage={errors.monthlyRent}
-            helperText="Expected gross monthly rent at full occupancy."
+            helperText={t("property.field.monthlyRent.helper")}
             inputId="monthlyRent"
-            label="Monthly rent"
+            label={t("property.field.monthlyRent.label")}
           >
             <Input
               id="monthlyRent"
@@ -347,9 +379,9 @@ export function PropertyInvestmentCalculator() {
 
           <CalculatorField
             errorMessage={errors.occupancyRatePercent}
-            helperText="Share of the year the unit is expected to be tenanted."
+            helperText={t("property.field.occupancyRatePercent.helper")}
             inputId="occupancyRatePercent"
-            label="Occupancy rate (%)"
+            label={t("property.field.occupancyRatePercent.label")}
           >
             <Input
               id="occupancyRatePercent"
@@ -372,14 +404,14 @@ export function PropertyInvestmentCalculator() {
 
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            Property expenses
+            {t("property.field.expenses")}
           </legend>
           <div className="mt-3 grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={errors.monthlyMaintenanceAllowance}
-              helperText="Monthly maintenance allowance."
+              helperText={t("property.field.monthlyMaintenanceAllowance.helper")}
               inputId="monthlyMaintenanceAllowance"
-              label="Maintenance allowance (monthly)"
+              label={t("property.field.monthlyMaintenanceAllowance.label")}
             >
               <Input
                 id="monthlyMaintenanceAllowance"
@@ -400,9 +432,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.monthlySinkingFund}
-              helperText="Monthly sinking fund contribution."
+              helperText={t("property.field.monthlySinkingFund.helper")}
               inputId="monthlySinkingFund"
-              label="Sinking fund (monthly)"
+              label={t("property.field.monthlySinkingFund.label")}
             >
               <Input
                 id="monthlySinkingFund"
@@ -423,9 +455,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.annualCukaiTaksiran}
-              helperText="Yearly assessment tax (cukai taksiran)."
+              helperText={t("property.field.annualCukaiTaksiran.helper")}
               inputId="annualCukaiTaksiran"
-              label="Cukai taksiran"
+              label={t("property.field.annualCukaiTaksiran.label")}
             >
               <Input
                 id="annualCukaiTaksiran"
@@ -446,9 +478,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.annualCukaiTanahOrPetak}
-              helperText="Yearly quit rent (cukai tanah or cukai petak)."
+              helperText={t("property.field.annualCukaiTanahOrPetak.helper")}
               inputId="annualCukaiTanahOrPetak"
-              label="Cukai tanah or petak"
+              label={t("property.field.annualCukaiTanahOrPetak.label")}
             >
               <Input
                 id="annualCukaiTanahOrPetak"
@@ -469,9 +501,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.annualIndahWaterCost}
-              helperText="Yearly Indah Water sewerage cost."
+              helperText={t("property.field.annualIndahWaterCost.helper")}
               inputId="annualIndahWaterCost"
-              label="Indah Water cost"
+              label={t("property.field.annualIndahWaterCost.label")}
             >
               <Input
                 id="annualIndahWaterCost"
@@ -492,9 +524,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.annualRepairAllowance}
-              helperText="Yearly allowance for repairs."
+              helperText={t("property.field.annualRepairAllowance.helper")}
               inputId="annualRepairAllowance"
-              label="Repair allowance"
+              label={t("property.field.annualRepairAllowance.label")}
             >
               <Input
                 id="annualRepairAllowance"
@@ -515,9 +547,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.annualFireInsurance}
-              helperText="Yearly fire insurance premium."
+              helperText={t("property.field.annualFireInsurance.helper")}
               inputId="annualFireInsurance"
-              label="Fire insurance"
+              label={t("property.field.annualFireInsurance.label")}
             >
               <Input
                 id="annualFireInsurance"
@@ -538,9 +570,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.annualOtherCosts}
-              helperText="Any other recurring yearly cost not covered above."
+              helperText={t("property.field.annualOtherCosts.helper")}
               inputId="annualOtherCosts"
-              label="Other costs"
+              label={t("property.field.annualOtherCosts.label")}
             >
               <Input
                 id="annualOtherCosts"
@@ -563,17 +595,17 @@ export function PropertyInvestmentCalculator() {
 
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            Mortgage insurance (MRTT or MLTT)
+            {t("property.field.insurance")}
           </legend>
           <div className="mt-3 flex flex-wrap gap-3">
             <ModeButton
               isActive={values.insuranceType === "mrtt"}
-              label="MRTT (single premium)"
+              label={t("property.mode.mrtt")}
               onClick={() => handleValueChange("insuranceType", "mrtt")}
             />
             <ModeButton
               isActive={values.insuranceType === "mltt"}
-              label="MLTT (recurring premium)"
+              label={t("property.mode.mltt")}
               onClick={() => handleValueChange("insuranceType", "mltt")}
             />
           </div>
@@ -583,14 +615,14 @@ export function PropertyInvestmentCalculator() {
               <div className="mt-3 flex flex-wrap gap-3">
                 <ModeButton
                   isActive={values.mrttPaymentTreatment === "upfront"}
-                  label="Upfront cash cost"
+                  label={t("property.mode.mrttUpfront")}
                   onClick={() =>
                     handleValueChange("mrttPaymentTreatment", "upfront")
                   }
                 />
                 <ModeButton
                   isActive={values.mrttPaymentTreatment === "financed"}
-                  label="Financed into the loan"
+                  label={t("property.mode.mrttFinanced")}
                   onClick={() =>
                     handleValueChange("mrttPaymentTreatment", "financed")
                   }
@@ -599,9 +631,9 @@ export function PropertyInvestmentCalculator() {
               <div className="mt-3">
                 <CalculatorField
                   errorMessage={errors.mrttCost}
-                  helperText="One-time MRTT premium, paid upfront or added to the loan."
+                  helperText={t("property.field.mrttCost.helper")}
                   inputId="mrttCost"
-                  label="MRTT cost"
+                  label={t("property.field.mrttCost.label")}
                 >
                   <Input
                     id="mrttCost"
@@ -622,9 +654,9 @@ export function PropertyInvestmentCalculator() {
             <div className="mt-3">
               <CalculatorField
                 errorMessage={errors.annualMlttCost}
-                helperText="Recurring annual MLTT premium, paid alongside your other yearly property costs. It is never financed into the loan."
+                helperText={t("property.field.annualMlttCost.helper")}
                 inputId="annualMlttCost"
-                label="Annual MLTT cost"
+                label={t("property.field.annualMlttCost.label")}
               >
                 <Input
                   id="annualMlttCost"
@@ -648,19 +680,19 @@ export function PropertyInvestmentCalculator() {
 
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            Exit value assumption
+            {t("property.field.exitValue")}
           </legend>
           <div className="mt-3 flex flex-wrap gap-3">
             <ModeButton
               isActive={values.exitValueMode === "appreciation-rate"}
-              label="Annual appreciation rate"
+              label={t("property.mode.appreciationRate")}
               onClick={() =>
                 handleValueChange("exitValueMode", "appreciation-rate")
               }
             />
             <ModeButton
               isActive={values.exitValueMode === "exit-price"}
-              label="Expected exit price"
+              label={t("property.mode.exitPrice")}
               onClick={() => handleValueChange("exitValueMode", "exit-price")}
             />
           </div>
@@ -668,9 +700,9 @@ export function PropertyInvestmentCalculator() {
             {values.exitValueMode === "appreciation-rate" ? (
               <CalculatorField
                 errorMessage={errors.annualAppreciationRate}
-                helperText="Fixed annual appreciation assumption for the full holding period."
+                helperText={t("property.field.annualAppreciationRate.helper")}
                 inputId="annualAppreciationRate"
-                label="Annual appreciation rate (%)"
+                label={t("property.field.annualAppreciationRate.label")}
               >
                 <Input
                   id="annualAppreciationRate"
@@ -691,9 +723,9 @@ export function PropertyInvestmentCalculator() {
             ) : (
               <CalculatorField
                 errorMessage={errors.expectedExitPrice}
-                helperText="Use this when you already have an expected sale price."
+                helperText={t("property.field.expectedExitPrice.helper")}
                 inputId="expectedExitPrice"
-                label="Expected exit price"
+                label={t("property.field.expectedExitPrice.label")}
               >
                 <Input
                   id="expectedExitPrice"
@@ -717,14 +749,14 @@ export function PropertyInvestmentCalculator() {
 
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            REIT comparison
+            {t("property.field.reitComparison")}
           </legend>
           <div className="mt-3 grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={errors.reitInitialCapital}
-              helperText="Optional starting capital for both REIT strategies; enter 0 to start with none."
+              helperText={t("property.field.reitInitialCapital.helper")}
               inputId="reitInitialCapital"
-              label="REIT initial capital"
+              label={t("property.field.reitInitialCapital.label")}
             >
               <Input
                 id="reitInitialCapital"
@@ -745,9 +777,9 @@ export function PropertyInvestmentCalculator() {
 
             <CalculatorField
               errorMessage={errors.reitAnnualReturnRate}
-              helperText="Fixed annual total return assumption for the REIT."
+              helperText={t("property.field.reitAnnualReturnRate.helper")}
               inputId="reitAnnualReturnRate"
-              label="REIT annual return rate (%)"
+              label={t("property.field.reitAnnualReturnRate.label")}
             >
               <Input
                 id="reitAnnualReturnRate"
@@ -773,7 +805,7 @@ export function PropertyInvestmentCalculator() {
             type="submit"
             className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
-            Compare property and REIT
+            {t("property.button.compare")}
           </Button>
           <Button
             type="button"
@@ -781,7 +813,7 @@ export function PropertyInvestmentCalculator() {
             onClick={handleReset}
             className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Reset inputs
+            {t("common.reset")}
           </Button>
         </div>
       </form>
@@ -789,57 +821,65 @@ export function PropertyInvestmentCalculator() {
       <div className="grid min-w-0 gap-5">
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Property Overview
+            {t("property.overview.heading")}
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <MetricCard
-              label="Total loan"
+              label={t("property.metric.totalLoan.term")}
               value={formatCurrency(comparison.property.loanPrincipal)}
             />
             <MetricCard
-              label="Monthly instalment"
+              label={t("property.overview.monthlyInstalment")}
               value={formatCurrency(comparison.property.monthlyInstalment)}
             />
             <MetricCard
-              label="Projected exit value"
+              label={t("property.overview.projectedExitValue")}
               value={formatCurrency(comparison.property.exitValue)}
             />
             <MetricCard
-              label="Remaining loan balance"
+              label={t("property.overview.remainingLoanBalance")}
               value={formatCurrency(comparison.property.remainingLoanBalance)}
             />
             <MetricCard
-              label="Equity at sale"
+              label={t("property.metric.equityAtSale.term")}
               value={formatCurrency(comparison.property.equityAtSale)}
             />
             <MetricCard
-              label="Cumulative net rental cash flow"
+              label={t("property.overview.cumulativeNetRentalCashFlow")}
               value={formatCurrency(
                 comparison.property.cumulativeNetRentalCashFlow,
               )}
             />
             <MetricCard
-              label="Cumulative user cash outflow"
+              label={t("property.metric.cumulativeUserCashOutflow.term")}
               value={formatCurrency(
                 comparison.property.cumulativeUserCashOutflow,
               )}
             />
           </div>
           <p className="text-muted-foreground mt-5 text-sm leading-6">
-            Based on a reducing-balance amortized loan at{" "}
-            {formatPercentage(submittedValues.annualFinancingRate)} over a{" "}
-            {submittedValues.holdingPeriodYears}-year holding period within a{" "}
-            {submittedValues.financingTenureYears}-year tenure.
+            {t("property.overview.basis")
+              .replace(
+                "{rate}",
+                formatPercentage(submittedValues.annualFinancingRate),
+              )
+              .replace(
+                "{holding}",
+                String(submittedValues.holdingPeriodYears),
+              )
+              .replace(
+                "{tenure}",
+                String(submittedValues.financingTenureYears),
+              )}
           </p>
         </section>
 
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            REIT Overview
+            {t("property.reit.heading")}
           </p>
           <p className="text-muted-foreground mt-2 text-sm leading-6">
-            Both strategies start from the same capital and grow monthly; only
-            the monthly contribution amount differs.
+            {t("property.reit.intro")}
           </p>
           <div className="mt-5 grid gap-5 md:grid-cols-2">
             {REIT_STRATEGY_ORDER.map((strategyId) => {
@@ -851,21 +891,21 @@ export function PropertyInvestmentCalculator() {
                   className="rounded-2xl border border-border bg-card p-5"
                 >
                   <p className="text-(--foreground) text-sm font-semibold">
-                    {strategyLabels[strategyId]}
+                    {t(strategyLabelKeys[strategyId])}
                   </p>
                   <div className="mt-4 grid gap-3">
                     <MetricCard
-                      label="Monthly contribution"
+                      label={t("property.reit.monthlyContribution")}
                       value={formatCurrency(
                         strategySummary.monthlyContribution,
                       )}
                     />
                     <MetricCard
-                      label="Final value"
+                      label={t("property.reit.finalValue")}
                       value={formatCurrency(strategySummary.finalValue)}
                     />
                     <MetricCard
-                      label="Net return"
+                      label={t("property.metric.netReturn.term")}
                       value={formatCurrency(strategySummary.netReturn)}
                     />
                   </div>
@@ -874,27 +914,38 @@ export function PropertyInvestmentCalculator() {
             })}
           </div>
           <p className="text-muted-foreground mt-5 text-sm leading-6">
-            Based on {formatCurrency(submittedValues.reitInitialCapital)}{" "}
-            starting capital at a fixed{" "}
-            {formatPercentage(submittedValues.reitAnnualReturnRate)} annual
-            return, compounded monthly.
+            {t("property.reit.basis")
+              .replace(
+                "{capital}",
+                formatCurrency(submittedValues.reitInitialCapital),
+              )
+              .replace(
+                "{rate}",
+                formatPercentage(submittedValues.reitAnnualReturnRate),
+              )}
           </p>
         </section>
 
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Strategy Ranking
+            {t("property.ranking.heading")}
           </p>
           <p className="text-muted-foreground mt-2 text-sm leading-6">
-            Strategies ranked by net return for this holding period.
+            {t("property.ranking.description")}
           </p>
           <div className="mt-5 overflow-x-auto">
             <table className="w-full min-w-[420px] border-collapse text-left text-sm">
               <thead>
                 <tr className="text-muted-foreground text-xs uppercase tracking-[0.14em]">
-                  <th className="pb-3 pr-4 font-semibold">Rank</th>
-                  <th className="pb-3 pr-4 font-semibold">Strategy</th>
-                  <th className="pb-3 font-semibold">Net return</th>
+                  <th className="pb-3 pr-4 font-semibold">
+                    {t("property.ranking.rank")}
+                  </th>
+                  <th className="pb-3 pr-4 font-semibold">
+                    {t("property.ranking.strategy")}
+                  </th>
+                  <th className="pb-3 font-semibold">
+                    {t("property.ranking.netReturn")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -923,7 +974,7 @@ export function PropertyInvestmentCalculator() {
                         </span>
                       </td>
                       <td className="text-(--foreground) py-3 pr-4 font-semibold">
-                        {strategyLabels[strategyId]}
+                        {t(strategyLabelKeys[strategyId])}
                       </td>
                       <td className="text-(--foreground) py-3 font-semibold">
                         {formatCurrency(netReturn)}
@@ -940,10 +991,13 @@ export function PropertyInvestmentCalculator() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-                Yearly Projection
+                {t("property.projection.heading")}
               </p>
               <h2 className="mt-2 text-2xl font-semibold">
-                Year 1 to {comparison.property.yearlyProjection.length}
+                {t("property.projection.range").replace(
+                  "{n}",
+                  String(comparison.property.yearlyProjection.length),
+                )}
               </h2>
             </div>
             <Button
@@ -953,8 +1007,8 @@ export function PropertyInvestmentCalculator() {
               aria-expanded={isTableOpen}
               aria-label={
                 isTableOpen
-                  ? "Hide yearly projection"
-                  : "Show yearly projection"
+                  ? t("common.hideYearlyProjection")
+                  : t("common.showYearlyProjection")
               }
               onClick={() => setIsTableOpen((prev) => !prev)}
               className="rounded-full border border-border text-muted-foreground hover:bg-card hover:text-(--foreground)"
@@ -980,17 +1034,23 @@ export function PropertyInvestmentCalculator() {
               <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                 <thead>
                   <tr className="text-muted-foreground">
-                    <th className="pb-2 pr-4 font-medium">Year</th>
-                    <th className="pb-2 pr-4 font-medium">Loan balance</th>
                     <th className="pb-2 pr-4 font-medium">
-                      Net rental cash flow
+                      {t("property.table.year")}
                     </th>
                     <th className="pb-2 pr-4 font-medium">
-                      Cumulative net cash flow
+                      {t("property.table.loanBalance")}
                     </th>
-                    <th className="pb-2 pr-4 font-medium">REIT (instalment)</th>
+                    <th className="pb-2 pr-4 font-medium">
+                      {t("property.table.netRentalCashFlow")}
+                    </th>
+                    <th className="pb-2 pr-4 font-medium">
+                      {t("property.table.cumulativeNetCashFlow")}
+                    </th>
+                    <th className="pb-2 pr-4 font-medium">
+                      {t("property.table.reitInstalment")}
+                    </th>
                     <th className="pb-2 font-medium">
-                      REIT (instalment + costs)
+                      {t("property.table.reitInstalmentAndCosts")}
                     </th>
                   </tr>
                 </thead>
@@ -998,7 +1058,7 @@ export function PropertyInvestmentCalculator() {
                   {comparison.property.yearlyProjection.map((row) => (
                     <tr key={row.year} className="bg-card rounded-2xl">
                       <td className="rounded-l-2xl px-4 py-3 whitespace-nowrap">
-                        Year {row.year}
+                        {t("period.year").replace("{n}", String(row.year))}
                       </td>
                       <td className="px-4 py-3">
                         {formatCurrency(row.loanBalance)}
@@ -1042,20 +1102,22 @@ const REIT_STRATEGY_ORDER: readonly Exclude<
 >[] = ["instalment-matched", "instalment-and-costs-matched"];
 
 function MetricGlossary() {
+  const t = useTranslations();
+
   return (
     <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
-          What do these numbers mean?
+          {t("common.whatDoTheseNumbersMean")}
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          {metricDefinitions.map(({ term, definition }) => (
-            <div key={term}>
+          {metricDefinitionKeys.map(({ termKey, definitionKey }) => (
+            <div key={termKey}>
               <dt className="text-(--foreground) text-sm font-semibold">
-                {term}
+                {t(termKey)}
               </dt>
               <dd className="text-muted-foreground mt-1 text-sm leading-6">
-                {definition}
+                {t(definitionKey)}
               </dd>
             </div>
           ))}

@@ -5,10 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+import { useTranslations } from "@/lib/i18n/use-i18n";
+
+import { HeaderControls } from "./HeaderControls";
 import { navigationItems } from "./navigation-items";
 
 export function MobileMenu() {
   const pathname = usePathname();
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -55,7 +59,7 @@ export function MobileMenu() {
         type="button"
         aria-expanded={isOpen}
         aria-controls="mobile-menu"
-        aria-label={isOpen ? "Close menu" : "Open menu"}
+        aria-label={isOpen ? t("nav.close") : t("nav.open")}
         onClick={() => setIsOpen((current) => !current)}
         className="inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-(--foreground) hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
@@ -72,7 +76,7 @@ export function MobileMenu() {
         hidden={!isOpen}
         className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-elevated"
       >
-        <nav aria-label="Mobile" className="flex flex-col">
+        <nav aria-label={t("nav.ariaMobile")} className="flex flex-col">
           {navigationItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -88,11 +92,15 @@ export function MobileMenu() {
                     : "text-(--foreground) hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
         </nav>
+
+        <div className="mt-2 border-t border-border pt-3">
+          <HeaderControls />
+        </div>
       </div>
     </div>
   );

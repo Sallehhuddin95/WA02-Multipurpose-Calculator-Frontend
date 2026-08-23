@@ -66,6 +66,7 @@ The following tokens are added to `:root` and mirrored in `.dark`, and mapped in
 | `--shadow-elevated` | `0 28px 70px rgba(15,23,42,0.08)` | the literal `shadow-[0_28px_70px_rgba(23,27,38,0.08)]` hero shadow |
 | `--glow` | `color-mix(in oklab, var(--primary) 12%, transparent)` | the `rgba(37,99,235,0.12)` radial gradient in `html` |
 | `--dot-grid` | `color-mix(in oklab, var(--foreground) 5%, transparent)` | the `rgba(26,30,39,0.05)` dot grid in the root layout |
+| `--background-top` | `#fbfdff` | the literal `#fbfdff` top stop in the `html` background gradient; mirrored in `.dark` |
 
 ## Token-Only Styling Rule
 
@@ -78,6 +79,7 @@ Requirements for all `.tsx` files:
 - use token-derived utilities such as `bg-card`, `bg-card/80`, `bg-primary`, `text-primary-foreground`, `shadow-card`, `shadow-elevated`, `ring-2 ring-ring`
 - use `bg-primary text-primary-foreground` instead of `bg-primary text-white` for pills and badges
 - use `bg-card/N` plus `backdrop-blur` for the frosted glass surfaces instead of `bg-white/N`
+- the "no literal colors" rule is not light-only: it applies to both light and dark paths, so neither light-mode styling nor `.dark`-scoped overrides may introduce literal theme colors
 
 ## Typography Utility
 
@@ -101,7 +103,9 @@ Requirements for all `.tsx` files:
 
 ## Dark Mode Posture
 
-The `.dark` block exists but is not wired (no toggle or provider). The palette in `.dark` must be kept in sync with the light values so the theme remains correct if dark mode is enabled later. Any palette change must update both `:root` and `.dark`.
+Dark mode is wired and user-toggled. `next-themes` applies and removes the `.dark` class on `<html>` (`attribute="class"`), with `defaultTheme="light"` and `enableSystem={false}` so the theme is manual only and never follows the OS preference. The user's choice persists in `localStorage` under the `theme` key, and `disableTransitionOnChange` is enabled so the class swap is instant with no transition flash. Hover and motion effects still respect `prefers-reduced-motion` via the `motion-safe:`/`motion-reduce:` variants.
+
+The palette in `.dark` must be kept in sync with the light values in `:root` so both themes remain correct. Any palette change must update both `:root` and `.dark`.
 
 ## Loading, Empty, and Error States
 
@@ -114,10 +118,13 @@ No layout or responsive behavior changes are introduced by this spec. The theme 
 ## Acceptance Criteria
 
 - the app renders with the light-grey and blue palette defined above
-- no hardcoded `bg-white*`, `text-white`, `rgba(...)`, hex, or `shadow-[...]` theme literals remain in any `.tsx` file
+- no hardcoded `bg-white*`, `text-white`, `rgba(...)`, hex, or `shadow-[...]` theme literals remain in any `.tsx` file or in either the light or dark theme path
 - all interactive controls show a visible `ring-2` focus ring
 - text meets WCAG AA contrast on its background
-- dark mode block stays in sync (not required to be visible)
+- the app renders light by default on first visit, with no flash of the wrong theme on load
+- toggling the theme control adds the `.dark` class to `<html>` for dark mode and removes it for light mode
+- the user's theme choice persists across reloads
+- no literal theme colors remain in either the light or dark path; the `:root` and `.dark` blocks stay in sync
 
 ## Related Specs
 

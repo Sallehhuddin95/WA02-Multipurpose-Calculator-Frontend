@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState, type FormEvent, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { salaryCalculatorFormSchema } from "@/features/salary-calculator/schemas/salary-calculator-form";
-import { salaryProjectionFormSchema } from "@/features/salary-calculator/schemas/salary-projection-form";
+import { createSalaryCalculatorFormSchema } from "@/features/salary-calculator/schemas/salary-calculator-form";
+import { createSalaryProjectionFormSchema } from "@/features/salary-calculator/schemas/salary-projection-form";
 import {
   calculateAnnualProjection,
   calculateSalaryBreakdown,
@@ -16,7 +22,6 @@ import {
   ONE_OFF_INCREMENT_TYPES,
   SALARY_INCREMENT_MODES,
   WORKER_CATEGORIES,
-  WORKER_CATEGORY_LABELS,
   type OneOffIncrement,
   type OneOffIncrementType,
   type SalaryAnnualProjection,
@@ -26,6 +31,9 @@ import {
   type SalaryProjectionResult,
   type WorkerCategory,
 } from "@/features/salary-calculator/types/salary-calculator";
+import { usePersistedState } from "@/hooks/use-persisted-state";
+import { createTranslator, type MessageKey } from "@/lib/i18n/messages";
+import { useTranslations } from "@/lib/i18n/use-i18n";
 import { formatCurrency } from "@/utils/format-currency";
 
 type FieldErrorMap = Partial<Record<keyof SalaryCalculatorFormValues, string>>;
@@ -42,15 +50,21 @@ type ProjectionErrorMap = Partial<Record<ProjectionScalarField, string>> & {
   oneOffIncrements?: Record<number, OneOffErrorMap>;
 };
 
-const INCREMENT_MODE_LABELS: Record<SalaryIncrementMode, string> = {
-  percentage: "Percentage",
-  "fixed-amount": "Fixed amount",
-  none: "None",
+const workerCategoryLabelKeys: Record<WorkerCategory, MessageKey> = {
+  malaysian: "salary.category.malaysian",
+  "permanent-resident": "salary.category.permanentResident",
+  "foreign-worker": "salary.category.foreignWorker",
 };
 
-const ONE_OFF_TYPE_LABELS: Record<OneOffIncrementType, string> = {
-  amount: "Amount (RM)",
-  percentage: "Percentage (%)",
+const incrementModeLabelKeys: Record<SalaryIncrementMode, MessageKey> = {
+  percentage: "salary.mode.percentage",
+  "fixed-amount": "salary.mode.fixedAmount",
+  none: "salary.mode.none",
+};
+
+const oneOffTypeLabelKeys: Record<OneOffIncrementType, MessageKey> = {
+  amount: "salary.oneOffType.amount",
+  percentage: "salary.oneOffType.percentage",
 };
 
 const defaultValues: SalaryCalculatorFormValues = {
@@ -70,66 +84,148 @@ const defaultProjectionValues: SalaryProjectionFormValues = {
   oneOffIncrements: [],
 };
 
-const metricDefinitions: ReadonlyArray<{ term: string; definition: string }> = [
+const BREAKDOWN_STORAGE_KEY = "salary-calculator:breakdown:form:v1";
+const PROJECTION_STORAGE_KEY = "salary-calculator:projection:form:v1";
+
+interface SalaryProjectionPersistedState {
+  values: SalaryProjectionFormValues;
+  computed: boolean;
+}
+
+const defaultProjectionPersistedState: SalaryProjectionPersistedState = {
+  values: defaultProjectionValues,
+  computed: false,
+};
+
+const salaryCalculatorFormSchema = createSalaryCalculatorFormSchema(
+  createTranslator("en"),
+);
+const salaryProjectionFormSchema = createSalaryProjectionFormSchema(
+  createTranslator("en"),
+);
+
+function validateSalaryCalculatorForm(
+  value: unknown,
+): SalaryCalculatorFormValues | null {
+  const parsed = salaryCalculatorFormSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function validateSalaryProjectionPersisted(
+  value: unknown,
+): SalaryProjectionPersistedState | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const raw = value as { values?: unknown; computed?: unknown };
+
+  if (typeof raw.computed !== "boolean") {
+    return null;
+  }
+
+  const parsed = salaryProjectionFormSchema.safeParse(raw.values);
+  if (!parsed.success) {
+    return null;
+  }
+
+  return { values: parsed.data, computed: raw.computed };
+}
+
+const metricDefinitionKeys: ReadonlyArray<{
+  termKey: MessageKey;
+  definitionKey: MessageKey;
+}> = [
   {
-    term: "Gross monthly salary",
-    definition:
-      "Your total monthly base salary before any statutory deductions or contributions.",
+    termKey: "salary.metric.grossMonthlySalary.term",
+    definitionKey: "salary.metric.grossMonthlySalary.definition",
   },
   {
-    term: "EPF (Employee)",
-    definition:
-      "Your mandatory contribution to the Employees Provident Fund. The rate is typically 11% of your monthly salary for employees under 60.",
+    termKey: "salary.metric.epfEmployee.term",
+    definitionKey: "salary.metric.epfEmployee.definition",
   },
   {
-    term: "EPF (Employer)",
-    definition:
-      "Your employer's mandatory contribution to your EPF account. The rate is typically 12-13% depending on your salary level and age.",
+    termKey: "salary.metric.epfEmployer.term",
+    definitionKey: "salary.metric.epfEmployer.definition",
   },
   {
-    term: "SOCSO",
-    definition:
-      "Social Security Organization contributions under the Employment Injury Scheme and Invalidity Scheme. Provides coverage for work-related injuries and invalidity.",
+    termKey: "salary.metric.socso.term",
+    definitionKey: "salary.metric.socso.definition",
   },
   {
-    term: "EIS (SIP)",
-    definition:
-      "Employment Insurance System (Sistem Insurans Pekerjaan) contributions. Provides employment protection and retrenchment benefits for eligible workers.",
+    termKey: "salary.metric.eis.term",
+    definitionKey: "salary.metric.eis.definition",
   },
   {
-    term: "PCB (MTD)",
-    definition:
-      "Potongan Cukai Bulanan (Monthly Tax Deduction). Monthly income tax deducted at source based on your chargeable income after EPF relief.",
+    termKey: "salary.metric.pcb.term",
+    definitionKey: "salary.metric.pcb.definition",
   },
   {
-    term: "Lindung24",
-    definition:
-      "Optional PERKESO voluntary protection scheme providing 24-hour coverage for accidents and illnesses beyond work-related incidents. Coverage capped at RM6,000 monthly salary.",
+    termKey: "salary.metric.lindung24.term",
+    definitionKey: "salary.metric.lindung24.definition",
   },
   {
-    term: "Net take-home salary",
-    definition:
-      "Your gross salary minus all statutory deductions and optional contributions. This is the amount you actually receive in your bank account.",
+    termKey: "salary.metric.netTakeHome.term",
+    definitionKey: "salary.metric.netTakeHome.definition",
   },
   {
-    term: "Total employer cost",
-    definition:
-      "The total amount your employer pays for your employment: gross salary plus all employer statutory contributions (EPF, SOCSO, EIS).",
+    termKey: "salary.metric.totalEmployerCost.term",
+    definitionKey: "salary.metric.totalEmployerCost.definition",
   },
 ];
 
 
 export function SalaryCalculator() {
-  const [values, setValues] = useState<SalaryCalculatorFormValues>(defaultValues);
+  const t = useTranslations();
+  const [values, setValues, { reset: resetMain, isHydrated: isMainHydrated }] =
+    usePersistedState(
+      BREAKDOWN_STORAGE_KEY,
+      defaultValues,
+      validateSalaryCalculatorForm,
+    );
   const [errors, setErrors] = useState<FieldErrorMap>({});
-  const [projectionValues, setProjectionValues] =
-    useState<SalaryProjectionFormValues>(defaultProjectionValues);
+  const [
+    projectionState,
+    setProjectionState,
+    { reset: resetProjection, isHydrated: isProjectionHydrated },
+  ] = usePersistedState(
+    PROJECTION_STORAGE_KEY,
+    defaultProjectionPersistedState,
+    validateSalaryProjectionPersisted,
+  );
   const [projectionErrors, setProjectionErrors] = useState<ProjectionErrorMap>({});
   const [projectionResult, setProjectionResult] =
     useState<SalaryProjectionResult | null>(null);
 
+  const projectionValues = projectionState.values;
+  const projectionComputed = projectionState.computed;
+
   const breakdown = calculateSalaryBreakdown(values);
   const annualProjection: SalaryAnnualProjection = calculateAnnualProjection(breakdown);
+
+  const recomputedProjectionRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      !isMainHydrated ||
+      !isProjectionHydrated ||
+      recomputedProjectionRef.current
+    ) {
+      return;
+    }
+
+    recomputedProjectionRef.current = true;
+
+    if (projectionComputed) {
+      setProjectionResult(projectSalary(values, projectionValues));
+    }
+  }, [
+    isMainHydrated,
+    isProjectionHydrated,
+    projectionComputed,
+    values,
+    projectionValues,
+  ]);
 
   function handleValueChange<K extends keyof SalaryCalculatorFormValues>(
     key: K,
@@ -142,14 +238,14 @@ export function SalaryCalculator() {
   }
 
   function handleReset() {
-    setValues(defaultValues);
+    resetMain();
     setErrors({});
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = salaryCalculatorFormSchema.safeParse(values);
+    const parsedValues = createSalaryCalculatorFormSchema(t).safeParse(values);
 
     if (!parsedValues.success) {
       const nextErrors: FieldErrorMap = {};
@@ -175,9 +271,9 @@ export function SalaryCalculator() {
     key: K,
     nextValue: SalaryProjectionFormValues[K],
   ) {
-    setProjectionValues((currentValues) => ({
-      ...currentValues,
-      [key]: nextValue,
+    setProjectionState((currentState) => ({
+      ...currentState,
+      values: { ...currentState.values, [key]: nextValue },
     }));
   }
 
@@ -186,35 +282,44 @@ export function SalaryCalculator() {
     key: keyof OneOffIncrement,
     nextValue: OneOffIncrement[keyof OneOffIncrement],
   ) {
-    setProjectionValues((currentValues) => ({
-      ...currentValues,
-      oneOffIncrements: currentValues.oneOffIncrements.map((oneOff, i) =>
-        i === index ? { ...oneOff, [key]: nextValue } : oneOff,
-      ),
+    setProjectionState((currentState) => ({
+      ...currentState,
+      values: {
+        ...currentState.values,
+        oneOffIncrements: currentState.values.oneOffIncrements.map(
+          (oneOff, i) => (i === index ? { ...oneOff, [key]: nextValue } : oneOff),
+        ),
+      },
     }));
   }
 
   function handleAddOneOff() {
-    setProjectionValues((currentValues) => ({
-      ...currentValues,
-      oneOffIncrements: [
-        ...currentValues.oneOffIncrements,
-        { year: 1, type: "amount", value: 1000 },
-      ],
+    setProjectionState((currentState) => ({
+      ...currentState,
+      values: {
+        ...currentState.values,
+        oneOffIncrements: [
+          ...currentState.values.oneOffIncrements,
+          { year: 1, type: "amount", value: 1000 },
+        ],
+      },
     }));
   }
 
   function handleRemoveOneOff(index: number) {
-    setProjectionValues((currentValues) => ({
-      ...currentValues,
-      oneOffIncrements: currentValues.oneOffIncrements.filter(
-        (_, i) => i !== index,
-      ),
+    setProjectionState((currentState) => ({
+      ...currentState,
+      values: {
+        ...currentState.values,
+        oneOffIncrements: currentState.values.oneOffIncrements.filter(
+          (_, i) => i !== index,
+        ),
+      },
     }));
   }
 
   function handleProjectionReset() {
-    setProjectionValues(defaultProjectionValues);
+    resetProjection();
     setProjectionErrors({});
     setProjectionResult(null);
   }
@@ -222,7 +327,9 @@ export function SalaryCalculator() {
   function handleProjectionSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = salaryProjectionFormSchema.safeParse(projectionValues);
+    const parsedValues = createSalaryProjectionFormSchema(t).safeParse(
+      projectionValues,
+    );
 
     if (!parsedValues.success) {
       const nextErrors: ProjectionErrorMap = {};
@@ -256,11 +363,19 @@ export function SalaryCalculator() {
 
       setProjectionErrors(nextErrors);
       setProjectionResult(null);
+      setProjectionState((currentState) => ({
+        ...currentState,
+        computed: false,
+      }));
       return;
     }
 
     setProjectionErrors({});
     setProjectionResult(projectSalary(values, parsedValues.data));
+    setProjectionState((currentState) => ({
+      ...currentState,
+      computed: true,
+    }));
   }
 
   return (
@@ -272,9 +387,9 @@ export function SalaryCalculator() {
       >
         <CalculatorField
           errorMessage={errors.grossMonthlySalary}
-          helperText="Your total monthly base salary before any deductions."
+          helperText={t("salary.field.grossMonthlySalary.helper")}
           inputId="grossMonthlySalary"
-          label="Gross monthly salary (RM)"
+          label={t("salary.field.grossMonthlySalary.label")}
         >
           <Input
             id="grossMonthlySalary"
@@ -292,9 +407,9 @@ export function SalaryCalculator() {
 
         <CalculatorField
           errorMessage={errors.workerCategory}
-          helperText="Your residency and employment status in Malaysia."
+          helperText={t("salary.field.workerCategory.helper")}
           inputId="workerCategory"
-          label="Worker category"
+          label={t("salary.field.workerCategory.label")}
         >
           <div className="mt-2 grid gap-2">
             {WORKER_CATEGORIES.map((category) => (
@@ -317,7 +432,7 @@ export function SalaryCalculator() {
                   className="sr-only"
                 />
                 <span className="font-semibold">
-                  {WORKER_CATEGORY_LABELS[category]}
+                  {t(workerCategoryLabelKeys[category])}
                 </span>
               </label>
             ))}
@@ -334,7 +449,7 @@ export function SalaryCalculator() {
               }
               className="size-4 accent-primary"
             />
-            <span className="font-semibold">Opt in to EPF contributions</span>
+            <span className="font-semibold">{t("salary.epfOptIn")}</span>
           </label>
         ) : null}
 
@@ -348,9 +463,9 @@ export function SalaryCalculator() {
             className="size-4 accent-primary"
           />
           <div>
-            <span className="font-semibold">Lindung24 protection</span>
+            <span className="font-semibold">{t("salary.lindung24.label")}</span>
             <p className="text-muted-foreground mt-1 text-xs leading-5">
-              Optional 24/7 PERKESO protection scheme (premium deducted from net salary).
+              {t("salary.lindung24.helper")}
             </p>
           </div>
         </label>
@@ -358,9 +473,9 @@ export function SalaryCalculator() {
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
             errorMessage={errors.employeeEpfRate}
-            helperText="Override statutory employee EPF rate. Leave blank for statutory rate."
+            helperText={t("salary.field.employeeEpfRate.helper")}
             inputId="employeeEpfRate"
-            label="Employee EPF rate (%)"
+            label={t("salary.field.employeeEpfRate.label")}
           >
             <Input
               id="employeeEpfRate"
@@ -376,16 +491,16 @@ export function SalaryCalculator() {
                   event.target.value === "" ? undefined : Number(event.target.value),
                 )
               }
-              placeholder="Statutory"
+              placeholder={t("salary.placeholder.statutory")}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
 
           <CalculatorField
             errorMessage={errors.employerEpfRate}
-            helperText="Override statutory employer EPF rate. Leave blank for statutory rate."
+            helperText={t("salary.field.employerEpfRate.helper")}
             inputId="employerEpfRate"
-            label="Employer EPF rate (%)"
+            label={t("salary.field.employerEpfRate.label")}
           >
             <Input
               id="employerEpfRate"
@@ -401,7 +516,7 @@ export function SalaryCalculator() {
                   event.target.value === "" ? undefined : Number(event.target.value),
                 )
               }
-              placeholder="Statutory"
+              placeholder={t("salary.placeholder.statutory")}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
@@ -412,7 +527,7 @@ export function SalaryCalculator() {
             type="submit"
             className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
-            Calculate breakdown
+            {t("salary.button.calculateBreakdown")}
           </Button>
           <Button
             type="button"
@@ -420,7 +535,7 @@ export function SalaryCalculator() {
             onClick={handleReset}
             className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Reset inputs
+            {t("common.reset")}
           </Button>
         </div>
       </form>
@@ -428,46 +543,46 @@ export function SalaryCalculator() {
       <div className="grid gap-5">
         <section className="rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
-            Employee Breakdown
+            {t("salary.breakdown.heading")}
           </p>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Based on a gross monthly salary of{" "}
+            {t("salary.breakdown.basisPrefix")}{" "}
             <span className="font-semibold text-(--foreground)">
               {formatCurrency(values.grossMonthlySalary)}
             </span>{" "}
-            as a{" "}
+            {t("salary.breakdown.basisAs")}{" "}
             <span className="font-semibold text-(--foreground)">
-              {WORKER_CATEGORY_LABELS[values.workerCategory].toLowerCase()}
+              {t(workerCategoryLabelKeys[values.workerCategory]).toLowerCase()}
             </span>
             {values.workerCategory === "foreign-worker" && values.foreignWorkerEpfOptIn
-              ? " (EPF opted in)"
+              ? t("salary.breakdown.epfOptedIn")
               : ""}
-            {values.lindung24OptIn ? " with Lindung24" : ""}.
+            {values.lindung24OptIn ? t("salary.breakdown.withLindung24") : ""}.
           </p>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <MetricCard
-              label="Gross monthly salary"
+              label={t("salary.metric.grossMonthlySalary.term")}
               value={formatCurrency(breakdown.grossMonthlySalary)}
             />
             <MetricCard
-              label="Net take-home salary"
+              label={t("salary.metric.netTakeHome.term")}
               value={formatCurrency(breakdown.netMonthlySalary)}
             />
           </div>
 
           <div className="mt-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Monthly Deductions
+              {t("salary.breakdown.monthlyDeductions")}
             </p>
             <div className="mt-3 divide-y divide-border">
               {breakdown.employeeDeductions.map((deduction) => (
                 <div
-                  key={deduction.label}
+                  key={deduction.labelKey}
                   className="flex items-center justify-between py-2.5 text-sm"
                 >
                   <span className="font-medium text-(--foreground)">
-                    {deduction.label}
+                    {t(deduction.labelKey)}
                   </span>
                   <span className="tabular-nums text-(--foreground)">
                     -{formatCurrency(deduction.employeeAmount)}
@@ -480,31 +595,31 @@ export function SalaryCalculator() {
 
         <section className="rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
-            Employer Cost
+            {t("salary.employerCost.heading")}
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <MetricCard
-              label="Gross salary"
+              label={t("salary.employerCost.grossSalary")}
               value={formatCurrency(breakdown.grossMonthlySalary)}
             />
             <MetricCard
-              label="Total employer cost"
+              label={t("salary.metric.totalEmployerCost.term")}
               value={formatCurrency(breakdown.totalEmployerCost)}
             />
           </div>
 
           <div className="mt-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Employer Contributions
+              {t("salary.employerCost.contributions")}
             </p>
             <div className="mt-3 divide-y divide-border">
               {breakdown.employerContributions.map((contribution) => (
                 <div
-                  key={contribution.label}
+                  key={contribution.labelKey}
                   className="flex items-center justify-between py-2.5 text-sm"
                 >
                   <span className="font-medium text-(--foreground)">
-                    {contribution.label}
+                    {t(contribution.labelKey)}
                   </span>
                   <span className="tabular-nums text-(--foreground)">
                     {formatCurrency(contribution.employerAmount)}
@@ -518,15 +633,15 @@ export function SalaryCalculator() {
         <section className="rounded-3xl border border-border bg-card/75 p-6">
           <details>
             <summary className="cursor-pointer text-sm font-medium uppercase tracking-[0.2em] text-primary">
-              Annualised Projection
+              {t("salary.annualised.heading")}
             </summary>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <MetricCard
-                label="Annual net take-home"
+                label={t("salary.annualised.netTakeHome")}
                 value={formatCurrency(annualProjection.netAnnualSalary)}
               />
               <MetricCard
-                label="Annual employer cost"
+                label={t("salary.annualised.employerCost")}
                 value={formatCurrency(annualProjection.totalEmployerCost)}
               />
             </div>
@@ -534,16 +649,16 @@ export function SalaryCalculator() {
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  Annual Deductions
+                  {t("salary.annualised.deductions")}
                 </p>
                 <div className="mt-3 divide-y divide-border">
                   {annualProjection.employeeDeductions.map((d) => (
                     <div
-                      key={d.label}
+                      key={d.labelKey}
                       className="flex items-center justify-between py-2.5 text-sm"
                     >
                       <span className="font-medium text-(--foreground)">
-                        {d.label}
+                        {t(d.labelKey)}
                       </span>
                       <span className="tabular-nums text-(--foreground)">
                         -{formatCurrency(d.employeeAmount)}
@@ -554,16 +669,16 @@ export function SalaryCalculator() {
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  Annual Employer Contributions
+                  {t("salary.annualised.employerContributions")}
                 </p>
                 <div className="mt-3 divide-y divide-border">
                   {annualProjection.employerContributions.map((c) => (
                     <div
-                      key={c.label}
+                      key={c.labelKey}
                       className="flex items-center justify-between py-2.5 text-sm"
                     >
                       <span className="font-medium text-(--foreground)">
-                        {c.label}
+                        {t(c.labelKey)}
                       </span>
                       <span className="tabular-nums text-(--foreground)">
                         {formatCurrency(c.employerAmount)}
@@ -577,10 +692,7 @@ export function SalaryCalculator() {
         </section>
 
         <p className="text-sm leading-6 text-muted-foreground">
-          This calculator uses the latest published EPF, SOCSO, EIS, PCB, and
-          Lindung24 rate schedules. Results are planning guidance, not official
-          payroll advice. Always verify with the latest statutory schedules
-          published by KWSP, PERKESO, and LHDN.
+          {t("salary.disclaimer")}
         </p>
 
         <MetricGlossary />
@@ -593,14 +705,14 @@ export function SalaryCalculator() {
           className="grid gap-4 p-6"
         >
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
-          Salary Projection
+          {t("salary.projection.heading")}
         </p>
 
         <CalculatorField
           errorMessage={projectionErrors.projectionYears}
-          helperText="How many years to project ahead, between 1 and 40."
+          helperText={t("salary.projection.years.helper")}
           inputId="projectionYears"
-          label="Projection years"
+          label={t("salary.projection.years.label")}
         >
           <Input
             id="projectionYears"
@@ -618,13 +730,15 @@ export function SalaryCalculator() {
         </CalculatorField>
 
         <div>
-          <p className="font-semibold text-(--foreground)">Increment mode</p>
+          <p className="font-semibold text-(--foreground)">
+            {t("salary.projection.incrementMode")}
+          </p>
           <div className="mt-2 flex flex-wrap gap-3">
             {SALARY_INCREMENT_MODES.map((mode) => (
               <ModeButton
                 key={mode}
                 isActive={projectionValues.incrementMode === mode}
-                label={INCREMENT_MODE_LABELS[mode]}
+                label={t(incrementModeLabelKeys[mode])}
                 onClick={() => handleProjectionChange("incrementMode", mode)}
               />
             ))}
@@ -639,9 +753,9 @@ export function SalaryCalculator() {
         {projectionValues.incrementMode === "percentage" ? (
           <CalculatorField
             errorMessage={projectionErrors.annualIncrementRate}
-            helperText="Year-over-year salary growth applied from year 2 onward."
+            helperText={t("salary.projection.annualIncrementRate.helper")}
             inputId="annualIncrementRate"
-            label="Annual increment rate (%)"
+            label={t("salary.projection.annualIncrementRate.label")}
           >
             <Input
               id="annualIncrementRate"
@@ -664,9 +778,9 @@ export function SalaryCalculator() {
         {projectionValues.incrementMode === "fixed-amount" ? (
           <CalculatorField
             errorMessage={projectionErrors.fixedAnnualIncrement}
-            helperText="Fixed ringgit amount added once per year from year 2 onward."
+            helperText={t("salary.projection.fixedAnnualIncrement.helper")}
             inputId="fixedAnnualIncrement"
-            label="Fixed annual increment (RM)"
+            label={t("salary.projection.fixedAnnualIncrement.label")}
           >
             <Input
               id="fixedAnnualIncrement"
@@ -687,9 +801,11 @@ export function SalaryCalculator() {
         ) : null}
 
         <div>
-          <p className="font-semibold text-(--foreground)">One-off increments</p>
+          <p className="font-semibold text-(--foreground)">
+            {t("salary.projection.oneOff")}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Optional salary bumps anchored to a specific career year.
+            {t("salary.projection.oneOffHelper")}
           </p>
 
           {projectionValues.oneOffIncrements.length > 0 ? (
@@ -704,7 +820,7 @@ export function SalaryCalculator() {
                       htmlFor={`oneOff-${index}-year`}
                       className="font-semibold text-(--foreground)"
                     >
-                      Year
+                      {t("salary.projection.year")}
                     </Label>
                     <Input
                       id={`oneOff-${index}-year`}
@@ -730,7 +846,7 @@ export function SalaryCalculator() {
                       htmlFor={`oneOff-${index}-type`}
                       className="font-semibold text-(--foreground)"
                     >
-                      Type
+                      {t("salary.projection.type")}
                     </Label>
                     <select
                       id={`oneOff-${index}-type`}
@@ -747,7 +863,7 @@ export function SalaryCalculator() {
                     >
                       {ONE_OFF_INCREMENT_TYPES.map((type) => (
                         <option key={type} value={type}>
-                          {ONE_OFF_TYPE_LABELS[type]}
+                          {t(oneOffTypeLabelKeys[type])}
                         </option>
                       ))}
                     </select>
@@ -763,7 +879,7 @@ export function SalaryCalculator() {
                       htmlFor={`oneOff-${index}-value`}
                       className="font-semibold text-(--foreground)"
                     >
-                      Value
+                      {t("salary.projection.value")}
                     </Label>
                     <Input
                       id={`oneOff-${index}-value`}
@@ -788,10 +904,13 @@ export function SalaryCalculator() {
                     type="button"
                     variant="outline"
                     onClick={() => handleRemoveOneOff(index)}
-                    aria-label={`Remove one-off increment ${index + 1}`}
+                    aria-label={t("salary.projection.removeOneOffAria").replace(
+                      "{index}",
+                      String(index + 1),
+                    )}
                     className="h-auto rounded-full border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
                   >
-                    Remove
+                    {t("salary.projection.remove")}
                   </Button>
                 </div>
               ))}
@@ -804,7 +923,7 @@ export function SalaryCalculator() {
             onClick={handleAddOneOff}
             className="mt-3 h-auto rounded-full border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Add one-off increment
+            {t("salary.projection.addOneOff")}
           </Button>
         </div>
 
@@ -813,7 +932,7 @@ export function SalaryCalculator() {
             type="submit"
             className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
-            Calculate projection
+            {t("salary.projection.calculate")}
           </Button>
           <Button
             type="button"
@@ -821,7 +940,7 @@ export function SalaryCalculator() {
             onClick={handleProjectionReset}
             className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Reset projection
+            {t("salary.projection.reset")}
           </Button>
         </div>
         </form>
@@ -831,19 +950,19 @@ export function SalaryCalculator() {
             <div className="p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <MetricCard
-                  label="Final-year gross monthly salary"
+                  label={t("salary.projection.finalGross")}
                   value={formatCurrency(projectionResult.finalGrossMonthlySalary)}
                 />
                 <MetricCard
-                  label="Final-year net monthly salary"
+                  label={t("salary.projection.finalNet")}
                   value={formatCurrency(projectionResult.finalNetMonthlySalary)}
                 />
                 <MetricCard
-                  label="Cumulative net salary"
+                  label={t("salary.projection.cumulativeNet")}
                   value={formatCurrency(projectionResult.cumulativeNetSalary)}
                 />
                 <MetricCard
-                  label="Cumulative employer cost"
+                  label={t("salary.projection.cumulativeEmployerCost")}
                   value={formatCurrency(projectionResult.cumulativeEmployerCost)}
                 />
               </div>
@@ -852,20 +971,24 @@ export function SalaryCalculator() {
             <div className="p-6">
               <details>
                 <summary className="cursor-pointer text-sm font-medium uppercase tracking-[0.2em] text-primary">
-                  Yearly Salary Projection
+                  {t("salary.projection.yearlyHeading")}
                 </summary>
                 <div className="mt-4 overflow-x-auto">
                 <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                   <thead>
                     <tr className="text-muted-foreground">
-                      <th className="pb-2 pr-4 font-medium">Year</th>
                       <th className="pb-2 pr-4 font-medium">
-                        Gross monthly salary
+                        {t("salary.projection.table.year")}
                       </th>
                       <th className="pb-2 pr-4 font-medium">
-                        Net monthly salary
+                        {t("salary.projection.table.grossMonthlySalary")}
                       </th>
-                      <th className="pb-2 font-medium">Total employer cost</th>
+                      <th className="pb-2 pr-4 font-medium">
+                        {t("salary.projection.table.netMonthlySalary")}
+                      </th>
+                      <th className="pb-2 font-medium">
+                        {t("salary.projection.table.totalEmployerCost")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -945,20 +1068,22 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
 }
 
 function MetricGlossary() {
+  const t = useTranslations();
+
   return (
     <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="cursor-pointer text-sm font-medium uppercase tracking-[0.2em] text-primary">
-          What do these numbers mean?
+          {t("common.whatDoTheseNumbersMean")}
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          {metricDefinitions.map(({ term, definition }) => (
-            <div key={term}>
+          {metricDefinitionKeys.map(({ termKey, definitionKey }) => (
+            <div key={termKey}>
               <dt className="text-sm font-semibold text-(--foreground)">
-                {term}
+                {t(termKey)}
               </dt>
               <dd className="mt-1 text-sm leading-6 text-muted-foreground">
-                {definition}
+                {t(definitionKey)}
               </dd>
             </div>
           ))}

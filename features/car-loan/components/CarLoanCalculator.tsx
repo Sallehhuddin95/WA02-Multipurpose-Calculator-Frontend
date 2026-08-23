@@ -1,20 +1,31 @@
 "use client";
 
-import React, { useState, type FormEvent, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { carLoanFormSchema } from "@/features/car-loan/schemas/car-loan-form";
+import { createCarLoanFormSchema } from "@/features/car-loan/schemas/car-loan-form";
 import { projectCarLoan } from "@/features/car-loan/services/project-car-loan";
 import type {
   CarLoanFormValues,
   CarLoanProjectionResult,
 } from "@/features/car-loan/types/car-loan";
+import { usePersistedState } from "@/hooks/use-persisted-state";
+import { createTranslator, type MessageKey } from "@/lib/i18n/messages";
+import { useTranslations } from "@/lib/i18n/use-i18n";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatPercentage } from "@/utils/format-percentage";
 
 type FieldErrorMap = Partial<Record<keyof CarLoanFormValues, string>>;
+
+const STORAGE_KEY = "car-loan:form:v1";
 
 const defaultValues: CarLoanFormValues = {
   inputMode: "vehicle-price",
@@ -29,44 +40,48 @@ const defaultValues: CarLoanFormValues = {
   earlySettlementMonth: 24,
 };
 
-const metricDefinitions: ReadonlyArray<{ term: string; definition: string }> = [
+const formSchema = createCarLoanFormSchema(createTranslator("en"));
+
+function validateCarLoanForm(value: unknown): CarLoanFormValues | null {
+  const parsed = formSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+const metricDefinitionKeys: ReadonlyArray<{
+  termKey: MessageKey;
+  definitionKey: MessageKey;
+}> = [
   {
-    term: "Financed principal",
-    definition:
-      "The amount financed after any down payment, before interest is added.",
+    termKey: "carLoan.metric.financedPrincipal.term",
+    definitionKey: "carLoan.metric.financedPrincipal.definition",
   },
   {
-    term: "Total interest",
-    definition:
-      "The total interest cost over the full loan term for the selected rate type.",
+    termKey: "carLoan.metric.totalInterest.term",
+    definitionKey: "carLoan.metric.totalInterest.definition",
   },
   {
-    term: "Total repayable",
-    definition: "Financed principal plus total interest across the full term.",
+    termKey: "carLoan.metric.totalRepayable.term",
+    definitionKey: "carLoan.metric.totalRepayable.definition",
   },
   {
-    term: "Monthly instalment",
-    definition: "The scheduled amount due each month for the full loan term.",
+    termKey: "carLoan.metric.monthlyInstalment.term",
+    definitionKey: "carLoan.metric.monthlyInstalment.definition",
   },
   {
-    term: "Paid to date",
-    definition:
-      "How much you would have paid in instalments by the selected settlement month.",
+    termKey: "carLoan.metric.paidToDate.term",
+    definitionKey: "carLoan.metric.paidToDate.definition",
   },
   {
-    term: "Earned interest",
-    definition:
-      "Under the fixed-rate Rule of 78 model, the portion of total interest considered already earned by the lender at the settlement month.",
+    termKey: "carLoan.metric.earnedInterest.term",
+    definitionKey: "carLoan.metric.earnedInterest.definition",
   },
   {
-    term: "Interest rebate",
-    definition:
-      "Under the fixed-rate Rule of 78 model, the portion of interest not yet earned that is credited back to you at settlement.",
+    termKey: "carLoan.metric.interestRebate.term",
+    definitionKey: "carLoan.metric.interestRebate.definition",
   },
   {
-    term: "Settlement amount",
-    definition:
-      "What you would need to pay the lender to close the loan at the selected month: the outstanding balance under variable rate, or the Rule of 78 result under fixed rate.",
+    termKey: "carLoan.metric.settlementAmount.term",
+    definitionKey: "carLoan.metric.settlementAmount.definition",
   },
 ];
 
@@ -75,10 +90,26 @@ function getInitialProjection(): CarLoanProjectionResult {
 }
 
 export function CarLoanCalculator() {
-  const [values, setValues] = useState<CarLoanFormValues>(defaultValues);
+  const t = useTranslations();
+  const [values, setValues, { reset, isHydrated }] = usePersistedState(
+    STORAGE_KEY,
+    defaultValues,
+    validateCarLoanForm,
+  );
   const [errors, setErrors] = useState<FieldErrorMap>({});
   const [projection, setProjection] =
     useState<CarLoanProjectionResult>(getInitialProjection);
+
+  const recomputedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isHydrated || recomputedRef.current) {
+      return;
+    }
+
+    recomputedRef.current = true;
+    setProjection(projectCarLoan(values));
+  }, [isHydrated, values]);
 
   function handleValueChange<K extends keyof CarLoanFormValues>(
     key: K,
@@ -91,7 +122,7 @@ export function CarLoanCalculator() {
   }
 
   function handleReset() {
-    setValues(defaultValues);
+    reset();
     setErrors({});
     setProjection(getInitialProjection());
   }
@@ -99,7 +130,7 @@ export function CarLoanCalculator() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedValues = carLoanFormSchema.safeParse(values);
+    const parsedValues = createCarLoanFormSchema(t).safeParse(values);
 
     if (!parsedValues.success) {
       const nextErrors: FieldErrorMap = {};
@@ -129,17 +160,17 @@ export function CarLoanCalculator() {
       >
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            Input method
+            {t("carLoan.field.inputMethod")}
           </legend>
           <div className="mt-3 flex flex-wrap gap-3">
             <ModeButton
               isActive={values.inputMode === "vehicle-price"}
-              label="Vehicle price and down payment"
+              label={t("carLoan.mode.vehiclePrice")}
               onClick={() => handleValueChange("inputMode", "vehicle-price")}
             />
             <ModeButton
               isActive={values.inputMode === "financed-principal"}
-              label="Financed principal directly"
+              label={t("carLoan.mode.financedPrincipal")}
               onClick={() =>
                 handleValueChange("inputMode", "financed-principal")
               }
@@ -149,25 +180,22 @@ export function CarLoanCalculator() {
 
         <fieldset>
           <legend className="text-(--foreground) text-sm font-semibold">
-            Rate type
+            {t("carLoan.field.rateType")}
           </legend>
           <div className="mt-3 flex flex-wrap gap-3">
             <ModeButton
               isActive={values.rateMode === "variable-rate"}
-              label="Variable rate (reducing balance)"
+              label={t("carLoan.mode.variableRate")}
               onClick={() => handleValueChange("rateMode", "variable-rate")}
             />
             <ModeButton
               isActive={values.rateMode === "fixed-rate"}
-              label="Fixed rate (Rule of 78, legacy)"
+              label={t("carLoan.mode.fixedRate")}
               onClick={() => handleValueChange("rateMode", "fixed-rate")}
             />
           </div>
           <p className="text-muted-foreground mt-2 text-sm leading-6">
-            Variable rate reflects the reducing-balance method required for new
-            hire-purchase agreements under the Hire-Purchase (Amendment) Act
-            2026. Fixed rate is kept for comparing against an older-style
-            flat-rate agreement.
+            {t("carLoan.rateHelp")}
           </p>
         </fieldset>
 
@@ -175,9 +203,9 @@ export function CarLoanCalculator() {
           <div className="grid gap-5 md:grid-cols-2">
             <CalculatorField
               errorMessage={errors.vehiclePrice}
-              helperText="On-the-road vehicle cost before down payment reduction."
+              helperText={t("carLoan.field.vehiclePrice.helper")}
               inputId="vehiclePrice"
-              label="Vehicle price"
+              label={t("carLoan.field.vehiclePrice.label")}
             >
               <Input
                 id="vehiclePrice"
@@ -195,9 +223,9 @@ export function CarLoanCalculator() {
 
             <CalculatorField
               errorMessage={errors.downPayment}
-              helperText="Cash paid up front before financing begins."
+              helperText={t("carLoan.field.downPayment.helper")}
               inputId="downPayment"
-              label="Down payment"
+              label={t("carLoan.field.downPayment.label")}
             >
               <Input
                 id="downPayment"
@@ -216,9 +244,9 @@ export function CarLoanCalculator() {
         ) : (
           <CalculatorField
             errorMessage={errors.financedPrincipal}
-            helperText="Use this when you already know the exact financed amount from the bank or dealer."
+            helperText={t("carLoan.field.financedPrincipal.helper")}
             inputId="financedPrincipal"
-            label="Financed principal"
+            label={t("carLoan.field.financedPrincipal.label")}
           >
             <Input
               id="financedPrincipal"
@@ -242,9 +270,9 @@ export function CarLoanCalculator() {
           {values.rateMode === "variable-rate" ? (
             <CalculatorField
               errorMessage={errors.variableAnnualInterestRate}
-              helperText="Effective Interest Rate (EIR) under the reducing-balance method."
+              helperText={t("carLoan.field.variableAnnualInterestRate.helper")}
               inputId="variableAnnualInterestRate"
-              label="Annual interest rate (EIR) (%)"
+              label={t("carLoan.field.variableAnnualInterestRate.label")}
             >
               <Input
                 id="variableAnnualInterestRate"
@@ -265,9 +293,9 @@ export function CarLoanCalculator() {
           ) : (
             <CalculatorField
               errorMessage={errors.fixedAnnualInterestRate}
-              helperText="Flat annual interest rate used across the full term."
+              helperText={t("carLoan.field.fixedAnnualInterestRate.helper")}
               inputId="fixedAnnualInterestRate"
-              label="Flat annual interest rate (%)"
+              label={t("carLoan.field.fixedAnnualInterestRate.label")}
             >
               <Input
                 id="fixedAnnualInterestRate"
@@ -289,9 +317,9 @@ export function CarLoanCalculator() {
 
           <CalculatorField
             errorMessage={errors.tenureYears}
-            helperText="Whole number of years."
+            helperText={t("carLoan.field.tenureYears.helper")}
             inputId="tenureYears"
-            label="Tenure (years)"
+            label={t("carLoan.field.tenureYears.label")}
           >
             <Input
               id="tenureYears"
@@ -318,16 +346,16 @@ export function CarLoanCalculator() {
             className="text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background h-4 w-4 rounded border-border"
           />
           <span className="text-(--foreground) text-sm font-semibold">
-            I want to check an early settlement estimate
+            {t("carLoan.earlySettlementCheckbox")}
           </span>
         </label>
 
         {values.earlySettlementEnabled ? (
           <CalculatorField
             errorMessage={errors.earlySettlementMonth}
-            helperText="Month number used for the settlement estimate."
+            helperText={t("carLoan.field.earlySettlementMonth.helper")}
             inputId="earlySettlementMonth"
-            label="Early settlement month"
+            label={t("carLoan.field.earlySettlementMonth.label")}
           >
             <Input
               id="earlySettlementMonth"
@@ -352,7 +380,7 @@ export function CarLoanCalculator() {
             type="submit"
             className="h-auto rounded-full px-5 py-3 text-sm font-semibold shadow-none"
           >
-            Calculate loan
+            {t("carLoan.button.calculate")}
           </Button>
           <Button
             type="button"
@@ -360,7 +388,7 @@ export function CarLoanCalculator() {
             onClick={handleReset}
             className="h-auto rounded-full border-border bg-card px-5 py-3 text-sm font-semibold text-foreground shadow-none hover:border-primary hover:bg-card hover:text-foreground"
           >
-            Reset inputs
+            {t("common.reset")}
           </Button>
         </div>
       </form>
@@ -368,32 +396,48 @@ export function CarLoanCalculator() {
       <div className="grid gap-5">
         <section className="rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-            Loan Summary
+            {t("carLoan.summary.heading")}
           </p>
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Financed principal"
+              label={t("carLoan.metric.financedPrincipal.term")}
               value={formatCurrency(projection.loanSummary.financedPrincipal)}
             />
             <MetricCard
-              label="Total interest"
+              label={t("carLoan.metric.totalInterest.term")}
               value={formatCurrency(projection.loanSummary.totalInterest)}
             />
             <MetricCard
-              label="Total repayable"
+              label={t("carLoan.metric.totalRepayable.term")}
               value={formatCurrency(
                 projection.loanSummary.totalRepayableAmount,
               )}
             />
             <MetricCard
-              label="Monthly instalment"
+              label={t("carLoan.metric.monthlyInstalment.term")}
               value={formatCurrency(projection.loanSummary.monthlyInstalment)}
             />
           </div>
           <p className="text-muted-foreground mt-5 text-sm leading-6">
             {values.rateMode === "variable-rate"
-              ? `Based on ${formatPercentage(values.variableAnnualInterestRate)} EIR under the reducing-balance method over ${projection.loanSummary.totalMonths} months.`
-              : `Based on ${formatPercentage(values.fixedAnnualInterestRate)} flat annual interest over ${projection.loanSummary.totalMonths} months.`}
+              ? t("carLoan.summary.basis.variable")
+                  .replace(
+                    "{rate}",
+                    formatPercentage(values.variableAnnualInterestRate),
+                  )
+                  .replace(
+                    "{months}",
+                    String(projection.loanSummary.totalMonths),
+                  )
+              : t("carLoan.summary.basis.fixed")
+                  .replace(
+                    "{rate}",
+                    formatPercentage(values.fixedAnnualInterestRate),
+                  )
+                  .replace(
+                    "{months}",
+                    String(projection.loanSummary.totalMonths),
+                  )}
           </p>
         </section>
 
@@ -402,29 +446,32 @@ export function CarLoanCalculator() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
-                  Early Settlement Estimate
+                  {t("carLoan.settlement.heading")}
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold">
-                  Month {projection.settlement.summary.settlementMonth}
+                  {t("carLoan.settlement.monthHeading").replace(
+                    "{month}",
+                    String(projection.settlement.summary.settlementMonth),
+                  )}
                 </h2>
               </div>
               <div className="bg-accent text-accent-foreground rounded-2xl px-4 py-3 text-sm">
                 {projection.settlement.rateMode === "variable-rate"
-                  ? "Outstanding-balance settlement (reducing balance)"
-                  : "Rule of 78 style rebate projection"}
+                  ? t("carLoan.settlement.variableBadge")
+                  : t("carLoan.settlement.fixedBadge")}
               </div>
             </div>
 
             {projection.settlement.rateMode === "variable-rate" ? (
               <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <MetricCard
-                  label="Paid to date"
+                  label={t("carLoan.metric.paidToDate.term")}
                   value={formatCurrency(
                     projection.settlement.summary.totalPaidToDate,
                   )}
                 />
                 <MetricCard
-                  label="Settlement amount"
+                  label={t("carLoan.metric.settlementAmount.term")}
                   value={formatCurrency(
                     projection.settlement.summary.projectedSettlementAmount,
                   )}
@@ -433,25 +480,25 @@ export function CarLoanCalculator() {
             ) : (
               <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <MetricCard
-                  label="Paid to date"
+                  label={t("carLoan.metric.paidToDate.term")}
                   value={formatCurrency(
                     projection.settlement.summary.totalPaidToDate,
                   )}
                 />
                 <MetricCard
-                  label="Earned interest"
+                  label={t("carLoan.metric.earnedInterest.term")}
                   value={formatCurrency(
                     projection.settlement.summary.earnedInterest,
                   )}
                 />
                 <MetricCard
-                  label="Interest rebate"
+                  label={t("carLoan.metric.interestRebate.term")}
                   value={formatCurrency(
                     projection.settlement.summary.unearnedInterestRebate,
                   )}
                 />
                 <MetricCard
-                  label="Settlement amount"
+                  label={t("carLoan.metric.settlementAmount.term")}
                   value={formatCurrency(
                     projection.settlement.summary.projectedSettlementAmount,
                   )}
@@ -461,8 +508,8 @@ export function CarLoanCalculator() {
 
             <p className="text-muted-foreground mt-5 text-sm leading-6">
               {projection.settlement.rateMode === "variable-rate"
-                ? "Under the reducing-balance method, the settlement amount is simply the outstanding loan balance at this month, not a lender-issued payoff quote."
-                : "This estimate applies the documented Rule of 78 weighting from the spec and should be treated as planning guidance rather than a lender-issued statement."}
+                ? t("carLoan.settlement.footer.variable")
+                : t("carLoan.settlement.footer.fixed")}
             </p>
           </section>
         ) : null}
@@ -474,20 +521,22 @@ export function CarLoanCalculator() {
 }
 
 function MetricGlossary() {
+  const t = useTranslations();
+
   return (
     <section className="rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
-          What do these numbers mean?
+          {t("common.whatDoTheseNumbersMean")}
         </summary>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          {metricDefinitions.map(({ term, definition }) => (
-            <div key={term}>
+          {metricDefinitionKeys.map(({ termKey, definitionKey }) => (
+            <div key={termKey}>
               <dt className="text-(--foreground) text-sm font-semibold">
-                {term}
+                {t(termKey)}
               </dt>
               <dd className="text-muted-foreground mt-1 text-sm leading-6">
-                {definition}
+                {t(definitionKey)}
               </dd>
             </div>
           ))}
