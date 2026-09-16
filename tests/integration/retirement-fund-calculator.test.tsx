@@ -40,7 +40,7 @@ describe("RetirementFundCalculator", () => {
     ).toBeInTheDocument();
 
     await user.click(
-      screen.getByRole("button", { name: /fixed ringgit increase/i }),
+      screen.getByRole("radio", { name: /fixed ringgit increase/i }),
     );
 
     expect(

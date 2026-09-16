@@ -11,6 +11,7 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SegmentedControl } from "@/components/SegmentedControl";
 import {
   createRetirementAccumulationFormSchema,
   createRetirementDrawdownFormSchema,
@@ -322,7 +323,7 @@ export function RetirementFundCalculator() {
         <form
           noValidate
           onSubmit={handleAccumulationSubmit}
-          className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
+          className="grid min-w-0 content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-4 sm:p-6"
         >
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("retirement.sectionA")}
@@ -424,29 +425,26 @@ export function RetirementFundCalculator() {
             </CalculatorField>
           </div>
 
-          <div>
-            <p className="text-(--foreground) text-sm font-semibold">
-              {t("retirement.salaryGrowthMode")}
-            </p>
-            <div className="mt-2 flex flex-wrap gap-3">
-              <ModeButton
-                isActive={accumulationValues.salaryGrowthMode === "percentage"}
-                label={t(salaryGrowthModeLabelKeys.percentage)}
-                onClick={() =>
-                  handleAccumulationChange("salaryGrowthMode", "percentage")
-                }
-              />
-              <ModeButton
-                isActive={
-                  accumulationValues.salaryGrowthMode === "fixed-amount"
-                }
-                label={t(salaryGrowthModeLabelKeys["fixed-amount"])}
-                onClick={() =>
-                  handleAccumulationChange("salaryGrowthMode", "fixed-amount")
-                }
-              />
-            </div>
-          </div>
+          <SegmentedControl
+            label={t("retirement.salaryGrowthMode")}
+            onValueChange={(next) =>
+              handleAccumulationChange(
+                "salaryGrowthMode",
+                next as typeof accumulationValues.salaryGrowthMode,
+              )
+            }
+            options={[
+              {
+                label: t(salaryGrowthModeLabelKeys.percentage),
+                value: "percentage",
+              },
+              {
+                label: t(salaryGrowthModeLabelKeys["fixed-amount"]),
+                value: "fixed-amount",
+              },
+            ]}
+            value={accumulationValues.salaryGrowthMode}
+          />
 
           {accumulationValues.salaryGrowthMode === "percentage" ? (
             <CalculatorField
@@ -642,7 +640,7 @@ export function RetirementFundCalculator() {
         <form
           noValidate
           onSubmit={handleDrawdownSubmit}
-          className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
+          className="grid min-w-0 content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-4 sm:p-6"
         >
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("retirement.sectionB")}
@@ -941,29 +939,6 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   );
 }
 
-interface ModeButtonProps {
-  isActive: boolean;
-  label: string;
-  onClick: () => void;
-}
-
-function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
-  return (
-    <Button
-      type="button"
-      variant={isActive ? "default" : "outline"}
-      onClick={onClick}
-      className={[
-        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
-        isActive
-          ? ""
-          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
-      ].join(" ")}
-    >
-      {label}
-    </Button>
-  );
-}
 
 interface ToggleTableButtonProps {
   isOpen: boolean;

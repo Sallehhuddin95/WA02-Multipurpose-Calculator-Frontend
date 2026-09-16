@@ -6,7 +6,7 @@ export default async function CompoundInterestPage() {
 
   return (
     <main className="mx-auto w-[min(1180px,calc(100%_-_2rem))] pb-16 pt-10 md:pb-24 md:pt-14">
-      <section className="border border-border bg-card/80 shadow-elevated backdrop-blur-lg rounded-4xl p-8 md:p-10">
+      <section className="border border-border bg-card/80 shadow-elevated backdrop-blur-lg rounded-4xl p-5 sm:p-8 md:p-10">
         <p className="text-primary text-sm font-medium uppercase tracking-[0.22em]">
           {t("route.compoundInterest.kicker")}
         </p>

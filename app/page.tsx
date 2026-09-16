@@ -109,7 +109,7 @@ export default async function HomePage() {
       </section>
 
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div className="rounded-4xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-lg md:p-10">
+        <div className="rounded-4xl border border-border bg-card/80 p-5 shadow-elevated backdrop-blur-lg sm:p-8 md:p-10">
           <div className="mb-8">
             <p className="text-primary mb-4 text-sm font-medium uppercase tracking-[0.22em]">
               {t("home.allShipped")}
@@ -143,7 +143,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <aside className="rounded-4xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-lg md:p-10">
+        <aside className="rounded-4xl border border-border bg-card/80 p-5 shadow-elevated backdrop-blur-lg sm:p-8 md:p-10">
           <AboutCard t={t} />
         </aside>
       </section>

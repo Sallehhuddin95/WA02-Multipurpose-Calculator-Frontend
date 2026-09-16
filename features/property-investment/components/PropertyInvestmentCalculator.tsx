@@ -11,6 +11,7 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SegmentedControl } from "@/components/SegmentedControl";
 import { createPropertyInvestmentFormSchema } from "@/features/property-investment/schemas/property-investment-form";
 import { projectPropertyInvestment } from "@/features/property-investment/services/project-property-investment";
 import type {
@@ -203,7 +204,7 @@ export function PropertyInvestmentCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
+        className="grid min-w-0 content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-4 sm:p-6"
       >
           <CalculatorField
             errorMessage={errors.purchasePrice}
@@ -225,23 +226,20 @@ export function PropertyInvestmentCalculator() {
           />
         </CalculatorField>
 
-        <fieldset>
-          <legend className="text-(--foreground) text-sm font-semibold">
-            {t("property.field.inputMethod")}
-          </legend>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <ModeButton
-              isActive={values.inputMode === "down-payment"}
-              label={t("property.mode.downPayment")}
-              onClick={() => handleValueChange("inputMode", "down-payment")}
-            />
-            <ModeButton
-              isActive={values.inputMode === "loan-principal"}
-              label={t("property.mode.loanPrincipal")}
-              onClick={() => handleValueChange("inputMode", "loan-principal")}
-            />
-          </div>
-        </fieldset>
+        <SegmentedControl
+          label={t("property.field.inputMethod")}
+          onValueChange={(next) =>
+            handleValueChange("inputMode", next as typeof values.inputMode)
+          }
+          options={[
+            { label: t("property.mode.downPayment"), value: "down-payment" },
+            {
+              label: t("property.mode.loanPrincipal"),
+              value: "loan-principal",
+            },
+          ]}
+          value={values.inputMode}
+        />
 
         {values.inputMode === "down-payment" ? (
           <CalculatorField
@@ -402,7 +400,7 @@ export function PropertyInvestmentCalculator() {
           </CalculatorField>
         </div>
 
-        <fieldset>
+        <fieldset className="min-w-0">
           <legend className="text-(--foreground) text-sm font-semibold">
             {t("property.field.expenses")}
           </legend>
@@ -593,41 +591,37 @@ export function PropertyInvestmentCalculator() {
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend className="text-(--foreground) text-sm font-semibold">
-            {t("property.field.insurance")}
-          </legend>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <ModeButton
-              isActive={values.insuranceType === "mrtt"}
-              label={t("property.mode.mrtt")}
-              onClick={() => handleValueChange("insuranceType", "mrtt")}
-            />
-            <ModeButton
-              isActive={values.insuranceType === "mltt"}
-              label={t("property.mode.mltt")}
-              onClick={() => handleValueChange("insuranceType", "mltt")}
-            />
-          </div>
+        <SegmentedControl
+          label={t("property.field.insurance")}
+          onValueChange={(next) =>
+            handleValueChange(
+              "insuranceType",
+              next as typeof values.insuranceType,
+            )
+          }
+          options={[
+            { label: t("property.mode.mrtt"), value: "mrtt" },
+            { label: t("property.mode.mltt"), value: "mltt" },
+          ]}
+          value={values.insuranceType}
+        />
 
-          {values.insuranceType === "mrtt" ? (
-            <>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <ModeButton
-                  isActive={values.mrttPaymentTreatment === "upfront"}
-                  label={t("property.mode.mrttUpfront")}
-                  onClick={() =>
-                    handleValueChange("mrttPaymentTreatment", "upfront")
-                  }
-                />
-                <ModeButton
-                  isActive={values.mrttPaymentTreatment === "financed"}
-                  label={t("property.mode.mrttFinanced")}
-                  onClick={() =>
-                    handleValueChange("mrttPaymentTreatment", "financed")
-                  }
-                />
-              </div>
+        {values.insuranceType === "mrtt" ? (
+          <>
+            <SegmentedControl
+              label={t("property.field.mrttPaymentTreatment")}
+              onValueChange={(next) =>
+                handleValueChange(
+                  "mrttPaymentTreatment",
+                  next as typeof values.mrttPaymentTreatment,
+                )
+              }
+              options={[
+                { label: t("property.mode.mrttUpfront"), value: "upfront" },
+                { label: t("property.mode.mrttFinanced"), value: "financed" },
+              ]}
+              value={values.mrttPaymentTreatment}
+            />
               <div className="mt-3">
                 <CalculatorField
                   errorMessage={errors.mrttCost}
@@ -676,26 +670,24 @@ export function PropertyInvestmentCalculator() {
               </CalculatorField>
             </div>
           )}
-        </fieldset>
 
-        <fieldset>
-          <legend className="text-(--foreground) text-sm font-semibold">
-            {t("property.field.exitValue")}
-          </legend>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <ModeButton
-              isActive={values.exitValueMode === "appreciation-rate"}
-              label={t("property.mode.appreciationRate")}
-              onClick={() =>
-                handleValueChange("exitValueMode", "appreciation-rate")
-              }
-            />
-            <ModeButton
-              isActive={values.exitValueMode === "exit-price"}
-              label={t("property.mode.exitPrice")}
-              onClick={() => handleValueChange("exitValueMode", "exit-price")}
-            />
-          </div>
+        <SegmentedControl
+          label={t("property.field.exitValue")}
+          onValueChange={(next) =>
+            handleValueChange(
+              "exitValueMode",
+              next as typeof values.exitValueMode,
+            )
+          }
+          options={[
+            {
+              label: t("property.mode.appreciationRate"),
+              value: "appreciation-rate",
+            },
+            { label: t("property.mode.exitPrice"), value: "exit-price" },
+          ]}
+          value={values.exitValueMode}
+        />
           <div className="mt-3">
             {values.exitValueMode === "appreciation-rate" ? (
               <CalculatorField
@@ -745,9 +737,8 @@ export function PropertyInvestmentCalculator() {
               </CalculatorField>
             )}
           </div>
-        </fieldset>
 
-        <fieldset>
+        <fieldset className="min-w-0">
           <legend className="text-(--foreground) text-sm font-semibold">
             {t("property.field.reitComparison")}
           </legend>
@@ -1174,26 +1165,3 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   );
 }
 
-interface ModeButtonProps {
-  isActive: boolean;
-  label: string;
-  onClick: () => void;
-}
-
-function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
-  return (
-    <Button
-      type="button"
-      variant={isActive ? "default" : "outline"}
-      onClick={onClick}
-      className={[
-        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
-        isActive
-          ? ""
-          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
-      ].join(" ")}
-    >
-      {label}
-    </Button>
-  );
-}

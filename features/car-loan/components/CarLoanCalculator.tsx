@@ -11,6 +11,7 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SegmentedControl } from "@/components/SegmentedControl";
 import { createCarLoanFormSchema } from "@/features/car-loan/schemas/car-loan-form";
 import { projectCarLoan } from "@/features/car-loan/services/project-car-loan";
 import type {
@@ -156,48 +157,37 @@ export function CarLoanCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
+        className="grid min-w-0 content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-4 sm:p-6"
       >
-        <fieldset>
-          <legend className="text-(--foreground) text-sm font-semibold">
-            {t("carLoan.field.inputMethod")}
-          </legend>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <ModeButton
-              isActive={values.inputMode === "vehicle-price"}
-              label={t("carLoan.mode.vehiclePrice")}
-              onClick={() => handleValueChange("inputMode", "vehicle-price")}
-            />
-            <ModeButton
-              isActive={values.inputMode === "financed-principal"}
-              label={t("carLoan.mode.financedPrincipal")}
-              onClick={() =>
-                handleValueChange("inputMode", "financed-principal")
-              }
-            />
-          </div>
-        </fieldset>
+        <SegmentedControl
+          label={t("carLoan.field.inputMethod")}
+          onValueChange={(next) =>
+            handleValueChange("inputMode", next as typeof values.inputMode)
+          }
+          options={[
+            { label: t("carLoan.mode.vehiclePrice"), value: "vehicle-price" },
+            {
+              label: t("carLoan.mode.financedPrincipal"),
+              value: "financed-principal",
+            },
+          ]}
+          value={values.inputMode}
+        />
 
-        <fieldset>
-          <legend className="text-(--foreground) text-sm font-semibold">
-            {t("carLoan.field.rateType")}
-          </legend>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <ModeButton
-              isActive={values.rateMode === "variable-rate"}
-              label={t("carLoan.mode.variableRate")}
-              onClick={() => handleValueChange("rateMode", "variable-rate")}
-            />
-            <ModeButton
-              isActive={values.rateMode === "fixed-rate"}
-              label={t("carLoan.mode.fixedRate")}
-              onClick={() => handleValueChange("rateMode", "fixed-rate")}
-            />
-          </div>
-          <p className="text-muted-foreground mt-2 text-sm leading-6">
-            {t("carLoan.rateHelp")}
-          </p>
-        </fieldset>
+        <SegmentedControl
+          label={t("carLoan.field.rateType")}
+          onValueChange={(next) =>
+            handleValueChange("rateMode", next as typeof values.rateMode)
+          }
+          options={[
+            { label: t("carLoan.mode.variableRate"), value: "variable-rate" },
+            { label: t("carLoan.mode.fixedRate"), value: "fixed-rate" },
+          ]}
+          value={values.rateMode}
+        />
+        <p className="text-muted-foreground -mt-3 text-sm leading-6">
+          {t("carLoan.rateHelp")}
+        </p>
 
         {values.inputMode === "vehicle-price" ? (
           <div className="grid gap-5 md:grid-cols-2">
@@ -593,26 +583,3 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   );
 }
 
-interface ModeButtonProps {
-  isActive: boolean;
-  label: string;
-  onClick: () => void;
-}
-
-function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
-  return (
-    <Button
-      type="button"
-      variant={isActive ? "default" : "outline"}
-      onClick={onClick}
-      className={[
-        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
-        isActive
-          ? ""
-          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
-      ].join(" ")}
-    >
-      {label}
-    </Button>
-  );
-}

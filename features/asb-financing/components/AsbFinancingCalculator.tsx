@@ -166,7 +166,7 @@ export function AsbFinancingCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
+        className="grid min-w-0 content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-4 sm:p-6"
       >
         <div className="grid gap-5 md:grid-cols-2">
           <CalculatorField
