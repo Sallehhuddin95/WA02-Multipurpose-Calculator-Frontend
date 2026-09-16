@@ -274,8 +274,8 @@ export function CompoundInterestCalculator() {
         </div>
       </form>
 
-      <div className="grid gap-5">
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+      <div className="grid min-w-0 gap-5">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("compound.summary.heading")}
           </p>
@@ -307,7 +307,7 @@ export function CompoundInterestCalculator() {
           </p>
         </section>
 
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">

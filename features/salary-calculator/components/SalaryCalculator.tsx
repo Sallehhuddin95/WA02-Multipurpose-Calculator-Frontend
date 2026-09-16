@@ -540,8 +540,8 @@ export function SalaryCalculator() {
         </div>
       </form>
 
-      <div className="grid gap-5">
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+      <div className="grid min-w-0 gap-5">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
             {t("salary.breakdown.heading")}
           </p>
@@ -593,7 +593,7 @@ export function SalaryCalculator() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
             {t("salary.employerCost.heading")}
           </p>
@@ -630,7 +630,7 @@ export function SalaryCalculator() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <details>
             <summary className="cursor-pointer text-sm font-medium uppercase tracking-[0.2em] text-primary">
               {t("salary.annualised.heading")}
@@ -698,7 +698,7 @@ export function SalaryCalculator() {
         <MetricGlossary />
       </div>
 
-      <section className="lg:col-span-2 overflow-hidden rounded-3xl border border-border bg-card/75 divide-y divide-border">
+      <section className="lg:col-span-2 min-w-0 overflow-hidden rounded-3xl border border-border bg-card/75 divide-y divide-border">
         <form
           noValidate
           onSubmit={handleProjectionSubmit}
@@ -1071,7 +1071,7 @@ function MetricGlossary() {
   const t = useTranslations();
 
   return (
-    <section className="rounded-3xl border border-border bg-card/75 p-6">
+    <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="cursor-pointer text-sm font-medium uppercase tracking-[0.2em] text-primary">
           {t("common.whatDoTheseNumbersMean")}

@@ -1,7 +1,7 @@
 ---
 description: "Expert Next.js architect for feature-driven App Router systems with TypeScript, TanStack Query, and layered testing"
 mode: subagent
-model: opencode/deepseek-v4-flash-max
+model: opencode-go/deepseek-v4-pro
 permission:
   edit: allow
   bash: allow

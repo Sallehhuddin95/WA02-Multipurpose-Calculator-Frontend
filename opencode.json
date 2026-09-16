@@ -1,14 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/deepseek-v4-flash-max",
+  "model": "opencode-go/deepseek-v4-flash",
   "default_agent": "build",
   "agents": {
     "build": {
-      "model": "opencode/deepseek-v4-flash-max",
+"model": "opencode-go/deepseek-v4-flash",
       "description": "Primary coding agent for complex reasoning and multi-file changes"
     },
     "plan": {
-      "model": "opencode/qwen-3.7-max",
+      "model": "opencode-go/qwen3.7-max",
       "description": "Architectural planning and system design"
     },
     "fast-edit": {
@@ -16,7 +16,7 @@
       "description": "Quick inline fixes, single-file edits, and docstrings"
     },
     "reviewer": {
-      "model": "opencode/minimax-m3",
+      "model": "opencode-go/minimax-m3",
       "description": "Lightweight code review and sanity checks",
       "mode": "subagent"
     }

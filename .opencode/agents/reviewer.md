@@ -1,7 +1,7 @@
 ---
 description: "Code review agent for correctness, regression risk, architecture compliance, security, and testing adequacy"
 mode: subagent
-model: opencode/deepseek-v4-flash-max
+model: opencode-go/deepseek-v4-flash
 permission:
   edit: deny
   bash: deny

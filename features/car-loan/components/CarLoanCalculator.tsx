@@ -393,8 +393,8 @@ export function CarLoanCalculator() {
         </div>
       </form>
 
-      <div className="grid gap-5">
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+      <div className="grid min-w-0 gap-5">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("carLoan.summary.heading")}
           </p>
@@ -442,7 +442,7 @@ export function CarLoanCalculator() {
         </section>
 
         {projection.settlement ? (
-          <section className="rounded-3xl border border-border bg-card/75 p-6">
+          <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
@@ -524,7 +524,7 @@ function MetricGlossary() {
   const t = useTranslations();
 
   return (
-    <section className="rounded-3xl border border-border bg-card/75 p-6">
+    <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           {t("common.whatDoTheseNumbersMean")}
