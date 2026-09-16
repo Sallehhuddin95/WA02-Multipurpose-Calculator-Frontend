@@ -56,6 +56,33 @@ describe("SalaryCalculator", () => {
     expect(screen.queryByText(/Opt in to EPF contributions/i)).not.toBeInTheDocument();
   });
 
+  it("hides the EPF rate fields for a foreign worker without the EPF opt-in", async () => {
+    const user = userEvent.setup();
+    render(<SalaryCalculator />);
+
+    expect(screen.getByLabelText(/employee epf rate/i)).toBeInTheDocument();
+
+    await user.click(screen.getByText("Foreign worker"));
+
+    expect(
+      screen.queryByLabelText(/employee epf rate/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/employer epf rate/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the EPF rate fields once a foreign worker opts in to EPF", async () => {
+    const user = userEvent.setup();
+    render(<SalaryCalculator />);
+
+    await user.click(screen.getByText("Foreign worker"));
+    await user.click(screen.getByText(/Opt in to EPF contributions/i));
+
+    expect(screen.getByLabelText(/employee epf rate/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/employer epf rate/i)).toBeInTheDocument();
+  });
+
   it("shows Lindung24 checkbox", () => {
     render(<SalaryCalculator />);
 

@@ -10,10 +10,10 @@ describe("RetirementFundCalculator", () => {
     render(<RetirementFundCalculator />);
 
     expect(
-      screen.getByText(/section a · retirement savings projection/i),
+      screen.getByText(/section a - retirement savings projection/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/section b · retirement fund longevity simulation/i),
+      screen.getByText(/section b - retirement fund longevity simulation/i),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/final capital/i).length).toBeGreaterThan(0);
     expect(

@@ -9,8 +9,8 @@ import React, {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { createPropertyInvestmentFormSchema } from "@/features/property-investment/schemas/property-investment-form";
 import { projectPropertyInvestment } from "@/features/property-investment/services/project-property-investment";
@@ -212,16 +212,13 @@ export function PropertyInvestmentCalculator() {
             inputId="purchasePrice"
             label={t("property.field.purchasePrice.label")}
           >
-          <Input
+          <NumericInput
             id="purchasePrice"
             name="purchasePrice"
-            type="number"
             min="0"
             step="1000"
             value={values.purchasePrice}
-            onChange={(event) =>
-              handleValueChange("purchasePrice", Number(event.target.value))
-            }
+            onValueChange={(next) => handleValueChange("purchasePrice", next)}
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
@@ -248,16 +245,13 @@ export function PropertyInvestmentCalculator() {
             inputId="downPayment"
             label={t("property.field.downPayment.label")}
           >
-            <Input
+            <NumericInput
               id="downPayment"
               name="downPayment"
-              type="number"
               min="0"
               step="1000"
               value={values.downPayment}
-              onChange={(event) =>
-                handleValueChange("downPayment", Number(event.target.value))
-              }
+              onValueChange={(next) => handleValueChange("downPayment", next)}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
@@ -268,16 +262,13 @@ export function PropertyInvestmentCalculator() {
             inputId="loanPrincipal"
             label={t("property.field.loanPrincipal.label")}
           >
-            <Input
+            <NumericInput
               id="loanPrincipal"
               name="loanPrincipal"
-              type="number"
               min="0"
               step="1000"
               value={values.loanPrincipal}
-              onChange={(event) =>
-                handleValueChange("loanPrincipal", Number(event.target.value))
-              }
+              onValueChange={(next) => handleValueChange("loanPrincipal", next)}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
@@ -290,18 +281,14 @@ export function PropertyInvestmentCalculator() {
             inputId="annualFinancingRate"
             label={t("property.field.annualFinancingRate.label")}
           >
-            <Input
+            <NumericInput
               id="annualFinancingRate"
               name="annualFinancingRate"
-              type="number"
               min="0"
               step="0.1"
               value={values.annualFinancingRate}
-              onChange={(event) =>
-                handleValueChange(
-                  "annualFinancingRate",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("annualFinancingRate", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -313,18 +300,14 @@ export function PropertyInvestmentCalculator() {
             inputId="financingTenureYears"
             label={t("property.field.financingTenureYears.label")}
           >
-            <Input
+            <NumericInput
               id="financingTenureYears"
               name="financingTenureYears"
-              type="number"
               min="1"
               step="1"
               value={values.financingTenureYears}
-              onChange={(event) =>
-                handleValueChange(
-                  "financingTenureYears",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("financingTenureYears", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -337,18 +320,14 @@ export function PropertyInvestmentCalculator() {
           inputId="holdingPeriodYears"
           label={t("property.field.holdingPeriodYears.label")}
         >
-          <Input
+          <NumericInput
             id="holdingPeriodYears"
             name="holdingPeriodYears"
-            type="number"
             min="1"
             step="1"
             value={values.holdingPeriodYears}
-            onChange={(event) =>
-              handleValueChange(
-                "holdingPeriodYears",
-                Number(event.target.value),
-              )
+            onValueChange={(next) =>
+              handleValueChange("holdingPeriodYears", next)
             }
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
@@ -361,16 +340,13 @@ export function PropertyInvestmentCalculator() {
             inputId="monthlyRent"
             label={t("property.field.monthlyRent.label")}
           >
-            <Input
+            <NumericInput
               id="monthlyRent"
               name="monthlyRent"
-              type="number"
               min="0"
               step="50"
               value={values.monthlyRent}
-              onChange={(event) =>
-                handleValueChange("monthlyRent", Number(event.target.value))
-              }
+              onValueChange={(next) => handleValueChange("monthlyRent", next)}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
@@ -381,19 +357,15 @@ export function PropertyInvestmentCalculator() {
             inputId="occupancyRatePercent"
             label={t("property.field.occupancyRatePercent.label")}
           >
-            <Input
+            <NumericInput
               id="occupancyRatePercent"
               name="occupancyRatePercent"
-              type="number"
               min="0"
               max="100"
               step="1"
               value={values.occupancyRatePercent}
-              onChange={(event) =>
-                handleValueChange(
-                  "occupancyRatePercent",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("occupancyRatePercent", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -411,18 +383,14 @@ export function PropertyInvestmentCalculator() {
               inputId="monthlyMaintenanceAllowance"
               label={t("property.field.monthlyMaintenanceAllowance.label")}
             >
-              <Input
+              <NumericInput
                 id="monthlyMaintenanceAllowance"
                 name="monthlyMaintenanceAllowance"
-                type="number"
                 min="0"
                 step="50"
                 value={values.monthlyMaintenanceAllowance}
-                onChange={(event) =>
-                  handleValueChange(
-                    "monthlyMaintenanceAllowance",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("monthlyMaintenanceAllowance", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -434,18 +402,14 @@ export function PropertyInvestmentCalculator() {
               inputId="monthlySinkingFund"
               label={t("property.field.monthlySinkingFund.label")}
             >
-              <Input
+              <NumericInput
                 id="monthlySinkingFund"
                 name="monthlySinkingFund"
-                type="number"
                 min="0"
                 step="10"
                 value={values.monthlySinkingFund}
-                onChange={(event) =>
-                  handleValueChange(
-                    "monthlySinkingFund",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("monthlySinkingFund", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -457,18 +421,14 @@ export function PropertyInvestmentCalculator() {
               inputId="annualCukaiTaksiran"
               label={t("property.field.annualCukaiTaksiran.label")}
             >
-              <Input
+              <NumericInput
                 id="annualCukaiTaksiran"
                 name="annualCukaiTaksiran"
-                type="number"
                 min="0"
                 step="10"
                 value={values.annualCukaiTaksiran}
-                onChange={(event) =>
-                  handleValueChange(
-                    "annualCukaiTaksiran",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("annualCukaiTaksiran", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -480,18 +440,14 @@ export function PropertyInvestmentCalculator() {
               inputId="annualCukaiTanahOrPetak"
               label={t("property.field.annualCukaiTanahOrPetak.label")}
             >
-              <Input
+              <NumericInput
                 id="annualCukaiTanahOrPetak"
                 name="annualCukaiTanahOrPetak"
-                type="number"
                 min="0"
                 step="10"
                 value={values.annualCukaiTanahOrPetak}
-                onChange={(event) =>
-                  handleValueChange(
-                    "annualCukaiTanahOrPetak",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("annualCukaiTanahOrPetak", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -503,18 +459,14 @@ export function PropertyInvestmentCalculator() {
               inputId="annualIndahWaterCost"
               label={t("property.field.annualIndahWaterCost.label")}
             >
-              <Input
+              <NumericInput
                 id="annualIndahWaterCost"
                 name="annualIndahWaterCost"
-                type="number"
                 min="0"
                 step="10"
                 value={values.annualIndahWaterCost}
-                onChange={(event) =>
-                  handleValueChange(
-                    "annualIndahWaterCost",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("annualIndahWaterCost", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -526,18 +478,14 @@ export function PropertyInvestmentCalculator() {
               inputId="annualRepairAllowance"
               label={t("property.field.annualRepairAllowance.label")}
             >
-              <Input
+              <NumericInput
                 id="annualRepairAllowance"
                 name="annualRepairAllowance"
-                type="number"
                 min="0"
                 step="50"
                 value={values.annualRepairAllowance}
-                onChange={(event) =>
-                  handleValueChange(
-                    "annualRepairAllowance",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("annualRepairAllowance", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -549,18 +497,14 @@ export function PropertyInvestmentCalculator() {
               inputId="annualFireInsurance"
               label={t("property.field.annualFireInsurance.label")}
             >
-              <Input
+              <NumericInput
                 id="annualFireInsurance"
                 name="annualFireInsurance"
-                type="number"
                 min="0"
                 step="10"
                 value={values.annualFireInsurance}
-                onChange={(event) =>
-                  handleValueChange(
-                    "annualFireInsurance",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("annualFireInsurance", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -572,18 +516,14 @@ export function PropertyInvestmentCalculator() {
               inputId="annualOtherCosts"
               label={t("property.field.annualOtherCosts.label")}
             >
-              <Input
+              <NumericInput
                 id="annualOtherCosts"
                 name="annualOtherCosts"
-                type="number"
                 min="0"
                 step="10"
                 value={values.annualOtherCosts}
-                onChange={(event) =>
-                  handleValueChange(
-                    "annualOtherCosts",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("annualOtherCosts", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -629,16 +569,13 @@ export function PropertyInvestmentCalculator() {
                   inputId="mrttCost"
                   label={t("property.field.mrttCost.label")}
                 >
-                  <Input
+                  <NumericInput
                     id="mrttCost"
                     name="mrttCost"
-                    type="number"
                     min="0"
                     step="100"
                     value={values.mrttCost}
-                    onChange={(event) =>
-                      handleValueChange("mrttCost", Number(event.target.value))
-                    }
+                    onValueChange={(next) => handleValueChange("mrttCost", next)}
                     className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                   />
                 </CalculatorField>
@@ -652,18 +589,14 @@ export function PropertyInvestmentCalculator() {
                 inputId="annualMlttCost"
                 label={t("property.field.annualMlttCost.label")}
               >
-                <Input
+                <NumericInput
                   id="annualMlttCost"
                   name="annualMlttCost"
-                  type="number"
                   min="0"
                   step="50"
                   value={values.annualMlttCost}
-                  onChange={(event) =>
-                    handleValueChange(
-                      "annualMlttCost",
-                      Number(event.target.value),
-                    )
+                  onValueChange={(next) =>
+                    handleValueChange("annualMlttCost", next)
                   }
                   className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                 />
@@ -696,18 +629,14 @@ export function PropertyInvestmentCalculator() {
                 inputId="annualAppreciationRate"
                 label={t("property.field.annualAppreciationRate.label")}
               >
-                <Input
+                <NumericInput
                   id="annualAppreciationRate"
                   name="annualAppreciationRate"
-                  type="number"
                   min="0"
                   step="0.1"
                   value={values.annualAppreciationRate}
-                  onChange={(event) =>
-                    handleValueChange(
-                      "annualAppreciationRate",
-                      Number(event.target.value),
-                    )
+                  onValueChange={(next) =>
+                    handleValueChange("annualAppreciationRate", next)
                   }
                   className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                 />
@@ -719,18 +648,14 @@ export function PropertyInvestmentCalculator() {
                 inputId="expectedExitPrice"
                 label={t("property.field.expectedExitPrice.label")}
               >
-                <Input
+                <NumericInput
                   id="expectedExitPrice"
                   name="expectedExitPrice"
-                  type="number"
                   min="0"
                   step="1000"
                   value={values.expectedExitPrice}
-                  onChange={(event) =>
-                    handleValueChange(
-                      "expectedExitPrice",
-                      Number(event.target.value),
-                    )
+                  onValueChange={(next) =>
+                    handleValueChange("expectedExitPrice", next)
                   }
                   className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                 />
@@ -749,18 +674,14 @@ export function PropertyInvestmentCalculator() {
               inputId="reitInitialCapital"
               label={t("property.field.reitInitialCapital.label")}
             >
-              <Input
+              <NumericInput
                 id="reitInitialCapital"
                 name="reitInitialCapital"
-                type="number"
                 min="0"
                 step="1000"
                 value={values.reitInitialCapital}
-                onChange={(event) =>
-                  handleValueChange(
-                    "reitInitialCapital",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("reitInitialCapital", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -772,18 +693,14 @@ export function PropertyInvestmentCalculator() {
               inputId="reitAnnualReturnRate"
               label={t("property.field.reitAnnualReturnRate.label")}
             >
-              <Input
+              <NumericInput
                 id="reitAnnualReturnRate"
                 name="reitAnnualReturnRate"
-                type="number"
                 min="0"
                 step="0.1"
                 value={values.reitAnnualReturnRate}
-                onChange={(event) =>
-                  handleValueChange(
-                    "reitAnnualReturnRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("reitAnnualReturnRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />

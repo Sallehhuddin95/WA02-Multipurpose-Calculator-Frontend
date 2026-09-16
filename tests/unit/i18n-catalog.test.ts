@@ -51,7 +51,7 @@ describe("i18n catalog", () => {
     expect(tMs("nav.overview")).toBe("Laman Utama");
     expect(tMs("metadata.title")).toBe("Kalkulator Serba Guna");
     expect(tMs("route.carLoan.kicker")).toBe(
-      "Pinjaman Kereta dan Penyelesaian Awal",
+      "Pinjaman Kereta & Penyelesaian Awal",
     );
   });
 
@@ -61,5 +61,20 @@ describe("i18n catalog", () => {
     // The Malay catalog uses "tahun"/"bulan" without plural forms, matching
     // "1 tahun" and "3 tahun" alike.
     expect(tMs("nav.overview")).not.toContain("tahuns");
+  });
+
+  it("uses only plain hyphens in UI copy, never en/em dashes or middots", () => {
+    const forbidden = ["–", "—", "·"];
+
+    for (const catalog of [enMessages, msMessages]) {
+      for (const [key, value] of Object.entries(catalog)) {
+        for (const character of forbidden) {
+          expect(
+            value,
+            `messages key "${key}" contains a forbidden character "${character}"`,
+          ).not.toContain(character);
+        }
+      }
+    }
   });
 });

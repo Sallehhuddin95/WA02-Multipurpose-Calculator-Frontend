@@ -9,8 +9,8 @@ import React, {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { createCarLoanFormSchema } from "@/features/car-loan/schemas/car-loan-form";
 import { projectCarLoan } from "@/features/car-loan/services/project-car-loan";
@@ -197,16 +197,13 @@ export function CarLoanCalculator() {
               inputId="vehiclePrice"
               label={t("carLoan.field.vehiclePrice.label")}
             >
-              <Input
+              <NumericInput
                 id="vehiclePrice"
                 name="vehiclePrice"
-                type="number"
                 min="0"
                 step="1000"
                 value={values.vehiclePrice}
-                onChange={(event) =>
-                  handleValueChange("vehiclePrice", Number(event.target.value))
-                }
+                onValueChange={(next) => handleValueChange("vehiclePrice", next)}
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
@@ -217,16 +214,13 @@ export function CarLoanCalculator() {
               inputId="downPayment"
               label={t("carLoan.field.downPayment.label")}
             >
-              <Input
+              <NumericInput
                 id="downPayment"
                 name="downPayment"
-                type="number"
                 min="0"
                 step="1000"
                 value={values.downPayment}
-                onChange={(event) =>
-                  handleValueChange("downPayment", Number(event.target.value))
-                }
+                onValueChange={(next) => handleValueChange("downPayment", next)}
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
             </CalculatorField>
@@ -238,18 +232,14 @@ export function CarLoanCalculator() {
             inputId="financedPrincipal"
             label={t("carLoan.field.financedPrincipal.label")}
           >
-            <Input
+            <NumericInput
               id="financedPrincipal"
               name="financedPrincipal"
-              type="number"
               min="0"
               step="1000"
               value={values.financedPrincipal}
-              onChange={(event) =>
-                handleValueChange(
-                  "financedPrincipal",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("financedPrincipal", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -264,18 +254,14 @@ export function CarLoanCalculator() {
               inputId="variableAnnualInterestRate"
               label={t("carLoan.field.variableAnnualInterestRate.label")}
             >
-              <Input
+              <NumericInput
                 id="variableAnnualInterestRate"
                 name="variableAnnualInterestRate"
-                type="number"
                 min="0"
                 step="0.1"
                 value={values.variableAnnualInterestRate}
-                onChange={(event) =>
-                  handleValueChange(
-                    "variableAnnualInterestRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("variableAnnualInterestRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -287,18 +273,14 @@ export function CarLoanCalculator() {
               inputId="fixedAnnualInterestRate"
               label={t("carLoan.field.fixedAnnualInterestRate.label")}
             >
-              <Input
+              <NumericInput
                 id="fixedAnnualInterestRate"
                 name="fixedAnnualInterestRate"
-                type="number"
                 min="0"
                 step="0.1"
                 value={values.fixedAnnualInterestRate}
-                onChange={(event) =>
-                  handleValueChange(
-                    "fixedAnnualInterestRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleValueChange("fixedAnnualInterestRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -311,16 +293,13 @@ export function CarLoanCalculator() {
             inputId="tenureYears"
             label={t("carLoan.field.tenureYears.label")}
           >
-            <Input
+            <NumericInput
               id="tenureYears"
               name="tenureYears"
-              type="number"
               min="1"
               step="1"
               value={values.tenureYears}
-              onChange={(event) =>
-                handleValueChange("tenureYears", Number(event.target.value))
-              }
+              onValueChange={(next) => handleValueChange("tenureYears", next)}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
@@ -347,18 +326,14 @@ export function CarLoanCalculator() {
             inputId="earlySettlementMonth"
             label={t("carLoan.field.earlySettlementMonth.label")}
           >
-            <Input
+            <NumericInput
               id="earlySettlementMonth"
               name="earlySettlementMonth"
-              type="number"
               min="1"
               step="1"
               value={values.earlySettlementMonth}
-              onChange={(event) =>
-                handleValueChange(
-                  "earlySettlementMonth",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("earlySettlementMonth", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />

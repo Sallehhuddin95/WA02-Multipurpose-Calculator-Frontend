@@ -9,8 +9,8 @@ import React, {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/NumericInput";
 import { createAsbFinancingFormSchema } from "@/features/asb-financing/schemas/asb-financing-form";
 import { projectAsbFinancing } from "@/features/asb-financing/services/project-asb-financing";
 import {
@@ -175,18 +175,14 @@ export function AsbFinancingCalculator() {
             inputId="financingPrincipal"
             label={t("asb.field.financingPrincipal.label")}
           >
-            <Input
+            <NumericInput
               id="financingPrincipal"
               name="financingPrincipal"
-              type="number"
               min="0"
               step="1000"
               value={values.financingPrincipal}
-              onChange={(event) =>
-                handleValueChange(
-                  "financingPrincipal",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("financingPrincipal", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -198,18 +194,14 @@ export function AsbFinancingCalculator() {
             inputId="financingTenureYears"
             label={t("asb.field.financingTenureYears.label")}
           >
-            <Input
+            <NumericInput
               id="financingTenureYears"
               name="financingTenureYears"
-              type="number"
               min="1"
               step="1"
               value={values.financingTenureYears}
-              onChange={(event) =>
-                handleValueChange(
-                  "financingTenureYears",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("financingTenureYears", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -223,18 +215,14 @@ export function AsbFinancingCalculator() {
             inputId="annualFinancingRate"
             label={t("asb.field.annualFinancingRate.label")}
           >
-            <Input
+            <NumericInput
               id="annualFinancingRate"
               name="annualFinancingRate"
-              type="number"
               min="0"
               step="0.1"
               value={values.annualFinancingRate}
-              onChange={(event) =>
-                handleValueChange(
-                  "annualFinancingRate",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("annualFinancingRate", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -246,18 +234,14 @@ export function AsbFinancingCalculator() {
             inputId="annualDividendRate"
             label={t("asb.field.annualDividendRate.label")}
           >
-            <Input
+            <NumericInput
               id="annualDividendRate"
               name="annualDividendRate"
-              type="number"
               min="0"
               step="0.1"
               value={values.annualDividendRate}
-              onChange={(event) =>
-                handleValueChange(
-                  "annualDividendRate",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleValueChange("annualDividendRate", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -270,18 +254,14 @@ export function AsbFinancingCalculator() {
           inputId="annualSideInvestmentReturnRate"
           label={t("asb.field.annualSideInvestmentReturnRate.label")}
         >
-          <Input
+          <NumericInput
             id="annualSideInvestmentReturnRate"
             name="annualSideInvestmentReturnRate"
-            type="number"
             min="0"
             step="0.1"
             value={values.annualSideInvestmentReturnRate}
-            onChange={(event) =>
-              handleValueChange(
-                "annualSideInvestmentReturnRate",
-                Number(event.target.value),
-              )
+            onValueChange={(next) =>
+              handleValueChange("annualSideInvestmentReturnRate", next)
             }
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
@@ -293,18 +273,14 @@ export function AsbFinancingCalculator() {
           inputId="analysisHorizonYears"
           label={t("asb.field.analysisHorizonYears.label")}
         >
-          <Input
+          <NumericInput
             id="analysisHorizonYears"
             name="analysisHorizonYears"
-            type="number"
             min="1"
             step="1"
             value={values.analysisHorizonYears}
-            onChange={(event) =>
-              handleValueChange(
-                "analysisHorizonYears",
-                Number(event.target.value),
-              )
+            onValueChange={(next) =>
+              handleValueChange("analysisHorizonYears", next)
             }
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
