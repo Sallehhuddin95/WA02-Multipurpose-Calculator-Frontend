@@ -61,10 +61,10 @@ describe("LanguageSwitch", () => {
 
     expect(screen.getByText("Laman Utama")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Tukar kepada Bahasa Melayu" }),
+      screen.getByRole("button", { name: "Tukar ke Bahasa Melayu" }),
     ).toHaveAttribute("aria-pressed", "true");
     expect(
-      screen.getByRole("button", { name: "Tukar kepada Bahasa Inggeris" }),
+      screen.getByRole("button", { name: "Tukar ke Bahasa Inggeris" }),
     ).toHaveAttribute("aria-pressed", "false");
   });
 

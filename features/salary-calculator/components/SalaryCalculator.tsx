@@ -11,6 +11,7 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { createSalaryCalculatorFormSchema } from "@/features/salary-calculator/schemas/salary-calculator-form";
 import { createSalaryProjectionFormSchema } from "@/features/salary-calculator/schemas/salary-projection-form";
@@ -204,6 +205,10 @@ export function SalaryCalculator() {
   const breakdown = calculateSalaryBreakdown(values);
   const annualProjection: SalaryAnnualProjection = calculateAnnualProjection(breakdown);
 
+  const epfApplies =
+    values.workerCategory !== "foreign-worker" ||
+    values.foreignWorkerEpfOptIn;
+
   const recomputedProjectionRef = useRef(false);
 
   useEffect(() => {
@@ -392,16 +397,13 @@ export function SalaryCalculator() {
           inputId="grossMonthlySalary"
           label={t("salary.field.grossMonthlySalary.label")}
         >
-          <Input
+          <NumericInput
             id="grossMonthlySalary"
             name="grossMonthlySalary"
-            type="number"
             min="1"
             step="100"
             value={values.grossMonthlySalary}
-            onChange={(event) =>
-              handleValueChange("grossMonthlySalary", Number(event.target.value))
-            }
+            onValueChange={(next) => handleValueChange("grossMonthlySalary", next)}
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
@@ -471,57 +473,59 @@ export function SalaryCalculator() {
           </div>
         </label>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          <CalculatorField
-            errorMessage={errors.employeeEpfRate}
-            helperText={t("salary.field.employeeEpfRate.helper")}
-            inputId="employeeEpfRate"
-            label={t("salary.field.employeeEpfRate.label")}
-          >
-            <Input
-              id="employeeEpfRate"
-              name="employeeEpfRate"
-              type="number"
-              min="0"
-              max="100"
-              step="0.5"
-              value={values.employeeEpfRate ?? ""}
-              onChange={(event) =>
-                handleValueChange(
-                  "employeeEpfRate",
-                  event.target.value === "" ? undefined : Number(event.target.value),
-                )
-              }
-              placeholder={t("salary.placeholder.statutory")}
-              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
-            />
-          </CalculatorField>
+        {epfApplies ? (
+          <div className="grid gap-5 md:grid-cols-2">
+            <CalculatorField
+              errorMessage={errors.employeeEpfRate}
+              helperText={t("salary.field.employeeEpfRate.helper")}
+              inputId="employeeEpfRate"
+              label={t("salary.field.employeeEpfRate.label")}
+            >
+              <Input
+                id="employeeEpfRate"
+                name="employeeEpfRate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={values.employeeEpfRate ?? ""}
+                onChange={(event) =>
+                  handleValueChange(
+                    "employeeEpfRate",
+                    event.target.value === "" ? undefined : Number(event.target.value),
+                  )
+                }
+                placeholder={t("salary.placeholder.statutory")}
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
+              />
+            </CalculatorField>
 
-          <CalculatorField
-            errorMessage={errors.employerEpfRate}
-            helperText={t("salary.field.employerEpfRate.helper")}
-            inputId="employerEpfRate"
-            label={t("salary.field.employerEpfRate.label")}
-          >
-            <Input
-              id="employerEpfRate"
-              name="employerEpfRate"
-              type="number"
-              min="0"
-              max="100"
-              step="0.5"
-              value={values.employerEpfRate ?? ""}
-              onChange={(event) =>
-                handleValueChange(
-                  "employerEpfRate",
-                  event.target.value === "" ? undefined : Number(event.target.value),
-                )
-              }
-              placeholder={t("salary.placeholder.statutory")}
-              className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
-            />
-          </CalculatorField>
-        </div>
+            <CalculatorField
+              errorMessage={errors.employerEpfRate}
+              helperText={t("salary.field.employerEpfRate.helper")}
+              inputId="employerEpfRate"
+              label={t("salary.field.employerEpfRate.label")}
+            >
+              <Input
+                id="employerEpfRate"
+                name="employerEpfRate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={values.employerEpfRate ?? ""}
+                onChange={(event) =>
+                  handleValueChange(
+                    "employerEpfRate",
+                    event.target.value === "" ? undefined : Number(event.target.value),
+                  )
+                }
+                placeholder={t("salary.placeholder.statutory")}
+                className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
+              />
+            </CalculatorField>
+          </div>
+        ) : null}
 
         <div className="flex flex-wrap gap-3 pt-2">
           <Button
@@ -715,16 +719,15 @@ export function SalaryCalculator() {
           inputId="projectionYears"
           label={t("salary.projection.years.label")}
         >
-          <Input
+          <NumericInput
             id="projectionYears"
             name="projectionYears"
-            type="number"
             min="1"
             max="40"
             step="1"
             value={projectionValues.projectionYears}
-            onChange={(event) =>
-              handleProjectionChange("projectionYears", Number(event.target.value))
+            onValueChange={(next) =>
+              handleProjectionChange("projectionYears", next)
             }
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
@@ -759,18 +762,14 @@ export function SalaryCalculator() {
             inputId="annualIncrementRate"
             label={t("salary.projection.annualIncrementRate.label")}
           >
-            <Input
+            <NumericInput
               id="annualIncrementRate"
               name="annualIncrementRate"
-              type="number"
               min="0"
               step="0.1"
               value={projectionValues.annualIncrementRate}
-              onChange={(event) =>
-                handleProjectionChange(
-                  "annualIncrementRate",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleProjectionChange("annualIncrementRate", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -784,18 +783,14 @@ export function SalaryCalculator() {
             inputId="fixedAnnualIncrement"
             label={t("salary.projection.fixedAnnualIncrement.label")}
           >
-            <Input
+            <NumericInput
               id="fixedAnnualIncrement"
               name="fixedAnnualIncrement"
-              type="number"
               min="0"
               step="100"
               value={projectionValues.fixedAnnualIncrement}
-              onChange={(event) =>
-                handleProjectionChange(
-                  "fixedAnnualIncrement",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleProjectionChange("fixedAnnualIncrement", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -824,15 +819,14 @@ export function SalaryCalculator() {
                     >
                       {t("salary.projection.year")}
                     </Label>
-                    <Input
+                    <NumericInput
                       id={`oneOff-${index}-year`}
                       name={`oneOff-${index}-year`}
-                      type="number"
                       min="1"
                       step="1"
                       value={oneOff.year}
-                      onChange={(event) =>
-                        handleOneOffChange(index, "year", Number(event.target.value))
+                      onValueChange={(next) =>
+                        handleOneOffChange(index, "year", next)
                       }
                       className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                     />
@@ -883,15 +877,14 @@ export function SalaryCalculator() {
                     >
                       {t("salary.projection.value")}
                     </Label>
-                    <Input
+                    <NumericInput
                       id={`oneOff-${index}-value`}
                       name={`oneOff-${index}-value`}
-                      type="number"
                       min="0"
                       step="100"
                       value={oneOff.value}
-                      onChange={(event) =>
-                        handleOneOffChange(index, "value", Number(event.target.value))
+                      onValueChange={(next) =>
+                        handleOneOffChange(index, "value", next)
                       }
                       className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
                     />

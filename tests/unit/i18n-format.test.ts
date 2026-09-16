@@ -26,16 +26,16 @@ describe("formatPeriodLabel", () => {
   it("renders the start label and English year/quarter/month templates", () => {
     expect(formatPeriodLabel(0, "annually", tEn)).toBe("Start");
     expect(formatPeriodLabel(2, "annually", tEn)).toBe("Year 2");
-    expect(formatPeriodLabel(2, "quarterly", tEn)).toBe("Year 1 · Q2");
-    expect(formatPeriodLabel(2, "monthly", tEn)).toBe("Year 1 · Month 2");
+    expect(formatPeriodLabel(2, "quarterly", tEn)).toBe("Year 1 - Q2");
+    expect(formatPeriodLabel(2, "monthly", tEn)).toBe("Year 1 - Month 2");
   });
 
   it("renders Malay templates without pluralization", () => {
     expect(formatPeriodLabel(0, "annually", tMs)).toBe("Mula");
     expect(formatPeriodLabel(2, "annually", tMs)).toBe("Tahun 2");
     expect(formatPeriodLabel(3, "annually", tMs)).toBe("Tahun 3");
-    expect(formatPeriodLabel(2, "quarterly", tMs)).toBe("Tahun 1 · Suku 2");
-    expect(formatPeriodLabel(2, "monthly", tMs)).toBe("Tahun 1 · Bulan 2");
+    expect(formatPeriodLabel(2, "quarterly", tMs)).toBe("Tahun 1 - Suku 2");
+    expect(formatPeriodLabel(2, "monthly", tMs)).toBe("Tahun 1 - Bulan 2");
   });
 });
 
@@ -47,7 +47,7 @@ describe("formatDepletionLabel", () => {
       "Does not deplete within 100 years",
     );
     expect(formatDepletionLabel(scenario, tMs)).toBe(
-      "Tidak berkurangan dalam tempoh 100 tahun",
+      "Mampu bertahan lebih 100 tahun!",
     );
   });
 

@@ -9,8 +9,8 @@ import React, {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/NumericInput";
 import {
   Select,
   SelectContent,
@@ -144,16 +144,13 @@ export function CompoundInterestCalculator() {
           inputId="startingPrincipal"
           label={t("compound.field.startingPrincipal.label")}
         >
-          <Input
+          <NumericInput
             id="startingPrincipal"
             name="startingPrincipal"
-            type="number"
             min="0"
             step="100"
             value={values.startingPrincipal}
-            onChange={(event) =>
-              handleValueChange("startingPrincipal", Number(event.target.value))
-            }
+            onValueChange={(next) => handleValueChange("startingPrincipal", next)}
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
@@ -164,16 +161,13 @@ export function CompoundInterestCalculator() {
           inputId="annualRate"
           label={t("compound.field.annualRate.label")}
         >
-          <Input
+          <NumericInput
             id="annualRate"
             name="annualRate"
-            type="number"
             min="0"
             step="0.1"
             value={values.annualRate}
-            onChange={(event) =>
-              handleValueChange("annualRate", Number(event.target.value))
-            }
+            onValueChange={(next) => handleValueChange("annualRate", next)}
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />
         </CalculatorField>
@@ -185,16 +179,13 @@ export function CompoundInterestCalculator() {
             inputId="durationYears"
             label={t("compound.field.durationYears.label")}
           >
-            <Input
+            <NumericInput
               id="durationYears"
               name="durationYears"
-              type="number"
               min="0"
               step="1"
               value={values.durationYears}
-              onChange={(event) =>
-                handleValueChange("durationYears", Number(event.target.value))
-              }
+              onValueChange={(next) => handleValueChange("durationYears", next)}
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
           </CalculatorField>
@@ -239,18 +230,14 @@ export function CompoundInterestCalculator() {
           inputId="monthlyContribution"
           label={t("compound.field.monthlyContribution.label")}
         >
-          <Input
+          <NumericInput
             id="monthlyContribution"
             name="monthlyContribution"
-            type="number"
             min="0"
             step="50"
             value={values.monthlyContribution}
-            onChange={(event) =>
-              handleValueChange(
-                "monthlyContribution",
-                Number(event.target.value),
-              )
+            onValueChange={(next) =>
+              handleValueChange("monthlyContribution", next)
             }
             className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
           />

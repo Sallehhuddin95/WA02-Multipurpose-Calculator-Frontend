@@ -9,8 +9,8 @@ import React, {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import {
   createRetirementAccumulationFormSchema,
@@ -336,18 +336,14 @@ export function RetirementFundCalculator() {
               inputId="initialBalance"
               label={t("retirement.field.initialBalance.label")}
             >
-              <Input
+              <NumericInput
                 id="initialBalance"
                 name="initialBalance"
-                type="number"
                 min="0"
                 step="1000"
                 value={accumulationValues.initialBalance}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "initialBalance",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("initialBalance", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -359,18 +355,14 @@ export function RetirementFundCalculator() {
               inputId="yearsToRetirement"
               label={t("retirement.field.yearsToRetirement.label")}
             >
-              <Input
+              <NumericInput
                 id="yearsToRetirement"
                 name="yearsToRetirement"
-                type="number"
                 min="1"
                 step="1"
                 value={accumulationValues.yearsToRetirement}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "yearsToRetirement",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("yearsToRetirement", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -384,18 +376,14 @@ export function RetirementFundCalculator() {
               inputId="annualReturnRate"
               label={t("retirement.field.annualReturnRate.label")}
             >
-              <Input
+              <NumericInput
                 id="annualReturnRate"
                 name="annualReturnRate"
-                type="number"
                 min="0"
                 step="0.1"
                 value={accumulationValues.annualReturnRate}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "annualReturnRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("annualReturnRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -407,18 +395,14 @@ export function RetirementFundCalculator() {
               inputId="currentMonthlySalary"
               label={t("retirement.field.currentMonthlySalary.label")}
             >
-              <Input
+              <NumericInput
                 id="currentMonthlySalary"
                 name="currentMonthlySalary"
-                type="number"
                 min="0"
                 step="100"
                 value={accumulationValues.currentMonthlySalary}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "currentMonthlySalary",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("currentMonthlySalary", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -453,18 +437,14 @@ export function RetirementFundCalculator() {
               inputId="annualSalaryIncrementRate"
               label={t("retirement.field.annualSalaryIncrementRate.label")}
             >
-              <Input
+              <NumericInput
                 id="annualSalaryIncrementRate"
                 name="annualSalaryIncrementRate"
-                type="number"
                 min="0"
                 step="0.1"
                 value={accumulationValues.annualSalaryIncrementRate}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "annualSalaryIncrementRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("annualSalaryIncrementRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -476,18 +456,14 @@ export function RetirementFundCalculator() {
               inputId="fixedAnnualSalaryIncrement"
               label={t("retirement.field.fixedAnnualSalaryIncrement.label")}
             >
-              <Input
+              <NumericInput
                 id="fixedAnnualSalaryIncrement"
                 name="fixedAnnualSalaryIncrement"
-                type="number"
                 min="0"
                 step="50"
                 value={accumulationValues.fixedAnnualSalaryIncrement}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "fixedAnnualSalaryIncrement",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("fixedAnnualSalaryIncrement", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -501,19 +477,15 @@ export function RetirementFundCalculator() {
               inputId="employeeContributionRate"
               label={t("retirement.field.employeeContributionRate.label")}
             >
-              <Input
+              <NumericInput
                 id="employeeContributionRate"
                 name="employeeContributionRate"
-                type="number"
                 min="0"
                 max="100"
                 step="0.5"
                 value={accumulationValues.employeeContributionRate}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "employeeContributionRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("employeeContributionRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -525,19 +497,15 @@ export function RetirementFundCalculator() {
               inputId="employerContributionRate"
               label={t("retirement.field.employerContributionRate.label")}
             >
-              <Input
+              <NumericInput
                 id="employerContributionRate"
                 name="employerContributionRate"
-                type="number"
                 min="0"
                 max="100"
                 step="0.5"
                 value={accumulationValues.employerContributionRate}
-                onChange={(event) =>
-                  handleAccumulationChange(
-                    "employerContributionRate",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleAccumulationChange("employerContributionRate", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -652,18 +620,14 @@ export function RetirementFundCalculator() {
             inputId="startingBalance"
             label={t("retirement.field.startingBalance.label")}
           >
-            <Input
+            <NumericInput
               id="startingBalance"
               name="startingBalance"
-              type="number"
               min="0"
               step="1000"
               value={drawdownValues.startingBalance}
-              onChange={(event) =>
-                handleDrawdownChange(
-                  "startingBalance",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleDrawdownChange("startingBalance", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
@@ -676,18 +640,14 @@ export function RetirementFundCalculator() {
               inputId="lumpSumWithdrawal"
               label={t("retirement.field.lumpSumWithdrawal.label")}
             >
-              <Input
+              <NumericInput
                 id="lumpSumWithdrawal"
                 name="lumpSumWithdrawal"
-                type="number"
                 min="0"
                 step="1000"
                 value={drawdownValues.lumpSumWithdrawal}
-                onChange={(event) =>
-                  handleDrawdownChange(
-                    "lumpSumWithdrawal",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleDrawdownChange("lumpSumWithdrawal", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -699,18 +659,14 @@ export function RetirementFundCalculator() {
               inputId="monthlyWithdrawal"
               label={t("retirement.field.monthlyWithdrawal.label")}
             >
-              <Input
+              <NumericInput
                 id="monthlyWithdrawal"
                 name="monthlyWithdrawal"
-                type="number"
                 min="0"
                 step="100"
                 value={drawdownValues.monthlyWithdrawal}
-                onChange={(event) =>
-                  handleDrawdownChange(
-                    "monthlyWithdrawal",
-                    Number(event.target.value),
-                  )
+                onValueChange={(next) =>
+                  handleDrawdownChange("monthlyWithdrawal", next)
                 }
                 className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
               />
@@ -725,18 +681,14 @@ export function RetirementFundCalculator() {
             inputId="postRetirementAnnualReturnRate"
             label={t("retirement.field.postRetirementAnnualReturnRate.label")}
           >
-            <Input
+            <NumericInput
               id="postRetirementAnnualReturnRate"
               name="postRetirementAnnualReturnRate"
-              type="number"
               min="0"
               step="0.1"
               value={drawdownValues.postRetirementAnnualReturnRate}
-              onChange={(event) =>
-                handleDrawdownChange(
-                  "postRetirementAnnualReturnRate",
-                  Number(event.target.value),
-                )
+              onValueChange={(next) =>
+                handleDrawdownChange("postRetirementAnnualReturnRate", next)
               }
               className="mt-2 h-auto w-full rounded-2xl bg-card px-4 py-3 shadow-none md:text-base"
             />
