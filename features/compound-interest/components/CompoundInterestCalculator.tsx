@@ -266,7 +266,7 @@ export function CompoundInterestCalculator() {
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("compound.summary.heading")}
           </p>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <MetricCard
               label={t("compound.metric.projectedBalance")}
               value={formatCurrency(summary.finalProjectedBalance)}
@@ -446,7 +446,7 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
     <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
       <p className="text-muted-foreground text-sm leading-5">{label}</p>
-      <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
+      <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) tabular-nums sm:text-lg">
         {value}
       </p>
     </div>
