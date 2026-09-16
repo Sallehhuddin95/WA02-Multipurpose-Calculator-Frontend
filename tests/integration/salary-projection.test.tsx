@@ -9,9 +9,9 @@ describe("SalaryCalculator salary projection", () => {
   it("renders the three increment mode controls", () => {
     render(<SalaryCalculator />);
 
-    expect(screen.getByRole("button", { name: "Percentage" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Fixed amount" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "None" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Percentage" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Fixed amount" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "None" })).toBeInTheDocument();
   });
 
   it("shows and hides the conditional increment input per mode", async () => {
@@ -26,13 +26,13 @@ describe("SalaryCalculator salary projection", () => {
       screen.queryByLabelText(/Fixed annual increment/i),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Percentage" }));
+    await user.click(screen.getByRole("radio", { name: "Percentage" }));
     expect(screen.getByLabelText(/Annual increment rate/i)).toBeInTheDocument();
     expect(
       screen.queryByLabelText(/Fixed annual increment/i),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Fixed amount" }));
+    await user.click(screen.getByRole("radio", { name: "Fixed amount" }));
     expect(
       screen.queryByLabelText(/Annual increment rate/i),
     ).not.toBeInTheDocument();
@@ -136,7 +136,7 @@ describe("SalaryCalculator salary projection", () => {
     fireEvent.change(screen.getByLabelText(/Projection years/i), {
       target: { value: "40" },
     });
-    await user.click(screen.getByRole("button", { name: "Percentage" }));
+    await user.click(screen.getByRole("radio", { name: "Percentage" }));
     await user.click(
       screen.getByRole("button", { name: "Add one-off increment" }),
     );

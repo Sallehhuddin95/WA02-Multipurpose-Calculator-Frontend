@@ -39,13 +39,13 @@ describe("CarLoanCalculator", () => {
     expect(screen.getByText(/^early settlement estimate$/i)).toBeInTheDocument();
   });
 
-  it("switches to the fixed-rate tab and shows the flat annual interest rate field", async () => {
+  it("switches to the fixed-rate option and shows the flat annual interest rate field", async () => {
     const user = userEvent.setup();
 
     render(<CarLoanCalculator />);
 
     await user.click(
-      screen.getByRole("button", {
+      screen.getByRole("radio", {
         name: /fixed rate \(rule of 78, legacy\)/i,
       }),
     );

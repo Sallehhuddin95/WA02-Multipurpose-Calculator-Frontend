@@ -11,6 +11,7 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SegmentedControl } from "@/components/SegmentedControl";
 import { createSalaryCalculatorFormSchema } from "@/features/salary-calculator/schemas/salary-calculator-form";
 import { createSalaryProjectionFormSchema } from "@/features/salary-calculator/schemas/salary-projection-form";
 import {
@@ -383,7 +384,7 @@ export function SalaryCalculator() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="grid content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-6"
+        className="grid min-w-0 content-start gap-5 self-start rounded-3xl border border-border bg-card/75 p-4 sm:p-6"
       >
         <CalculatorField
           errorMessage={errors.grossMonthlySalary}
@@ -702,7 +703,7 @@ export function SalaryCalculator() {
         <form
           noValidate
           onSubmit={handleProjectionSubmit}
-          className="grid gap-4 p-6"
+          className="grid min-w-0 gap-4 p-4 sm:p-6"
         >
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
           {t("salary.projection.heading")}
@@ -730,19 +731,20 @@ export function SalaryCalculator() {
         </CalculatorField>
 
         <div>
-          <p className="font-semibold text-(--foreground)">
-            {t("salary.projection.incrementMode")}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-3">
-            {SALARY_INCREMENT_MODES.map((mode) => (
-              <ModeButton
-                key={mode}
-                isActive={projectionValues.incrementMode === mode}
-                label={t(incrementModeLabelKeys[mode])}
-                onClick={() => handleProjectionChange("incrementMode", mode)}
-              />
-            ))}
-          </div>
+          <SegmentedControl
+            label={t("salary.projection.incrementMode")}
+            onValueChange={(next) =>
+              handleProjectionChange(
+                "incrementMode",
+                next as typeof projectionValues.incrementMode,
+              )
+            }
+            options={SALARY_INCREMENT_MODES.map((mode) => ({
+              label: t(incrementModeLabelKeys[mode]),
+              value: mode,
+            }))}
+            value={projectionValues.incrementMode}
+          />
           {projectionErrors.incrementMode ? (
             <p className="mt-1 text-sm font-medium text-destructive">
               {projectionErrors.incrementMode}
@@ -1093,26 +1095,3 @@ function MetricGlossary() {
   );
 }
 
-interface ModeButtonProps {
-  isActive: boolean;
-  label: string;
-  onClick: () => void;
-}
-
-function ModeButton({ isActive, label, onClick }: Readonly<ModeButtonProps>) {
-  return (
-    <Button
-      type="button"
-      variant={isActive ? "default" : "outline"}
-      onClick={onClick}
-      className={[
-        "h-auto rounded-full px-4 py-2 text-sm font-medium shadow-none",
-        isActive
-          ? ""
-          : "border-border bg-card/60 text-(--foreground) hover:border-primary hover:bg-card/60 hover:text-(--foreground)",
-      ].join(" ")}
-    >
-      {label}
-    </Button>
-  );
-}

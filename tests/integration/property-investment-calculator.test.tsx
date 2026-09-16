@@ -21,7 +21,7 @@ describe("PropertyInvestmentCalculator", () => {
     render(<PropertyInvestmentCalculator />);
 
     await user.click(
-      screen.getByRole("button", { name: /loan principal directly/i }),
+      screen.getByRole("radio", { name: /loan principal directly/i }),
     );
 
     expect(screen.getByLabelText(/^loan principal$/i)).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe("PropertyInvestmentCalculator", () => {
     render(<PropertyInvestmentCalculator />);
 
     await user.click(
-      screen.getByRole("button", { name: /expected exit price/i }),
+      screen.getByRole("radio", { name: /expected exit price/i }),
     );
 
     expect(screen.getByLabelText(/^expected exit price$/i)).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("PropertyInvestmentCalculator", () => {
     render(<PropertyInvestmentCalculator />);
 
     expect(
-      screen.getByRole("button", { name: /upfront cash cost/i }),
+      screen.getByRole("radio", { name: /upfront cash cost/i }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/^mrtt cost$/i)).toBeInTheDocument();
   });
@@ -122,12 +122,12 @@ describe("PropertyInvestmentCalculator", () => {
     render(<PropertyInvestmentCalculator />);
 
     await user.click(
-      screen.getByRole("button", { name: /mltt \(recurring premium\)/i }),
+      screen.getByRole("radio", { name: /mltt \(recurring premium\)/i }),
     );
 
     expect(screen.getByLabelText(/annual mltt cost/i)).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /upfront cash cost/i }),
+      screen.queryByRole("radio", { name: /upfront cash cost/i }),
     ).not.toBeInTheDocument();
   });
 

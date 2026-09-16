@@ -270,6 +270,7 @@
   "property.mode.mltt": "MLTT (recurring premium)",
   "property.mode.mrttUpfront": "Upfront cash cost",
   "property.mode.mrttFinanced": "Financed into the loan",
+  "property.field.mrttPaymentTreatment": "MRTT premium payment",
   "property.field.mrttCost.label": "MRTT cost",
   "property.field.mrttCost.helper": "One-time MRTT premium, paid upfront or added to the loan.",
   "property.field.annualMlttCost.label": "Annual MLTT cost",
