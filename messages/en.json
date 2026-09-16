@@ -63,7 +63,7 @@
   "route.retirementFund.kicker": "Retirement Fund Calculator",
   "route.retirementFund.heading": "Project retirement savings and see how long they will last.",
   "route.retirementFund.intro": "Model EPF-style contributions through your working years, then simulate a gratuity-and-pension-style withdrawal pattern to see how long the accumulated fund lasts.",
-  "route.retirementFund.assumptions": "Assumptions: annual return credited once per year on the end-of-year balance, not compounded monthly, matching the ASB financing dividend-crediting convention. Outputs are nominal and do not adjust for inflation, tax, or EPF withdrawal rules. This is planning guidance, not financial advice.",
+  "route.retirementFund.assumptions": "Assumptions: annual return credited once per year on the end-of-year balance, not compounded monthly. Outputs are nominal and do not adjust for inflation, tax, or EPF withdrawal rules. This is planning guidance, not financial advice.",
   "route.salaryCalculator.kicker": "Salary Calculator",
   "route.salaryCalculator.heading": "Break down your gross salary into net take-home pay and employer cost.",
   "route.salaryCalculator.intro": "See every statutory deduction - EPF, SOCSO, EIS, PCB - plus optional Lindung24 protection. Supports Malaysian citizens, permanent residents, and foreign workers.",

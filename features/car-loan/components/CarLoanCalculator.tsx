@@ -363,7 +363,7 @@ export function CarLoanCalculator() {
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("carLoan.summary.heading")}
           </p>
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <MetricCard
               label={t("carLoan.metric.financedPrincipal.term")}
               value={formatCurrency(projection.loanSummary.financedPrincipal)}
@@ -428,7 +428,7 @@ export function CarLoanCalculator() {
             </div>
 
             {projection.settlement.rateMode === "variable-rate" ? (
-              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <MetricCard
                   label={t("carLoan.metric.paidToDate.term")}
                   value={formatCurrency(
@@ -443,7 +443,7 @@ export function CarLoanCalculator() {
                 />
               </div>
             ) : (
-              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <MetricCard
                   label={t("carLoan.metric.paidToDate.term")}
                   value={formatCurrency(
@@ -551,7 +551,7 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
     <div className="bg-card min-w-0 rounded-3xl border border-border p-4">
       <p className="text-muted-foreground text-sm leading-5">{label}</p>
-      <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
+      <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) tabular-nums sm:text-lg">
         {value}
       </p>
     </div>

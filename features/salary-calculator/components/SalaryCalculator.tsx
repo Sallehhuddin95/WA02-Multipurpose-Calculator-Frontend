@@ -1055,7 +1055,7 @@ function MetricCard({ label, value }: Readonly<MetricCardProps>) {
   return (
     <div className="min-w-0 rounded-3xl border border-border bg-card p-4">
       <p className="text-sm leading-5 text-muted-foreground">{label}</p>
-      <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) sm:text-lg [overflow-wrap:anywhere]">
+      <p className="mt-3 text-base font-semibold leading-snug text-(--foreground) tabular-nums sm:text-lg">
         {value}
       </p>
     </div>
