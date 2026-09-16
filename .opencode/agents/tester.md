@@ -1,7 +1,7 @@
 ---
 description: "Testing agent for test strategy, coverage decisions, validation design, and behavior-first test implementation"
 mode: subagent
-model: opencode/deepseek-v4-flash-max
+model: opencode-go/deepseek-v4-pro
 permission:
   edit: allow
   bash: allow

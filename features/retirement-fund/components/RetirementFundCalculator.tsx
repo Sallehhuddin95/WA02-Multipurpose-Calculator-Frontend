@@ -872,7 +872,7 @@ function MetricGlossary() {
   const t = useTranslations();
 
   return (
-    <section className="rounded-3xl border border-border bg-card/75 p-6">
+    <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           {t("common.whatDoTheseNumbersMean")}

@@ -328,8 +328,8 @@ export function AsbFinancingCalculator() {
         </div>
       </form>
 
-      <div className="grid gap-5">
-        <section className="rounded-3xl border border-border bg-card/75 p-6">
+      <div className="grid min-w-0 gap-5">
+        <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("asb.overview.heading")}
           </p>
@@ -361,7 +361,7 @@ export function AsbFinancingCalculator() {
           return (
             <section
               key={strategyId}
-              className="rounded-3xl border border-border bg-card/75 p-6"
+              className="min-w-0 rounded-3xl border border-border bg-card/75 p-6"
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -441,7 +441,7 @@ function StrategyRankingTable({
   })).sort((a, b) => b.netPosition - a.netPosition);
 
   return (
-    <section className="rounded-3xl border border-border bg-card/75 p-6">
+    <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
         {t("asb.ranking.heading")}
       </p>
@@ -506,7 +506,7 @@ function MetricGlossary() {
   const t = useTranslations();
 
   return (
-    <section className="rounded-3xl border border-border bg-card/75 p-6">
+    <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
       <details>
         <summary className="text-primary cursor-pointer text-sm font-medium uppercase tracking-[0.2em]">
           {t("common.whatDoTheseNumbersMean")}
