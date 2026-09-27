@@ -5,10 +5,19 @@ import { describe, expect, it, vi } from "vitest";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 import { MobileMenu } from "@/components/layout/MobileMenu";
-import { navigationItems } from "@/components/layout/navigation-items";
+import {
+  navigationItems,
+  type NavigationLink,
+} from "@/components/layout/navigation-items";
 import { getMessages } from "@/lib/i18n/messages";
 
 const messages = getMessages("en");
+
+// The panel lists Overview plus all seven calculator links: the two direct
+// links and every link nested inside a group.
+const flatLinks: NavigationLink[] = navigationItems.flatMap((item) =>
+  item.kind === "link" ? [item] : [...item.items],
+);
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/car-loan",
@@ -40,16 +49,25 @@ describe("MobileMenu", () => {
     expect(toggle).toHaveAttribute("aria-controls", "mobile-menu");
   });
 
-  it("reveals all seven nav entries when activated", async () => {
+  it("reveals grouped sections and all calculator links when activated", async () => {
     const user = userEvent.setup();
     render(<MobileMenu />);
 
     await user.click(screen.getByRole("button", { name: "Open menu" }));
 
-    expect(navigationItems).toHaveLength(7);
-    navigationItems.forEach((item) => {
+    // Top-level navigation is now five entries: Overview, three groups, Salary.
+    expect(navigationItems).toHaveLength(5);
+
+    // Group section headings are present in the panel.
+    expect(screen.getByText("Property")).toBeInTheDocument();
+    expect(screen.getByText("Financing")).toBeInTheDocument();
+    expect(screen.getByText("Investing")).toBeInTheDocument();
+
+    // Overview plus all seven calculator links remain reachable.
+    expect(flatLinks).toHaveLength(8);
+    flatLinks.forEach((link) => {
       expect(
-        screen.getByRole("link", { name: messages[item.labelKey] }),
+        screen.getByRole("link", { name: messages[link.labelKey] }),
       ).toBeInTheDocument();
     });
   });
@@ -90,10 +108,10 @@ describe("MobileMenu", () => {
 
     await user.click(screen.getByRole("button", { name: "Open menu" }));
 
-    navigationItems.forEach((item) => {
+    flatLinks.forEach((link) => {
       expect(
-        screen.getByRole("link", { name: messages[item.labelKey] }),
-      ).toHaveAttribute("href", item.href);
+        screen.getByRole("link", { name: messages[link.labelKey] }),
+      ).toHaveAttribute("href", link.href);
     });
   });
 });

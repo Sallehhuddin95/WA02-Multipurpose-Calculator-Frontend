@@ -161,7 +161,7 @@ And the destination calculator page loads with its own feature-specific form and
 
 Given the user opens any page on a small-screen viewport below the `md` breakpoint
 When the user activates the hamburger disclosure in the Header
-Then the menu lists Overview and all six calculators
+Then the menu lists Overview and all seven calculators
 And the user can navigate to any calculator without losing app-shell context
 And pressing ESC closes the menu and returns focus to the toggle
 
@@ -177,7 +177,7 @@ And the user's choice persists after a page reload
 
 Given the user opens any page in the app
 When the user switches the language to Malay
-Then all seven navigation labels and the current page labels render in Malay
+Then all eight navigation labels and the current page labels render in Malay
 And the `<html lang>` attribute updates to `ms`
 And the user's choice persists after a page reload
 

@@ -78,22 +78,53 @@ export function MobileMenu() {
       >
         <nav aria-label={t("nav.ariaMobile")} className="flex flex-col">
           {navigationItems.map((item) => {
-            const isActive = pathname === item.href;
+            if (item.kind === "link") {
+              const isActive = pathname === item.href;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={() => setIsOpen(false)}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    isActive
+                      ? "bg-accent text-accent-foreground"
+                      : "text-(--foreground) hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  {t(item.labelKey)}
+                </Link>
+              );
+            }
 
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                onClick={() => setIsOpen(false)}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                  isActive
-                    ? "bg-accent text-accent-foreground"
-                    : "text-(--foreground) hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                {t(item.labelKey)}
-              </Link>
+              <div key={item.labelKey} className="mt-2">
+                <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t(item.labelKey)}
+                </p>
+                <div className="flex flex-col">
+                  {item.items.map((child) => {
+                    const isActive = pathname === child.href;
+
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        aria-current={isActive ? "page" : undefined}
+                        onClick={() => setIsOpen(false)}
+                        className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                          isActive
+                            ? "bg-accent text-accent-foreground"
+                            : "text-(--foreground) hover:bg-accent hover:text-accent-foreground"
+                        }`}
+                      >
+                        {t(child.labelKey)}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>

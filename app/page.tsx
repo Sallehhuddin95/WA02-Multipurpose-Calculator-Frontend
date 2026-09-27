@@ -31,6 +31,11 @@ const liveCalculators: readonly CalculatorCard[] = [
     href: "/property-investment",
   },
   {
+    nameKey: "home.rentVsBuy.name",
+    summaryKey: "home.rentVsBuy.summary",
+    href: "/rent-vs-buy",
+  },
+  {
     nameKey: "home.retirementFund.name",
     summaryKey: "home.retirementFund.summary",
     href: "/retirement-fund",
