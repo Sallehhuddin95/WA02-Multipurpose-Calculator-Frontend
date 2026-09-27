@@ -1,13 +1,26 @@
 import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { PropertyInvestmentCalculator } from "@/features/property-investment";
 
 describe("PropertyInvestmentCalculator", () => {
-  it("renders the property and REIT overview by default", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows an empty results panel before calculating and the overviews after", async () => {
+    const user = userEvent.setup();
+
     render(<PropertyInvestmentCalculator />);
+
+    expect(screen.getByText(/no results yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/property overview/i)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /compare property and reit/i }),
+    );
 
     expect(screen.getByText(/property overview/i)).toBeInTheDocument();
     expect(screen.getByText(/reit overview/i)).toBeInTheDocument();
@@ -43,6 +56,10 @@ describe("PropertyInvestmentCalculator", () => {
     const user = userEvent.setup();
 
     render(<PropertyInvestmentCalculator />);
+
+    await user.click(
+      screen.getByRole("button", { name: /compare property and reit/i }),
+    );
 
     const yearlyProjectionSection = screen
       .getByText(/yearly projection/i)

@@ -10,6 +10,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import {
@@ -105,15 +106,6 @@ function getInitialAccumulation(): RetirementAccumulationResult {
   return projectRetirementAccumulation(defaultAccumulationValues);
 }
 
-function getInitialDrawdown(startingBalance: number): RetirementDrawdownResult {
-  return projectRetirementDrawdown(
-    getDefaultDrawdownValues(
-      startingBalance,
-      defaultAccumulationValues.annualReturnRate,
-    ),
-  );
-}
-
 const ACCUMULATION_STORAGE_KEY = "retirement-fund:accumulation:form:v1";
 const DRAWDOWN_STORAGE_KEY = "retirement-fund:drawdown:form:v1";
 
@@ -149,7 +141,11 @@ export function RetirementFundCalculator() {
   const [
     accumulationValues,
     setAccumulationValues,
-    { reset: resetAccumulation, isHydrated: isAccumulationHydrated },
+    {
+      reset: resetAccumulation,
+      isHydrated: isAccumulationHydrated,
+      restored: restoredAccumulation,
+    },
   ] = usePersistedState(
     ACCUMULATION_STORAGE_KEY,
     defaultAccumulationValues,
@@ -157,14 +153,20 @@ export function RetirementFundCalculator() {
   );
   const [accumulationErrors, setAccumulationErrors] =
     useState<AccumulationErrorMap>({});
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
   const [accumulation, setAccumulation] =
-    useState<RetirementAccumulationResult>(getInitialAccumulation);
+    useState<RetirementAccumulationResult | null>(null);
   const [isAccumulationTableOpen, setIsAccumulationTableOpen] = useState(false);
 
   const [
     drawdownValues,
     setDrawdownValues,
-    { reset: resetDrawdown, isHydrated: isDrawdownHydrated },
+    {
+      reset: resetDrawdown,
+      isHydrated: isDrawdownHydrated,
+      restored: restoredDrawdown,
+    },
   ] = usePersistedState(
     DRAWDOWN_STORAGE_KEY,
     defaultDrawdownValues,
@@ -173,8 +175,8 @@ export function RetirementFundCalculator() {
   const [hasEditedStartingBalance, setHasEditedStartingBalance] =
     useState(false);
   const [drawdownErrors, setDrawdownErrors] = useState<DrawdownErrorMap>({});
-  const [drawdown, setDrawdown] = useState<RetirementDrawdownResult>(() =>
-    getInitialDrawdown(accumulation.finalCapital),
+  const [drawdown, setDrawdown] = useState<RetirementDrawdownResult | null>(
+    null,
   );
   const [openDrawdownTables, setOpenDrawdownTables] = useState<
     Record<DrawdownScenario, boolean>
@@ -192,8 +194,11 @@ export function RetirementFundCalculator() {
     }
 
     recomputedAccumulationRef.current = true;
-    setAccumulation(projectRetirementAccumulation(accumulationValues));
-  }, [isAccumulationHydrated, accumulationValues]);
+
+    if (restoredAccumulation) {
+      setAccumulation(projectRetirementAccumulation(accumulationValues));
+    }
+  }, [isAccumulationHydrated, restoredAccumulation, accumulationValues]);
 
   useEffect(() => {
     if (!isDrawdownHydrated || recomputedDrawdownRef.current) {
@@ -201,8 +206,11 @@ export function RetirementFundCalculator() {
     }
 
     recomputedDrawdownRef.current = true;
-    setDrawdown(projectRetirementDrawdown(drawdownValues));
-  }, [isDrawdownHydrated, drawdownValues]);
+
+    if (restoredDrawdown) {
+      setDrawdown(projectRetirementDrawdown(drawdownValues));
+    }
+  }, [isDrawdownHydrated, restoredDrawdown, drawdownValues]);
 
   function handleAccumulationChange<
     K extends keyof RetirementAccumulationFormValues,
@@ -216,7 +224,7 @@ export function RetirementFundCalculator() {
   function handleAccumulationReset() {
     resetAccumulation();
     setAccumulationErrors({});
-    setAccumulation(getInitialAccumulation());
+    setAccumulation(null);
   }
 
   function handleAccumulationSubmit(event: FormEvent<HTMLFormElement>) {
@@ -239,6 +247,8 @@ export function RetirementFundCalculator() {
       });
 
       setAccumulationErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setAccumulation(null);
       return;
     }
 
@@ -272,14 +282,14 @@ export function RetirementFundCalculator() {
 
   function handleDrawdownReset() {
     const resetValues = getDefaultDrawdownValues(
-      accumulation.finalCapital,
+      (accumulation ?? getInitialAccumulation()).finalCapital,
       accumulationValues.annualReturnRate,
     );
     resetDrawdown();
     setDrawdownValues(resetValues);
     setHasEditedStartingBalance(false);
     setDrawdownErrors({});
-    setDrawdown(projectRetirementDrawdown(resetValues));
+    setDrawdown(null);
   }
 
   function handleDrawdownSubmit(event: FormEvent<HTMLFormElement>) {
@@ -303,6 +313,8 @@ export function RetirementFundCalculator() {
       });
 
       setDrawdownErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setDrawdown(null);
       return;
     }
 
@@ -531,6 +543,7 @@ export function RetirementFundCalculator() {
         </form>
 
         <div className="grid min-w-0 gap-5">
+          {accumulation ? (
           <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
             <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
               {t("retirement.summary.heading")}
@@ -601,6 +614,9 @@ export function RetirementFundCalculator() {
               </div>
             ) : null}
           </section>
+          ) : (
+            <ResultsEmptyState />
+          )}
         </div>
       </section>
 
@@ -713,6 +729,8 @@ export function RetirementFundCalculator() {
         </form>
 
         <div className="grid min-w-0 gap-5">
+          {drawdown ? (
+          <>
           {DRAWDOWN_SCENARIOS.map((scenarioId) => {
             const scenario =
               drawdown[
@@ -812,6 +830,10 @@ export function RetirementFundCalculator() {
           </p>
 
           <MetricGlossary />
+          </>
+          ) : (
+            <ResultsEmptyState />
+          )}
         </div>
       </section>
     </div>

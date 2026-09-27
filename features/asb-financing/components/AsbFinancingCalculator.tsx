@@ -10,6 +10,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import { createAsbFinancingFormSchema } from "@/features/asb-financing/schemas/asb-financing-form";
 import { projectAsbFinancing } from "@/features/asb-financing/services/project-asb-financing";
@@ -93,20 +94,15 @@ const metricDefinitionKeys: ReadonlyArray<{
   },
 ];
 
-function getInitialComparison(): AsbFinancingComparisonResult {
-  return projectAsbFinancing(defaultValues);
-}
-
 export function AsbFinancingCalculator() {
   const t = useTranslations();
-  const [values, setValues, { reset, isHydrated }] = usePersistedState(
-    STORAGE_KEY,
-    defaultValues,
-    validateAsbFinancingForm,
-  );
+  const [values, setValues, { reset, isHydrated, restored }] =
+    usePersistedState(STORAGE_KEY, defaultValues, validateAsbFinancingForm);
   const [errors, setErrors] = useState<FieldErrorMap>({});
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
   const [comparison, setComparison] =
-    useState<AsbFinancingComparisonResult>(getInitialComparison);
+    useState<AsbFinancingComparisonResult | null>(null);
 
   const recomputedRef = useRef(false);
 
@@ -116,8 +112,11 @@ export function AsbFinancingCalculator() {
     }
 
     recomputedRef.current = true;
-    setComparison(projectAsbFinancing(values));
-  }, [isHydrated, values]);
+
+    if (restored) {
+      setComparison(projectAsbFinancing(values));
+    }
+  }, [isHydrated, restored, values]);
 
   function handleValueChange<K extends keyof AsbFinancingFormValues>(
     key: K,
@@ -132,7 +131,7 @@ export function AsbFinancingCalculator() {
   function handleReset() {
     reset();
     setErrors({});
-    setComparison(getInitialComparison());
+    setComparison(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -154,6 +153,8 @@ export function AsbFinancingCalculator() {
       });
 
       setErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setComparison(null);
       return;
     }
 
@@ -305,6 +306,8 @@ export function AsbFinancingCalculator() {
       </form>
 
       <div className="grid min-w-0 gap-5">
+        {comparison ? (
+          <>
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("asb.overview.heading")}
@@ -398,6 +401,10 @@ export function AsbFinancingCalculator() {
         </p>
 
         <MetricGlossary />
+          </>
+        ) : (
+          <ResultsEmptyState />
+        )}
       </div>
     </div>
   );

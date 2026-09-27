@@ -10,6 +10,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import {
   Select,
@@ -60,20 +61,14 @@ const frequencyLabelKeys: Record<CompoundingFrequency, MessageKey> = {
   monthly: "compound.frequency.monthly",
 };
 
-function getInitialSummary() {
-  return projectCompoundInterest(defaultValues);
-}
-
 export function CompoundInterestCalculator() {
   const t = useTranslations();
-  const [values, setValues, { reset, isHydrated }] = usePersistedState(
-    STORAGE_KEY,
-    defaultValues,
-    validateCompoundInterestForm,
-  );
+  const [values, setValues, { reset, isHydrated, restored }] =
+    usePersistedState(STORAGE_KEY, defaultValues, validateCompoundInterestForm);
   const [errors, setErrors] = useState<FieldErrorMap>({});
-  const [summary, setSummary] =
-    useState<CompoundInterestSummary>(getInitialSummary);
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
+  const [summary, setSummary] = useState<CompoundInterestSummary | null>(null);
   const [isTableOpen, setIsTableOpen] = useState(true);
 
   const recomputedRef = useRef(false);
@@ -84,8 +79,11 @@ export function CompoundInterestCalculator() {
     }
 
     recomputedRef.current = true;
-    setSummary(projectCompoundInterest(values));
-  }, [isHydrated, values]);
+
+    if (restored) {
+      setSummary(projectCompoundInterest(values));
+    }
+  }, [isHydrated, restored, values]);
 
   function handleValueChange<K extends keyof CompoundInterestFormValues>(
     key: K,
@@ -100,7 +98,7 @@ export function CompoundInterestCalculator() {
   function handleReset() {
     reset();
     setErrors({});
-    setSummary(getInitialSummary());
+    setSummary(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -122,6 +120,8 @@ export function CompoundInterestCalculator() {
       });
 
       setErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setSummary(null);
       return;
     }
 
@@ -129,7 +129,7 @@ export function CompoundInterestCalculator() {
     setSummary(projectCompoundInterest(parsedValues.data));
   }
 
-  const lastProjectionPoint = summary.projection.at(-1);
+  const lastProjectionPoint = summary?.projection.at(-1);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
@@ -262,6 +262,8 @@ export function CompoundInterestCalculator() {
       </form>
 
       <div className="grid min-w-0 gap-5">
+        {summary ? (
+          <>
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("compound.summary.heading")}
@@ -396,6 +398,10 @@ export function CompoundInterestCalculator() {
             </div>
           ) : null}
         </section>
+          </>
+        ) : (
+          <ResultsEmptyState />
+        )}
       </div>
     </div>
   );

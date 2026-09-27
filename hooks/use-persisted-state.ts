@@ -85,6 +85,12 @@ export interface PersistedStateControls {
    * and flips this flag so callers can recompute derived results exactly once.
    */
   isHydrated: boolean;
+  /**
+   * True when hydration applied a valid persisted value from storage.
+   * Lets callers distinguish a first visit (show the empty results state)
+   * from restored values (recompute and show results).
+   */
+  restored: boolean;
 }
 
 /**
@@ -108,6 +114,7 @@ export function usePersistedState<T>(
 ): [T, React.Dispatch<React.SetStateAction<T>>, PersistedStateControls] {
   const [value, setValue] = React.useState<T>(defaultValue);
   const [isHydrated, setIsHydrated] = React.useState(false);
+  const [restored, setRestored] = React.useState(false);
   const valueRef = React.useRef<T>(defaultValue);
 
   React.useEffect(() => {
@@ -122,6 +129,7 @@ export function usePersistedState<T>(
     } else if (persisted !== null) {
       valueRef.current = persisted;
       setValue(persisted);
+      setRestored(true);
     }
 
     setIsHydrated(true);
@@ -142,7 +150,8 @@ export function usePersistedState<T>(
     removeStorage(key);
     valueRef.current = defaultValue;
     setValue(defaultValue);
+    setRestored(false);
   }
 
-  return [value, setter, { reset, isHydrated }];
+  return [value, setter, { reset, isHydrated, restored }];
 }

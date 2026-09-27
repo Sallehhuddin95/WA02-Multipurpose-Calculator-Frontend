@@ -1,13 +1,27 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { SalaryCalculator } from "@/features/salary-calculator";
 
 describe("SalaryCalculator", () => {
-  it("renders default breakdown and result panels", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows an empty results panel before calculating and the breakdown after", async () => {
+    const user = userEvent.setup();
+
     render(<SalaryCalculator />);
+
+    // Both the breakdown panel and the projection panel start empty.
+    expect(screen.getAllByText(/no results yet/i)).toHaveLength(2);
+    expect(screen.queryByText(/Employee Breakdown/i)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /calculate breakdown/i }),
+    );
 
     expect(screen.getByText(/Employee Breakdown/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Employer Cost/i).length).toBeGreaterThan(0);
@@ -15,8 +29,14 @@ describe("SalaryCalculator", () => {
     expect(screen.getAllByText(/Total employer cost/i).length).toBeGreaterThan(0);
   });
 
-  it("renders all four deduction lines for default Malaysian scenario", () => {
+  it("renders all four deduction lines for default Malaysian scenario", async () => {
+    const user = userEvent.setup();
+
     render(<SalaryCalculator />);
+
+    await user.click(
+      screen.getByRole("button", { name: /calculate breakdown/i }),
+    );
 
     expect(screen.getAllByText("EPF (Employee)").length).toBeGreaterThan(0);
     expect(screen.getAllByText("SOCSO").length).toBeGreaterThan(0);
@@ -24,8 +44,14 @@ describe("SalaryCalculator", () => {
     expect(screen.getAllByText("PCB (MTD)").length).toBeGreaterThan(0);
   });
 
-  it("shows employer contribution lines", () => {
+  it("shows employer contribution lines", async () => {
+    const user = userEvent.setup();
+
     render(<SalaryCalculator />);
+
+    await user.click(
+      screen.getByRole("button", { name: /calculate breakdown/i }),
+    );
 
     expect(screen.getAllByText("EPF (Employer)").length).toBeGreaterThan(0);
     expect(screen.getAllByText("SOCSO (Employer)").length).toBeGreaterThan(0);
@@ -92,6 +118,10 @@ describe("SalaryCalculator", () => {
   it("shows annualised projection when details are expanded", async () => {
     const user = userEvent.setup();
     render(<SalaryCalculator />);
+
+    await user.click(
+      screen.getByRole("button", { name: /calculate breakdown/i }),
+    );
 
     const summary = screen.getByText("Annualised Projection");
     await user.click(summary);

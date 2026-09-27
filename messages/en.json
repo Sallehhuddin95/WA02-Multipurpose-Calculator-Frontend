@@ -85,6 +85,8 @@
   "common.hideProjectionTable": "Hide projection table",
   "common.showYearlyProjection": "Show yearly projection",
   "common.hideYearlyProjection": "Hide yearly projection",
+  "common.resultsEmpty.heading": "No results yet",
+  "common.resultsEmpty.body": "Fill in your details and press Calculate to see your results here.",
   "period.start": "Start",
   "period.year": "Year {n}",
   "period.yearQuarter": "Year {n} - Q{q}",
