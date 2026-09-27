@@ -1,12 +1,18 @@
 import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { RetirementFundCalculator } from "@/features/retirement-fund";
 
 describe("RetirementFundCalculator", () => {
-  it("renders both sections with default projection and drawdown results", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows empty results panels before calculating and section results after each submit", async () => {
+    const user = userEvent.setup();
+
     render(<RetirementFundCalculator />);
 
     expect(
@@ -15,7 +21,23 @@ describe("RetirementFundCalculator", () => {
     expect(
       screen.getByText(/section b - retirement fund longevity simulation/i),
     ).toBeInTheDocument();
-    expect(screen.getAllByText(/final capital/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/no results yet/i)).toHaveLength(2);
+    expect(screen.queryByText(/projection summary/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/time to depletion/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /project savings/i }));
+
+    expect(screen.getByText(/projection summary/i)).toBeInTheDocument();
+    expect(screen.queryByText(/time to depletion/i)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /simulate longevity/i }),
+    );
+
+    expect(screen.getByText(/projection summary/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/time to depletion/i).length).toBeGreaterThan(
+      0,
+    );
     expect(
       screen.getAllByText(/total contributions/i).length,
     ).toBeGreaterThan(0);
@@ -58,6 +80,11 @@ describe("RetirementFundCalculator", () => {
     const user = userEvent.setup();
 
     render(<RetirementFundCalculator />);
+
+    await user.click(screen.getByRole("button", { name: /project savings/i }));
+    await user.click(
+      screen.getByRole("button", { name: /simulate longevity/i }),
+    );
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
 

@@ -58,6 +58,7 @@ The initial release UI consists of:
   - a primary calculate action
   - a reset or clear action
   - inline validation messaging on invalid fields
+- primary calculate actions must give visible press feedback when activated, so the click feels like a button press even though the calculation itself resolves instantly
 - result sections must support both a compact summary and a more detailed breakdown without navigating away from the page
 - metric cards that display currency figures must keep values contained within card boundaries on supported breakpoints
 - when value width pressure occurs, UI must use a readable containment strategy such as adjusted typography scale, wrapping policy, or card min-width tuning without truncating the numeric value meaning
@@ -76,6 +77,7 @@ The initial release UI consists of:
 
 - before the user has entered enough inputs, the result panel remains visible but empty
 - the empty result panel must explain what the user needs to enter before calculation can run
+- results appear only after the user runs a calculation for the current inputs, or when previously entered values are restored from storage and recomputed on load; a first visit with no stored values always shows the empty panel, never pre-computed results; forms that track an explicit calculated state (currently the salary projection form) keep the empty panel until the next calculation even when values are restored
 - the home page must show all initial calculators even if none has been used yet
 
 ## Error State

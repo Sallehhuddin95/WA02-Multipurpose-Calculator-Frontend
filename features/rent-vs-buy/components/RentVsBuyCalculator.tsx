@@ -10,6 +10,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import { createRentVsBuyFormSchema } from "@/features/rent-vs-buy/schemas/rent-vs-buy-form";
 import { projectRentVsBuy } from "@/features/rent-vs-buy/services/project-rent-vs-buy";
@@ -97,20 +98,15 @@ const metricDefinitionKeys: ReadonlyArray<{
   },
 ];
 
-function getInitialComparison(): RentVsBuyComparisonResult {
-  return projectRentVsBuy(defaultValues);
-}
-
 export function RentVsBuyCalculator() {
   const t = useTranslations();
-  const [values, setValues, { reset, isHydrated }] = usePersistedState(
-    STORAGE_KEY,
-    defaultValues,
-    validateRentVsBuyForm,
-  );
+  const [values, setValues, { reset, isHydrated, restored }] =
+    usePersistedState(STORAGE_KEY, defaultValues, validateRentVsBuyForm);
   const [errors, setErrors] = useState<FieldErrorMap>({});
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
   const [comparison, setComparison] =
-    useState<RentVsBuyComparisonResult>(getInitialComparison);
+    useState<RentVsBuyComparisonResult | null>(null);
   const [submittedValues, setSubmittedValues] =
     useState<RentVsBuyFormValues>(defaultValues);
   const [isTableOpen, setIsTableOpen] = useState(false);
@@ -123,9 +119,12 @@ export function RentVsBuyCalculator() {
     }
 
     recomputedRef.current = true;
-    setComparison(projectRentVsBuy(values));
-    setSubmittedValues(values);
-  }, [isHydrated, values]);
+
+    if (restored) {
+      setComparison(projectRentVsBuy(values));
+      setSubmittedValues(values);
+    }
+  }, [isHydrated, restored, values]);
 
   function handleValueChange<K extends keyof RentVsBuyFormValues>(
     key: K,
@@ -140,7 +139,7 @@ export function RentVsBuyCalculator() {
   function handleReset() {
     reset();
     setErrors({});
-    setComparison(getInitialComparison());
+    setComparison(null);
     setSubmittedValues(defaultValues);
   }
 
@@ -163,6 +162,8 @@ export function RentVsBuyCalculator() {
       });
 
       setErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setComparison(null);
       return;
     }
 
@@ -469,6 +470,8 @@ export function RentVsBuyCalculator() {
       </form>
 
       <div className="grid min-w-0 gap-5">
+        {comparison ? (
+          <>
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("rentBuy.overview.heading")}
@@ -633,6 +636,10 @@ export function RentVsBuyCalculator() {
         </section>
 
         <MetricGlossary />
+          </>
+        ) : (
+          <ResultsEmptyState />
+        )}
       </div>
     </div>
   );

@@ -1,13 +1,26 @@
 import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { RentVsBuyCalculator } from "@/features/rent-vs-buy";
 
 describe("RentVsBuyCalculator", () => {
-  it("renders the overview, verdict, and projection sections with default results", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows an empty results panel before calculating and the sections after", async () => {
+    const user = userEvent.setup();
+
     render(<RentVsBuyCalculator />);
+
+    expect(screen.getByText(/no results yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/comparison overview/i)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /compare rent and buy/i }),
+    );
 
     expect(screen.getByText(/comparison overview/i)).toBeInTheDocument();
     expect(screen.getByText(/^verdict$/i)).toBeInTheDocument();
@@ -48,6 +61,9 @@ describe("RentVsBuyCalculator", () => {
 
     render(<RentVsBuyCalculator />);
 
+    await user.click(
+      screen.getByRole("button", { name: /compare rent and buy/i }),
+    );
     await user.click(
       screen.getByRole("button", { name: /show yearly projection/i }),
     );

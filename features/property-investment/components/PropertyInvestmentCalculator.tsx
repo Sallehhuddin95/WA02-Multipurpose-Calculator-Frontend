@@ -10,6 +10,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { createPropertyInvestmentFormSchema } from "@/features/property-investment/schemas/property-investment-form";
@@ -115,20 +116,27 @@ const metricDefinitionKeys: ReadonlyArray<{
   },
 ];
 
-function getInitialComparison(): PropertyInvestmentComparisonResult {
-  return projectPropertyInvestment(defaultValues);
+function getRankedStrategies(
+  comparison: PropertyInvestmentComparisonResult,
+) {
+  return PROPERTY_INVESTMENT_STRATEGY_IDS.map((strategyId) => ({
+    strategyId,
+    netReturn:
+      strategyId === "property"
+        ? comparison.property.netReturn
+        : comparison.reitStrategies[strategyId].netReturn,
+  })).sort((a, b) => b.netReturn - a.netReturn);
 }
 
 export function PropertyInvestmentCalculator() {
   const t = useTranslations();
-  const [values, setValues, { reset, isHydrated }] = usePersistedState(
-    STORAGE_KEY,
-    defaultValues,
-    validatePropertyInvestmentForm,
-  );
+  const [values, setValues, { reset, isHydrated, restored }] =
+    usePersistedState(STORAGE_KEY, defaultValues, validatePropertyInvestmentForm);
   const [errors, setErrors] = useState<FieldErrorMap>({});
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
   const [comparison, setComparison] =
-    useState<PropertyInvestmentComparisonResult>(getInitialComparison);
+    useState<PropertyInvestmentComparisonResult | null>(null);
   const [submittedValues, setSubmittedValues] =
     useState<PropertyInvestmentFormValues>(defaultValues);
   const [isTableOpen, setIsTableOpen] = useState(false);
@@ -141,9 +149,12 @@ export function PropertyInvestmentCalculator() {
     }
 
     recomputedRef.current = true;
-    setComparison(projectPropertyInvestment(values));
-    setSubmittedValues(values);
-  }, [isHydrated, values]);
+
+    if (restored) {
+      setComparison(projectPropertyInvestment(values));
+      setSubmittedValues(values);
+    }
+  }, [isHydrated, restored, values]);
 
   function handleValueChange<K extends keyof PropertyInvestmentFormValues>(
     key: K,
@@ -158,7 +169,7 @@ export function PropertyInvestmentCalculator() {
   function handleReset() {
     reset();
     setErrors({});
-    setComparison(getInitialComparison());
+    setComparison(null);
     setSubmittedValues(defaultValues);
   }
 
@@ -181,6 +192,8 @@ export function PropertyInvestmentCalculator() {
       });
 
       setErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setComparison(null);
       return;
     }
 
@@ -188,16 +201,6 @@ export function PropertyInvestmentCalculator() {
     setComparison(projectPropertyInvestment(parsedValues.data));
     setSubmittedValues(parsedValues.data);
   }
-
-  const rankedStrategies = PROPERTY_INVESTMENT_STRATEGY_IDS.map(
-    (strategyId) => ({
-      strategyId,
-      netReturn:
-        strategyId === "property"
-          ? comparison.property.netReturn
-          : comparison.reitStrategies[strategyId].netReturn,
-    }),
-  ).sort((a, b) => b.netReturn - a.netReturn);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
@@ -727,6 +730,8 @@ export function PropertyInvestmentCalculator() {
       </form>
 
       <div className="grid min-w-0 gap-5">
+        {comparison ? (
+          <>
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("property.overview.heading")}
@@ -857,8 +862,9 @@ export function PropertyInvestmentCalculator() {
                 </tr>
               </thead>
               <tbody>
-                {rankedStrategies.map(({ strategyId, netReturn }, index) => {
-                  const rank = index + 1;
+                {getRankedStrategies(comparison).map(
+                  ({ strategyId, netReturn }, index) => {
+                    const rank = index + 1;
                   const isTopRank = rank === 1;
 
                   return (
@@ -888,8 +894,9 @@ export function PropertyInvestmentCalculator() {
                         {formatCurrency(netReturn)}
                       </td>
                     </tr>
-                  );
-                })}
+                    );
+                  },
+                )}
               </tbody>
             </table>
           </div>
@@ -999,6 +1006,10 @@ export function PropertyInvestmentCalculator() {
         </section>
 
         <MetricGlossary />
+          </>
+        ) : (
+          <ResultsEmptyState />
+        )}
       </div>
     </div>
   );

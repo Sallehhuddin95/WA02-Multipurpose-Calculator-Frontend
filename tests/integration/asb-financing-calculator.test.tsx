@@ -1,13 +1,26 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { AsbFinancingCalculator } from "@/features/asb-financing";
 
 describe("AsbFinancingCalculator", () => {
-  it("renders all three strategy comparisons from the default scenario", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows an empty results panel before calculating and all three strategy comparisons after", async () => {
+    const user = userEvent.setup();
+
     render(<AsbFinancingCalculator />);
+
+    expect(screen.getByText(/no results yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/financing overview/i)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /compare strategies/i }),
+    );
 
     expect(screen.getByText(/financing overview/i)).toBeInTheDocument();
     expect(screen.getAllByText(/compounding strategy/i).length).toBeGreaterThan(

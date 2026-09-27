@@ -1,11 +1,15 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { SalaryCalculator } from "@/features/salary-calculator";
 
 describe("SalaryCalculator salary projection", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it("renders the three increment mode controls", () => {
     render(<SalaryCalculator />);
 
@@ -126,6 +130,10 @@ describe("SalaryCalculator salary projection", () => {
   it("does not change the monthly breakdown when projection inputs change", async () => {
     const user = userEvent.setup();
     render(<SalaryCalculator />);
+
+    await user.click(
+      screen.getByRole("button", { name: /calculate breakdown/i }),
+    );
 
     const netSalaryMetric = () =>
       screen.getAllByText("Net take-home salary")[0].nextElementSibling

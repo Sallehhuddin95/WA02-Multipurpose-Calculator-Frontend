@@ -10,6 +10,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { createCarLoanFormSchema } from "@/features/car-loan/schemas/car-loan-form";
@@ -86,20 +87,15 @@ const metricDefinitionKeys: ReadonlyArray<{
   },
 ];
 
-function getInitialProjection(): CarLoanProjectionResult {
-  return projectCarLoan(defaultValues);
-}
-
 export function CarLoanCalculator() {
   const t = useTranslations();
-  const [values, setValues, { reset, isHydrated }] = usePersistedState(
-    STORAGE_KEY,
-    defaultValues,
-    validateCarLoanForm,
-  );
+  const [values, setValues, { reset, isHydrated, restored }] =
+    usePersistedState(STORAGE_KEY, defaultValues, validateCarLoanForm);
   const [errors, setErrors] = useState<FieldErrorMap>({});
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
   const [projection, setProjection] =
-    useState<CarLoanProjectionResult>(getInitialProjection);
+    useState<CarLoanProjectionResult | null>(null);
 
   const recomputedRef = useRef(false);
 
@@ -109,8 +105,11 @@ export function CarLoanCalculator() {
     }
 
     recomputedRef.current = true;
-    setProjection(projectCarLoan(values));
-  }, [isHydrated, values]);
+
+    if (restored) {
+      setProjection(projectCarLoan(values));
+    }
+  }, [isHydrated, restored, values]);
 
   function handleValueChange<K extends keyof CarLoanFormValues>(
     key: K,
@@ -125,7 +124,7 @@ export function CarLoanCalculator() {
   function handleReset() {
     reset();
     setErrors({});
-    setProjection(getInitialProjection());
+    setProjection(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -145,6 +144,8 @@ export function CarLoanCalculator() {
       });
 
       setErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setProjection(null);
       return;
     }
 
@@ -359,6 +360,8 @@ export function CarLoanCalculator() {
       </form>
 
       <div className="grid min-w-0 gap-5">
+        {projection ? (
+          <>
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-primary text-sm font-medium uppercase tracking-[0.2em]">
             {t("carLoan.summary.heading")}
@@ -480,6 +483,10 @@ export function CarLoanCalculator() {
         ) : null}
 
         <MetricGlossary />
+          </>
+        ) : (
+          <ResultsEmptyState />
+        )}
       </div>
     </div>
   );

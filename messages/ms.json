@@ -85,6 +85,8 @@
   "common.hideProjectionTable": "Sembunyikan jadual unjuran",
   "common.showYearlyProjection": "Tunjukkan unjuran tahunan",
   "common.hideYearlyProjection": "Sembunyikan unjuran tahunan",
+  "common.resultsEmpty.heading": "Tiada keputusan lagi",
+  "common.resultsEmpty.body": "Isi maklumat anda dan tekan butang kira untuk melihat keputusan di sini.",
   "period.start": "Mula",
   "period.year": "Tahun {n}",
   "period.yearQuarter": "Tahun {n} - Suku {q}",

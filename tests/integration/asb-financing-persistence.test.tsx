@@ -34,6 +34,24 @@ describe("AsbFinancingCalculator persistence", () => {
     ).toHaveTextContent(/1,272\.79/);
   });
 
+  it("shows recomputed results after a refresh when stored values exist", async () => {
+    const { unmount } = render(<AsbFinancingCalculator />);
+
+    // Values persist on every change, even without pressing Calculate.
+    fireEvent.change(screen.getByLabelText(/financing principal/i), {
+      target: { value: "120000" },
+    });
+
+    unmount();
+
+    render(<AsbFinancingCalculator />);
+
+    expect(await screen.findByDisplayValue("120000")).toBeInTheDocument();
+    expect(
+      screen.getByText(/scheduled monthly instalment/i).nextElementSibling,
+    ).toHaveTextContent(/1,272\.79/);
+  });
+
   it("clears the stored key and resets values on reset", async () => {
     const user = userEvent.setup();
     const { unmount } = render(<AsbFinancingCalculator />);

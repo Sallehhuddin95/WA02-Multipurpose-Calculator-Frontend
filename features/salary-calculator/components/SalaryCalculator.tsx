@@ -11,6 +11,7 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResultsEmptyState } from "@/components/ResultsEmptyState";
 import { NumericInput } from "@/components/NumericInput";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { createSalaryCalculatorFormSchema } from "@/features/salary-calculator/schemas/salary-calculator-form";
@@ -27,6 +28,7 @@ import {
   type OneOffIncrement,
   type OneOffIncrementType,
   type SalaryAnnualProjection,
+  type SalaryBreakdownResult,
   type SalaryCalculatorFormValues,
   type SalaryIncrementMode,
   type SalaryProjectionFormValues,
@@ -179,12 +181,15 @@ const metricDefinitionKeys: ReadonlyArray<{
 
 export function SalaryCalculator() {
   const t = useTranslations();
-  const [values, setValues, { reset: resetMain, isHydrated: isMainHydrated }] =
-    usePersistedState(
-      BREAKDOWN_STORAGE_KEY,
-      defaultValues,
-      validateSalaryCalculatorForm,
-    );
+  const [
+    values,
+    setValues,
+    { reset: resetMain, isHydrated: isMainHydrated, restored: restoredMain },
+  ] = usePersistedState(
+    BREAKDOWN_STORAGE_KEY,
+    defaultValues,
+    validateSalaryCalculatorForm,
+  );
   const [errors, setErrors] = useState<FieldErrorMap>({});
   const [
     projectionState,
@@ -202,14 +207,33 @@ export function SalaryCalculator() {
   const projectionValues = projectionState.values;
   const projectionComputed = projectionState.computed;
 
-  const breakdown = calculateSalaryBreakdown(values);
-  const annualProjection: SalaryAnnualProjection = calculateAnnualProjection(breakdown);
+  // Null until the first successful calculation (or restored values on
+  // load), so the button press visibly produces the results.
+  const [breakdown, setBreakdown] = useState<SalaryBreakdownResult | null>(
+    null,
+  );
+  const annualProjection: SalaryAnnualProjection | null = breakdown
+    ? calculateAnnualProjection(breakdown)
+    : null;
 
   const epfApplies =
     values.workerCategory !== "foreign-worker" ||
     values.foreignWorkerEpfOptIn;
 
   const recomputedProjectionRef = useRef(false);
+  const recomputedBreakdownRef = useRef(false);
+
+  useEffect(() => {
+    if (!isMainHydrated || recomputedBreakdownRef.current) {
+      return;
+    }
+
+    recomputedBreakdownRef.current = true;
+
+    if (restoredMain) {
+      setBreakdown(calculateSalaryBreakdown(values));
+    }
+  }, [isMainHydrated, restoredMain, values]);
 
   useEffect(() => {
     if (
@@ -246,6 +270,7 @@ export function SalaryCalculator() {
   function handleReset() {
     resetMain();
     setErrors({});
+    setBreakdown(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -267,10 +292,13 @@ export function SalaryCalculator() {
       });
 
       setErrors(nextErrors);
+      // Never show stale results after a validation failure.
+      setBreakdown(null);
       return;
     }
 
     setErrors({});
+    setBreakdown(calculateSalaryBreakdown(parsedValues.data));
   }
 
   function handleProjectionChange<K extends keyof SalaryProjectionFormValues>(
@@ -546,6 +574,8 @@ export function SalaryCalculator() {
       </form>
 
       <div className="grid min-w-0 gap-5">
+        {breakdown && annualProjection ? (
+          <>
         <section className="min-w-0 rounded-3xl border border-border bg-card/75 p-6">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
             {t("salary.breakdown.heading")}
@@ -701,6 +731,10 @@ export function SalaryCalculator() {
         </p>
 
         <MetricGlossary />
+          </>
+        ) : (
+          <ResultsEmptyState />
+        )}
       </div>
 
       <section className="lg:col-span-2 min-w-0 overflow-hidden rounded-3xl border border-border bg-card/75 divide-y divide-border">
@@ -1009,7 +1043,11 @@ export function SalaryCalculator() {
               </details>
             </div>
           </>
-        ) : null}
+        ) : (
+          <div className="p-6">
+            <ResultsEmptyState />
+          </div>
+        )}
       </section>
     </div>
   );
