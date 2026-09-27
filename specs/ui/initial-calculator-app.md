@@ -19,7 +19,7 @@ Define the shared user interface behavior for the initial calculator release so 
 The initial release UI consists of:
 
 - three shared layout components composed in the root layout via `AppShell`:
-  - `components/layout/Header.tsx` — a Server Component with the site name "Multipurpose Calculators" and navigation links to all calculator routes; uses `position: sticky` via CSS (no JS) so the header remains visible during scroll. On `md+` viewports the horizontal navigation is rendered by a Client Component island (`PrimaryNav`) that uses `usePathname()` to set `aria-current="page"` on the active link. Below `md`, the horizontal nav is replaced by a hamburger disclosure menu (`MobileMenu`, a Client Component island) that opens a panel listing Overview and all six calculators. The shared navigation entries live in `components/layout/navigation-items.ts` and are consumed by both `PrimaryNav` and `MobileMenu`
+  - `components/layout/Header.tsx` — a Server Component with the site name "Multipurpose Calculators" and navigation links to all calculator routes; uses `position: sticky` via CSS (no JS) so the header remains visible during scroll. On `md+` viewports the horizontal navigation is rendered by a Client Component island (`PrimaryNav`) that groups calculator links into Property, Financing, and Investing dropdowns (Overview and Salary Calculator stay as direct links) and uses `usePathname()` to set `aria-current="page"` on the active link, with the parent group highlighted when one of its child routes is active. Below `md`, the horizontal nav is replaced by a hamburger disclosure menu (`MobileMenu`, a Client Component island) that opens a panel listing Overview and all seven calculators arranged under Property, Financing, and Investing section headings. The shared navigation entries live in `components/layout/navigation-items.ts` as a discriminated union of direct links and groups, and are consumed by both `PrimaryNav` and `MobileMenu`
   - a Header controls cluster (Client Component islands) holding the theme toggle and the language switch; the `MobileMenu` panel repeats both controls below `md` so theme and language stay reachable on small screens
   - `components/layout/Footer.tsx` — a Server Component with copyright text and a `CurrentYear.tsx` Client Component island for dynamic year rendering (`new Date().getFullYear()`)
   - `components/layout/AppShell.tsx` — composes Header + `<main>{children}</main>` + Footer
@@ -94,7 +94,7 @@ The initial release UI consists of:
   - primary actions
   - summary results
   - detailed charts and tables
-- navigation must remain usable on small screens without hiding access to any calculator; below `md` the horizontal nav collapses into a hamburger disclosure menu that lists Overview and all six calculators plus the theme toggle and language switch, is keyboard-reachable, closes on ESC with focus returned to the toggle, and closes on click-outside and on route change
+- navigation must remain usable on small screens without hiding access to any calculator; below `md` the horizontal nav collapses into a hamburger disclosure menu that lists Overview and all seven calculators arranged under Property, Financing, and Investing section headings plus the theme toggle and language switch, is keyboard-reachable, closes on ESC with focus returned to the toggle, and closes on click-outside and on route change
 - tables with many columns must remain readable on smaller screens through responsive stacking, selective summarization, or horizontal overflow handling
 - summary metric cards for calculators must remain readable on smaller screens and must not leak text beyond card edges
 - heading typography should preserve legibility and rhythm on small screens without clipped or awkward glyph presentation
@@ -103,6 +103,7 @@ The initial release UI consists of:
 ## Accessibility Notes
 
 - calculator navigation must be keyboard reachable and expose the current page state
+- desktop navigation dropdowns must expose `aria-expanded` and `aria-haspopup` on the group toggle, close on ESC with focus returned to the toggle, support arrow-key movement between menu items, close on click-outside and on route change, keep only one group open at a time, and keep `aria-current="page"` on the exact active child link only
 - the mobile navigation disclosure button must expose `aria-expanded` and `aria-controls`, close on ESC with focus returned to the toggle, close on click-outside and on route change, and respect `prefers-reduced-motion`
 - the theme toggle and language switch are keyboard-reachable, expose localized `aria-label`s, and show a visible `ring-2` focus ring
 - all form inputs must have visible labels
@@ -121,5 +122,6 @@ The initial release UI consists of:
   - [specs/features/home-and-car-loan-ui-refinement.md](../features/home-and-car-loan-ui-refinement.md)
   - [specs/features/ui-readability-and-layout-consistency.md](../features/ui-readability-and-layout-consistency.md)
   - [specs/features/property-investment.md](../features/property-investment.md)
+  - [specs/features/rent-vs-buy.md](../features/rent-vs-buy.md)
 - Acceptance: [specs/acceptance/initial-calculator-release.md](../acceptance/initial-calculator-release.md)
 - UI: [specs/ui/design-tokens-and-theme.md](./design-tokens-and-theme.md)

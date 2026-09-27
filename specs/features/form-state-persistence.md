@@ -47,6 +47,7 @@ Use one per-feature key with a version suffix. The naming convention is `<featur
 | Compound interest | 1 | `compound-interest:form:v1` |
 | Property investment | 1 | `property-investment:form:v1` |
 | Retirement fund | 2 (Section A accumulation, Section B drawdown) | `retirement-fund:accumulation:form:v1`, `retirement-fund:drawdown:form:v1` |
+| Rent vs buy | 1 | `rent-vs-buy:form:v1` |
 | Salary calculator | 2 (breakdown form, salary projection form) | `salary-calculator:breakdown:form:v1`, `salary-calculator:projection:form:v1` |
 
 The version suffix (`v<N>`) is the schema-migration gate. When a form's input shape changes, the feature bumps `N` and relies on the existing stale-key self-heal (fall back to defaults and clear) rather than writing a migration routine.
@@ -59,6 +60,7 @@ This behavior applies to the form surface of each calculator route:
 - car loan form, including the early-settlement toggle state
 - compound interest form
 - property investment form
+- rent vs buy form
 - retirement fund Section A (accumulation) form and Section B (drawdown) form
 - salary calculator breakdown form and salary projection form
 
